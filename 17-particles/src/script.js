@@ -33,6 +33,8 @@ const particlesGeometry = new THREE.BufferGeometry()
 particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
 particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
 
+console.log(particlesGeometry.attributes.position.array)
+
 const particlesMaterial = new THREE.PointsMaterial()
 // particlesMaterial.color = new THREE.Color('#ff88cc')
 particlesMaterial.size = 0.2
@@ -98,6 +100,13 @@ const clock = new THREE.Clock()
 const tick = () =>
 {
     const elapsedTime = clock.getElapsedTime()
+
+    for (let i = 0 ; i < count;i++) {
+        const i3 = i * 3
+        const x = particlesGeometry.attributes.position.array[i3]
+        particlesGeometry.attributes.position.array[i3 + 1] = Math.sin(elapsedTime + x)
+    }
+    particlesGeometry.attributes.position.needsUpdate = true
 
     // Update controls
     controls.update()

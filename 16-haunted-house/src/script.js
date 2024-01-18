@@ -124,6 +124,12 @@ bush3.scale.set(0.4, 0.4, 0.4)
 bush3.position.set(-0.8, 0.1, 2.2)
 bush4.scale.set(0.15, 0.15, 0.15)
 bush4.position.set(-1, 0.05, 2.6)
+bush1.castShadow = true
+bush2.castShadow = true
+bush3.castShadow = true
+bush4.castShadow = true
+
+
 house.add(bush1, bush2, bush3, bush4)
 
 // Graves
@@ -146,6 +152,7 @@ scene.add(graves)
         grave.rotation.y = (Math.random() - 0.5) * 0.4
         grave.rotation.z = (Math.random() - 0.5) * 0.2
         grave.rotation.x = (Math.random() - 0.5) * 0.2
+        grave.castShadow = true
         graves.add(grave)
     }
 }
@@ -162,6 +169,7 @@ const floor = new THREE.Mesh(
 )
 floor.rotation.x = -Math.PI * 0.5
 floor.position.y = 0
+floor.receiveShadow = true
 scene.add(floor)
 
 /**
@@ -175,6 +183,11 @@ scene.add(ambientLight)
 // Directional light
 const moonLight = new THREE.DirectionalLight('#b9d5ff', 0.16)
 moonLight.position.set(4, 5, -2)
+moonLight.castShadow = true
+moonLight.shadow.camera.far = 15
+moonLight.shadow.mapSize.width = 256
+moonLight.shadow.mapSize.height = 256
+
 gui.add(moonLight, 'intensity').min(0).max(1).step(0.001)
 gui.add(moonLight.position, 'x').min(-5).max(5).step(0.001)
 gui.add(moonLight.position, 'y').min(-5).max(5).step(0.001)
@@ -184,7 +197,38 @@ scene.add(moonLight)
 // Door light
 const doorLight = new THREE.PointLight('#ff7d46', 3, 7)
 doorLight.position.set(0, 2.2, 2.7)
+doorLight.castShadow = true
+doorLight.shadow.mapSize.width = 256
+doorLight.shadow.mapSize.height = 256
+doorLight.shadow.camera.far = 7
 house.add(doorLight)
+
+
+// Ghosts
+
+
+
+const ghost1 = new THREE.PointLight('#ff00ff', 6, 3)
+ghost1.castShadow = true
+ghost1.shadow.camera.far = 7
+ghost1.shadow.mapSize.width = 256
+ghost1.shadow.mapSize.height = 256
+
+scene.add(ghost1)
+
+const ghost2 = new THREE.PointLight('#00ffff', 6, 3)
+ghost2.castShadow = true
+ghost2.shadow.camera.far = 7
+ghost2.shadow.mapSize.width = 256
+ghost2.shadow.mapSize.height = 256
+scene.add(ghost2)
+
+const ghost3 = new THREE.PointLight('#ffff00', 6, 3)
+ghost3.castShadow = true
+ghost3.shadow.camera.far = 7
+ghost3.shadow.mapSize.width = 256
+ghost3.shadow.mapSize.height = 256
+scene.add(ghost3)
 
 /**
  * Sizes
@@ -231,7 +275,8 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 renderer.setClearColor('#262837')
-
+renderer.shadowMap.enabled = true
+renderer.shadowMap.type = THREE.PCFSoftShadowMap
 /**
  * Animate
  */
@@ -239,6 +284,20 @@ const clock = new THREE.Clock()
 
 const tick = () => {
     const elapsedTime = clock.getElapsedTime()
+    const ghost1Angle = elapsedTime * 0.5
+    ghost1.position.x = Math.cos(ghost1Angle) * 4
+    ghost1.position.z = Math.sin(ghost1Angle) * 4
+    ghost1.position.y = Math.sin(elapsedTime * 3)
+
+    const ghost2Angle = - elapsedTime * 0.32
+    ghost2.position.x = Math.cos(ghost2Angle) * 5
+    ghost2.position.z = Math.sin(ghost2Angle) * 5
+    ghost2.position.y = Math.sin(elapsedTime * 4) + Math.sin(elapsedTime * 2.5)
+
+    const ghost3Angle = - elapsedTime * 0.18
+    ghost3.position.x = Math.cos(ghost3Angle) * (7 + Math.sin(elapsedTime * 0.32))
+    ghost3.position.z = Math.sin(ghost3Angle) * (7 + Math.sin(elapsedTime * 0.5))
+    ghost3.position.y = Math.sin(elapsedTime * 4) + Math.sin(elapsedTime * 2.5)
 
     // Update controls
     controls.update()

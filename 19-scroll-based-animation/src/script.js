@@ -10,8 +10,11 @@ const parameters = {
     materialColor: '#ffeded'
 }
 
-gui
-    .addColor(parameters, 'materialColor')
+gui.addColor(parameters, 'materialColor').onChange(() => {
+    // 通知材质颜色发生改变
+    material.color.set(parameters.materialColor)
+})
+
 
 /**
  * Base
@@ -23,24 +26,37 @@ const canvas = document.querySelector('canvas.webgl')
 const scene = new THREE.Scene()
 
 /**
- * Test cube
+ * Objects
  */
-const cube = new THREE.Mesh(
-    new THREE.BoxGeometry(1, 1, 1),
-    new THREE.MeshBasicMaterial({ color: '#ff0000' })
-)
-scene.add(cube)
+
+// Material
+const material = new THREE.MeshToonMaterial({color: parameters.materialColor})
+
+
+// Mesh
+const mesh1 = new THREE.Mesh(new THREE.TorusGeometry(1, 0.4, 16, 60), material)
+
+const mesh2 = new THREE.Mesh(new THREE.ConeGeometry(1, 2, 32), material)
+const mesh3 = new THREE.Mesh(new THREE.TorusKnotGeometry(0.8, 0.35, 100, 16), material)
+
+scene.add(mesh1, mesh2, mesh3)
+
+// Lights
+const directionalLight = new THREE.DirectionalLight()
+directionalLight.color = new THREE.Color(0xffffff)
+// 强度
+directionalLight.intensity = 3
+directionalLight.position.set(1, 1, 0)
+scene.add(directionalLight)
 
 /**
  * Sizes
  */
 const sizes = {
-    width: window.innerWidth,
-    height: window.innerHeight
+    width: window.innerWidth, height: window.innerHeight
 }
 
-window.addEventListener('resize', () =>
-{
+window.addEventListener('resize', () => {
     // Update sizes
     sizes.width = window.innerWidth
     sizes.height = window.innerHeight
@@ -66,8 +82,7 @@ scene.add(camera)
  * Renderer
  */
 const renderer = new THREE.WebGLRenderer({
-    canvas: canvas,
-    alpha: true // transparent background
+    canvas: canvas, alpha: true // transparent background
 })
 
 renderer.setSize(sizes.width, sizes.height)
@@ -78,8 +93,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
  */
 const clock = new THREE.Clock()
 
-const tick = () =>
-{
+const tick = () => {
     const elapsedTime = clock.getElapsedTime()
 
     // Render

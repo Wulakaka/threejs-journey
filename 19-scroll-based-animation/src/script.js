@@ -25,12 +25,19 @@ const canvas = document.querySelector('canvas.webgl')
 // Scene
 const scene = new THREE.Scene()
 
+// Textures
+const textureLoader = new THREE.TextureLoader()
+const gradientTexture = textureLoader.load('/textures/gradients/5.jpg')
+gradientTexture.magFilter = THREE.NearestFilter
 /**
  * Objects
  */
 
 // Material
-const material = new THREE.MeshToonMaterial({color: parameters.materialColor})
+const material = new THREE.MeshToonMaterial({
+    color: parameters.materialColor,
+    gradientMap: gradientTexture
+})
 
 
 // Mesh

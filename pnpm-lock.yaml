@@ -19,6 +19,25 @@ importers:
         specifier: ^4.5.0
         version: 4.5.0
 
+  19-scroll-based-animation:
+    dependencies:
+      gsap:
+        specifier: 3.5.1
+        version: 3.5.1
+      lil-gui:
+        specifier: ^0.19.0
+        version: 0.19.0
+      three:
+        specifier: ^0.158.0
+        version: 0.158.0
+    devDependencies:
+      prettier:
+        specifier: ^3.2.4
+        version: 3.2.4
+      vite:
+        specifier: ^4.5.0
+        version: 4.5.0
+
 packages:
 
   /@esbuild/android-arm64@0.18.20:
@@ -257,6 +276,10 @@ packages:
     dev: true
     optional: true
 
+  /gsap@3.5.1:
+    resolution: {integrity: sha512-EMV0RSUKZNeTUzLKAizGlwxVOUyif3/g8I3S1aA/hf3gbqwBvmQ02x1RdTBQNQMOpHCVBv9y/vaHwfctoAg8zw==}
+    dev: false
+
   /lil-gui@0.19.0:
     resolution: {integrity: sha512-02/Z7rPng3GXWFwkQVj1hQaJYo2fIEYctqe0ima5uI/N2HEagB9ZGCQKkVWr3UuKfTr0arto3Q9prTB8sxtJJw==}
     dev: false
@@ -278,6 +301,12 @@ packages:
       nanoid: 3.3.7
       picocolors: 1.0.0
       source-map-js: 1.0.2
+    dev: true
+
+  /prettier@3.2.4:
+    resolution: {integrity: sha512-FWu1oLHKCrtpO1ypU6J0SbK2d9Ckwysq6bHj/uaCP26DxrPpppCLQRGVuqAxSTvhF00AcvDRyYrLNW7ocBhFFQ==}
+    engines: {node: '>=14'}
+    hasBin: true
     dev: true
 
   /rollup@3.29.4:

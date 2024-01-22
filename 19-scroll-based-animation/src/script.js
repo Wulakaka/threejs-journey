@@ -14,6 +14,7 @@ const parameters = {
 gui.addColor(parameters, 'materialColor').onChange(() => {
   // 通知材质颜色发生改变
   material.color.set(parameters.materialColor)
+  particlesMaterial.color.set(parameters.materialColor)
 })
 
 /**
@@ -196,10 +197,12 @@ const tick = () => {
   camera.position.y =
     (-scrollY / sizes.height) * objectsDistance
 
-  const parallaxX = cursor.x
-  const parallaxY = -cursor.y
-  cameraGroup.position.x += (parallaxX - cameraGroup.position.x) * deltaTime
-  cameraGroup.position.y += (parallaxY - cameraGroup.position.y) * deltaTime
+  // 目标位置
+  const parallaxX = cursor.x * 0.5
+  const parallaxY = -cursor.y * 0.5
+  // 平滑过渡
+  cameraGroup.position.x += (parallaxX - cameraGroup.position.x) * deltaTime * 5
+  cameraGroup.position.y += (parallaxY - cameraGroup.position.y) * deltaTime * 5
 
   for (const mesh of sectionMeshes) {
     mesh.rotation.x += deltaTime * 0.1

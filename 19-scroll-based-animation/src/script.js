@@ -154,19 +154,24 @@ window.addEventListener('mousemove', (event) => {
  */
 const clock = new THREE.Clock()
 
+let currentTime = 0
 const tick = () => {
   const elapsedTime = clock.getElapsedTime()
+  const deltaTime = elapsedTime - currentTime
+  currentTime = elapsedTime
+
+  // 同步滚动
   camera.position.y =
     (-scrollY / sizes.height) * objectsDistance
 
   const parallaxX = cursor.x
   const parallaxY = -cursor.y
-  cameraGroup.position.x += (parallaxX - cameraGroup.position.x) / 20
-  cameraGroup.position.y += (parallaxY - cameraGroup.position.y) / 20
+  cameraGroup.position.x += (parallaxX - cameraGroup.position.x) * deltaTime
+  cameraGroup.position.y += (parallaxY - cameraGroup.position.y) * deltaTime
 
   for (const mesh of sectionMeshes) {
-    mesh.rotation.x = elapsedTime * 0.1
-    mesh.rotation.y = elapsedTime * 0.12
+    mesh.rotation.x += deltaTime * 0.1
+    mesh.rotation.y += deltaTime * 0.12
   }
 
   // Render

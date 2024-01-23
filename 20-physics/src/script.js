@@ -3,6 +3,7 @@ import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js'
 import GUI from 'lil-gui'
 import CANNON from 'cannon'
 
+
 /**
  * Debug
  */
@@ -32,21 +33,6 @@ const environmentMapTexture = cubeTextureLoader.load([
   '/textures/environmentMaps/0/nz.png'
 ])
 
-/**
- * Test sphere
- */
-const sphere = new THREE.Mesh(
-  new THREE.SphereGeometry(0.5, 32, 32),
-  new THREE.MeshStandardMaterial({
-    metalness: 0.3,
-    roughness: 0.4,
-    envMap: environmentMapTexture,
-    envMapIntensity: 0.5
-  })
-)
-sphere.castShadow = true
-sphere.position.y = 0.5
-scene.add(sphere)
 
 /**
  * Floor
@@ -93,20 +79,47 @@ world.defaultContactMaterial = defaultContactMaterial
 
 // objects
 
-// sphere
-const sphereShape = new CANNON.Sphere(0.5)
-const sphereBody = new CANNON.Body({
-  mass: 1,
-  position: new CANNON.Vec3(0, 3, 0),
-  shape: sphereShape,
-  // material: defaultMaterial
-})
 
-// 添加基于物体坐标系的力
-sphereBody.applyLocalForce(new CANNON.Vec3(150, 0, 0), new CANNON.Vec3(0, 0, 0))
+/**
+ * Utils
+ */
+// 待更新的物体
+const objectsToUpdate = []
 
-// 将 body 添加到 world 中
-world.addBody(sphereBody)
+const createSphere = (radius, position) => {
+  // Three.js mesh
+  const mesh = new THREE.Mesh(
+    new THREE.SphereGeometry(radius, 32, 32),
+    new THREE.MeshStandardMaterial({
+      metalness: 0.3,
+      roughness: 0.4,
+      envMap: environmentMapTexture,
+      envMapIntensity: 0.5
+    })
+  )
+  mesh.castShadow = true
+  mesh.position.copy(position)
+  scene.add(mesh)
+
+  // Cannon.js body
+  const shape = new CANNON.Sphere(radius)
+  const body = new CANNON.Body({
+    shape: shape,
+    mass: 1,
+    position: new CANNON.Vec3(0, 3, 0),
+    material: defaultMaterial
+  })
+  body.position.copy(position)
+  world.addBody(body)
+
+  // Save in objects to update
+  objectsToUpdate.push({
+    mesh: mesh,
+    body: body
+  })
+}
+
+createSphere(0.5, {x: 0, y: 3, z: 0})
 
 // floor
 const floorShape = new CANNON.Plane()
@@ -191,11 +204,11 @@ const tick = () => {
   oldElapsedTime = elapsedTime
 
   // Update physics
-  // 添加风力
-  sphereBody.applyForce(new CANNON.Vec3(-0.5,0,0), sphereBody.position)
+  for (const object of objectsToUpdate) {
+    object.mesh.position.copy(object.body.position)
+  }
 
   world.step(1 / 60, deltaTime, 3)
-  sphere.position.copy(sphereBody.position)
 
   // Update controls
   controls.update()

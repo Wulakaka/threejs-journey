@@ -19,11 +19,11 @@ importers:
         specifier: ^4.5.0
         version: 4.5.0
 
-  19-scroll-based-animation:
+  20-physics:
     dependencies:
-      gsap:
-        specifier: 3.5.1
-        version: 3.5.1
+      cannon:
+        specifier: ^0.6.2
+        version: 0.6.2
       lil-gui:
         specifier: ^0.19.0
         version: 0.19.0
@@ -31,9 +31,6 @@ importers:
         specifier: ^0.158.0
         version: 0.158.0
     devDependencies:
-      prettier:
-        specifier: ^3.2.4
-        version: 3.2.4
       vite:
         specifier: ^4.5.0
         version: 4.5.0
@@ -238,6 +235,10 @@ packages:
     dev: true
     optional: true
 
+  /cannon@0.6.2:
+    resolution: {integrity: sha512-n/7wWSXr8KOSvjad2x0fJHgpMepKjOKi+NdSnjfYyijoDBZnp4JQKgPcpv28jlXoWM+N9zVYU09J0A6Qxx+Y7w==}
+    dev: false
+
   /esbuild@0.18.20:
     resolution: {integrity: sha512-ceqxoedUrcayh7Y7ZX6NdbbDzGROiyVBgC4PriJThBKSVPWnnFHZAkfI1lJT8QFkOwH4qOS2SJkS4wvpGl8BpA==}
     engines: {node: '>=12'}
@@ -276,10 +277,6 @@ packages:
     dev: true
     optional: true
 
-  /gsap@3.5.1:
-    resolution: {integrity: sha512-EMV0RSUKZNeTUzLKAizGlwxVOUyif3/g8I3S1aA/hf3gbqwBvmQ02x1RdTBQNQMOpHCVBv9y/vaHwfctoAg8zw==}
-    dev: false
-
   /lil-gui@0.19.0:
     resolution: {integrity: sha512-02/Z7rPng3GXWFwkQVj1hQaJYo2fIEYctqe0ima5uI/N2HEagB9ZGCQKkVWr3UuKfTr0arto3Q9prTB8sxtJJw==}
     dev: false
@@ -301,12 +298,6 @@ packages:
       nanoid: 3.3.7
       picocolors: 1.0.0
       source-map-js: 1.0.2
-    dev: true
-
-  /prettier@3.2.4:
-    resolution: {integrity: sha512-FWu1oLHKCrtpO1ypU6J0SbK2d9Ckwysq6bHj/uaCP26DxrPpppCLQRGVuqAxSTvhF00AcvDRyYrLNW7ocBhFFQ==}
-    engines: {node: '>=14'}
-    hasBin: true
     dev: true
 
   /rollup@3.29.4:

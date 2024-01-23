@@ -88,7 +88,8 @@ const defaultContactMaterial  = new CANNON.ContactMaterial(
     restitution: 0.7
   }
 )
-world.addContactMaterial(defaultContactMaterial)
+// world.addContactMaterial(defaultContactMaterial)
+world.defaultContactMaterial = defaultContactMaterial
 
 // objects
 
@@ -98,7 +99,7 @@ const sphereBody = new CANNON.Body({
   mass: 1,
   position: new CANNON.Vec3(0, 3, 0),
   shape: sphereShape,
-  material: defaultMaterial
+  // material: defaultMaterial
 })
 // 将 body 添加到 world 中
 world.addBody(sphereBody)
@@ -108,7 +109,7 @@ const floorShape = new CANNON.Plane()
 const floorBody = new CANNON.Body()
 floorBody.mass = 0
 floorBody.addShape(floorShape)
-floorBody.material = defaultMaterial
+// floorBody.material = defaultMaterial
 // 旋转 floorBody
 floorBody.quaternion.setFromAxisAngle(new CANNON.Vec3(-1, 0, 0), Math.PI * 0.5)
 world.addBody(floorBody)

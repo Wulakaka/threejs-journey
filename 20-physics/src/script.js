@@ -86,17 +86,21 @@ world.defaultContactMaterial = defaultContactMaterial
 // 待更新的物体
 const objectsToUpdate = []
 
+const sphereGeometry = new THREE.SphereGeometry(1, 32, 32)
+const sphereMaterial = new THREE.MeshStandardMaterial({
+  metalness: 0.3,
+  roughness: 0.4,
+  envMap: environmentMapTexture,
+  envMapIntensity: 0.5
+})
+
 const createSphere = (radius, position) => {
   // Three.js mesh
   const mesh = new THREE.Mesh(
-    new THREE.SphereGeometry(radius, 32, 32),
-    new THREE.MeshStandardMaterial({
-      metalness: 0.3,
-      roughness: 0.4,
-      envMap: environmentMapTexture,
-      envMapIntensity: 0.5
-    })
+    sphereGeometry,
+    sphereMaterial
   )
+  mesh.scale.set(radius, radius, radius)
   mesh.castShadow = true
   mesh.position.copy(position)
   scene.add(mesh)
@@ -123,7 +127,7 @@ createSphere(0.5, {x: 0, y: 3, z: 0})
 
 const debugObject = {}
 debugObject.createSphere = () => {
-  createSphere( Math.random() * 0.5,
+  createSphere(Math.random() * 0.5,
     {
       x: (Math.random() - 0.5) * 3,
       y: 3,

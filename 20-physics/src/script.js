@@ -80,7 +80,7 @@ world.gravity.set(0, -9.82, 0)
 // material
 // 默认材质
 const defaultMaterial = new CANNON.Material('default')
-const defaultContactMaterial  = new CANNON.ContactMaterial(
+const defaultContactMaterial = new CANNON.ContactMaterial(
   defaultMaterial,
   defaultMaterial,
   {
@@ -101,6 +101,10 @@ const sphereBody = new CANNON.Body({
   shape: sphereShape,
   // material: defaultMaterial
 })
+
+// 添加基于物体坐标系的力
+sphereBody.applyLocalForce(new CANNON.Vec3(150, 0, 0), new CANNON.Vec3(0, 0, 0))
+
 // 将 body 添加到 world 中
 world.addBody(sphereBody)
 
@@ -187,6 +191,9 @@ const tick = () => {
   oldElapsedTime = elapsedTime
 
   // Update physics
+  // 添加风力
+  sphereBody.applyForce(new CANNON.Vec3(-0.5,0,0), sphereBody.position)
+
   world.step(1 / 60, deltaTime, 3)
   sphere.position.copy(sphereBody.position)
 

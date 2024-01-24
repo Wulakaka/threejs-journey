@@ -86,8 +86,8 @@ world.defaultContactMaterial = defaultContactMaterial
 // 待更新的物体
 const objectsToUpdate = []
 
-const sphereGeometry = new THREE.SphereGeometry(1, 32, 32)
-const sphereMaterial = new THREE.MeshStandardMaterial({
+const sphereGeometry = new THREE.SphereGeometry(1, 20, 20)
+const meshMaterial = new THREE.MeshStandardMaterial({
   metalness: 0.3,
   roughness: 0.4,
   envMap: environmentMapTexture,
@@ -98,7 +98,7 @@ const createSphere = (radius, position) => {
   // Three.js mesh
   const mesh = new THREE.Mesh(
     sphereGeometry,
-    sphereMaterial
+    meshMaterial
   )
   mesh.scale.set(radius, radius, radius)
   mesh.castShadow = true
@@ -107,6 +107,37 @@ const createSphere = (radius, position) => {
 
   // Cannon.js body
   const shape = new CANNON.Sphere(radius)
+  const body = new CANNON.Body({
+    shape: shape,
+    mass: 1,
+    position: new CANNON.Vec3(0, 3, 0),
+    material: defaultMaterial
+  })
+  body.position.copy(position)
+  world.addBody(body)
+
+  // Save in objects to update
+  objectsToUpdate.push({
+    mesh: mesh,
+    body: body
+  })
+}
+
+const boxGeometry = new THREE.BoxGeometry(1, 1, 1)
+
+const createBox = (width, height, depth, position) => {
+  // Three.js mesh
+  const mesh = new THREE.Mesh(
+    boxGeometry,
+    meshMaterial
+  )
+  mesh.scale.set(width, height, depth)
+  mesh.castShadow = true
+  mesh.position.copy(position)
+  scene.add(mesh)
+
+  // Cannon.js body
+  const shape = new CANNON.Box(new CANNON.Vec3(width / 2, height / 2, depth / 2))
   const body = new CANNON.Body({
     shape: shape,
     mass: 1,
@@ -135,7 +166,17 @@ debugObject.createSphere = () => {
     })
 }
 
+debugObject.createBox = () => {
+  createBox(Math.random() * 0.5, Math.random() * 0.5, Math.random() * 0.5,
+    {
+      x: (Math.random() - 0.5) * 3,
+      y: 3,
+      z: (Math.random() - 0.5) * 3
+    })
+}
+
 gui.add(debugObject, 'createSphere')
+gui.add(debugObject, 'createBox')
 
 // floor
 const floorShape = new CANNON.Plane()
@@ -222,6 +263,7 @@ const tick = () => {
   // Update physics
   for (const object of objectsToUpdate) {
     object.mesh.position.copy(object.body.position)
+    object.mesh.quaternion.copy(object.body.quaternion)
   }
 
   world.step(1 / 60, deltaTime, 3)

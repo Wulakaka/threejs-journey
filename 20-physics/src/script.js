@@ -10,6 +10,20 @@ import CANNON from 'cannon'
 const gui = new GUI()
 
 /**
+ * Sounds
+ * @type {HTMLAudioElement}
+ */
+const hitSound = new Audio('/sounds/hit.mp3')
+const playSound = (collision) => {
+  const impactStrength = collision.contact.getImpactVelocityAlongNormal()
+  if (impactStrength > 1.5) {
+    hitSound.currentTime = 0
+    hitSound.volume = Math.min(impactStrength / 10, 1)
+    hitSound.play()
+  }
+}
+
+/**
  * Base
  */
 // Canvas
@@ -76,7 +90,7 @@ const defaultContactMaterial = new CANNON.ContactMaterial(
     restitution: 0.7
   }
 )
-// world.addContactMaterial(defaultContactMaterial)
+// 设置默认 contactMaterial
 world.defaultContactMaterial = defaultContactMaterial
 
 // objects
@@ -123,6 +137,8 @@ const createSphere = (radius, position) => {
     mesh: mesh,
     body: body
   })
+
+  body.addEventListener('collide', playSound)
 }
 
 const boxGeometry = new THREE.BoxGeometry(1, 1, 1)
@@ -154,9 +170,9 @@ const createBox = (width, height, depth, position) => {
     mesh: mesh,
     body: body
   })
-}
 
-createSphere(0.5, {x: 0, y: 3, z: 0})
+  body.addEventListener('collide', playSound)
+}
 
 const debugObject = {}
 debugObject.createSphere = () => {

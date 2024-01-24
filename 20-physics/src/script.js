@@ -62,6 +62,8 @@ scene.add(floor)
 // world
 const world = new CANNON.World()
 world.gravity.set(0, -9.82, 0)
+world.broadphase = new CANNON.SAPBroadphase(world)
+world.allowSleep = true
 
 // material
 // 默认材质

@@ -196,6 +196,17 @@ debugObject.createBox = () => {
 gui.add(debugObject, 'createSphere')
 gui.add(debugObject, 'createBox')
 
+debugObject.reset = () => {
+  for (const object of objectsToUpdate) {
+    object.body.removeEventListener('collide', playSound)
+    world.remove(object.body)
+    scene.remove(object.mesh)
+  }
+  // Reset array
+  objectsToUpdate.length = 0
+}
+gui.add(debugObject, 'reset')
+
 // floor
 const floorShape = new CANNON.Plane()
 const floorBody = new CANNON.Body()

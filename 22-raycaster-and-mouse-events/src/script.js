@@ -45,7 +45,8 @@ const raycaster = new THREE.Raycaster()
 /**
  * Mouse
  */
-let intersects = null
+
+let currentIntersect = null
 
 const mouse = new THREE.Vector2()
 window.addEventListener('mousemove', (event) => {
@@ -55,8 +56,8 @@ window.addEventListener('mousemove', (event) => {
 
 // click event
 window.addEventListener('click', () => {
-  if (intersects.length > 0) {
-    switch (intersects[0].object) {
+  if (currentIntersect) {
+    switch (currentIntersect.object) {
       case object1:
         console.log('click on object 1')
         break
@@ -119,7 +120,6 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
  */
 const clock = new THREE.Clock()
 
-let currentIntersect = null
 
 const tick = () => {
   const elapsedTime = clock.getElapsedTime()
@@ -130,14 +130,10 @@ const tick = () => {
   object3.position.y = Math.sin(elapsedTime * 1.4) * 1.5
 
   // Cast a ray
-  // const rayOrigin = new THREE.Vector3(-3, 0, 0)
-  // const rayDirection = new THREE.Vector3(10, 0, 0)
-  // rayDirection.normalize()
-  // raycaster.set(rayOrigin, rayDirection)
   raycaster.setFromCamera(mouse, camera)
 
   const objectsToTest = [object1, object2, object3]
-  intersects = raycaster.intersectObjects(objectsToTest)
+  const intersects = raycaster.intersectObjects(objectsToTest)
 
   for (const object of objectsToTest) {
     if (intersects.some(intersect => intersect.object === object)) {

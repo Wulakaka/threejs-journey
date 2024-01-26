@@ -45,11 +45,31 @@ const raycaster = new THREE.Raycaster()
 /**
  * Mouse
  */
+let intersects = null
+
 const mouse = new THREE.Vector2()
 window.addEventListener('mousemove', (event) => {
   mouse.x = event.clientX / sizes.width * 2 - 1
   mouse.y = -event.clientY / sizes.height * 2 + 1
 })
+
+// click event
+window.addEventListener('click', () => {
+  if (intersects.length > 0) {
+    switch (intersects[0].object) {
+      case object1:
+        console.log('click on object 1')
+        break
+      case object2:
+        console.log('click on object 2')
+        break
+      case object3:
+        console.log('click on object 3')
+        break
+    }
+  }
+})
+
 
 /**
  * Sizes
@@ -115,7 +135,7 @@ const tick = () => {
   raycaster.setFromCamera(mouse, camera)
 
   const objectsToTest = [object1, object2, object3]
-  const intersects = raycaster.intersectObjects(objectsToTest)
+  intersects = raycaster.intersectObjects(objectsToTest)
 
   for (const object of objectsToTest) {
     object.material.color.set('#ff0000')

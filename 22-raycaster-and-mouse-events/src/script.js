@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js'
 import GUI from 'lil-gui'
+import {GLTFLoader} from "three/addons";
 
 /**
  * Base
@@ -13,6 +14,12 @@ const canvas = document.querySelector('canvas.webgl')
 
 // Scene
 const scene = new THREE.Scene()
+
+/**
+ * Lights
+ */
+const ambientLight = new THREE.AmbientLight('#ffffff', 3)
+scene.add(ambientLight)
 
 /**
  * Objects
@@ -35,6 +42,16 @@ const object3 = new THREE.Mesh(
 object3.position.x = 2
 
 scene.add(object1, object2, object3)
+
+// model
+let model = null
+const gltfLoader = new GLTFLoader()
+gltfLoader.load('/models/Duck/glTF-Binary/Duck.glb', (gltf) => {
+  model = gltf.scene
+  console.log(model)
+  model.position.y = -2
+  scene.add(model)
+})
 
 /**
  * Raycaster
@@ -120,7 +137,6 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
  */
 const clock = new THREE.Clock()
 
-
 const tick = () => {
   const elapsedTime = clock.getElapsedTime()
 
@@ -143,7 +159,6 @@ const tick = () => {
     }
   }
 
-
   if (intersects.length) {
     if (!currentIntersect) {
       console.log('mouse enter')
@@ -154,6 +169,16 @@ const tick = () => {
     }
   }
   currentIntersect = intersects.length ? intersects[0] : null
+
+  if (model) {
+    // 关闭递归提升性能
+    const modelIntersects = raycaster.intersectObject(model.children[0].children[0], false)
+    if (modelIntersects.length) {
+      model.scale.set(1.2,1.2,1.2)
+    } else {
+      model.scale.set(1,1,1)
+    }
+  }
 
   // Update controls
   controls.update()

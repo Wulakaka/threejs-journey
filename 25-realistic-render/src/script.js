@@ -113,6 +113,7 @@ controls.enableDamping = true
  * Renderer
  */
 const renderer = new THREE.WebGLRenderer({
+  antialias: true,
     canvas: canvas
 })
 renderer.setSize(sizes.width, sizes.height)

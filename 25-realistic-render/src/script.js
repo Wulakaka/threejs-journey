@@ -1,8 +1,8 @@
 import * as THREE from 'three'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js'
 import GUI from 'lil-gui'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
-import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js'
+import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js'
+import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader.js'
 
 /**
  * Loaders
@@ -26,15 +26,14 @@ const scene = new THREE.Scene()
 /**
  * Update all materials
  */
-const updateAllMaterials = () =>
-{
-    scene.traverse((child) =>
-    {
-        if(child.isMesh && child.material.isMeshStandardMaterial)
-        {
-            child.material.envMapIntensity = global.envMapIntensity
-        }
-    })
+const updateAllMaterials = () => {
+  scene.traverse((child) => {
+    if (child.isMesh && child.material.isMeshStandardMaterial) {
+      child.material.envMapIntensity = global.envMapIntensity
+      child.castShadow = true
+      child.receiveShadow = true
+    }
+  })
 }
 
 /**
@@ -43,19 +42,18 @@ const updateAllMaterials = () =>
 // Global intensity
 global.envMapIntensity = 1
 gui
-    .add(global, 'envMapIntensity')
-    .min(0)
-    .max(10)
-    .step(0.001)
-    .onChange(updateAllMaterials)
+  .add(global, 'envMapIntensity')
+  .min(0)
+  .max(10)
+  .step(0.001)
+  .onChange(updateAllMaterials)
 
 // HDR (RGBE) equirectangular
-rgbeLoader.load('/environmentMaps/0/2k.hdr', (environmentMap) =>
-{
-    environmentMap.mapping = THREE.EquirectangularReflectionMapping
+rgbeLoader.load('/environmentMaps/0/2k.hdr', (environmentMap) => {
+  environmentMap.mapping = THREE.EquirectangularReflectionMapping
 
-    scene.background = environmentMap
-    scene.environment = environmentMap
+  scene.background = environmentMap
+  scene.environment = environmentMap
 })
 
 /**
@@ -63,37 +61,35 @@ rgbeLoader.load('/environmentMaps/0/2k.hdr', (environmentMap) =>
  */
 // Helmet
 gltfLoader.load(
-    '/models/FlightHelmet/glTF/FlightHelmet.gltf',
-    (gltf) =>
-    {
-        gltf.scene.scale.set(10, 10, 10)
-        scene.add(gltf.scene)
+  '/models/FlightHelmet/glTF/FlightHelmet.gltf',
+  (gltf) => {
+    gltf.scene.scale.set(10, 10, 10)
+    scene.add(gltf.scene)
 
-        updateAllMaterials()
-    }
+    updateAllMaterials()
+  }
 )
 
 /**
  * Sizes
  */
 const sizes = {
-    width: window.innerWidth,
-    height: window.innerHeight
+  width: window.innerWidth,
+  height: window.innerHeight
 }
 
-window.addEventListener('resize', () =>
-{
-    // Update sizes
-    sizes.width = window.innerWidth
-    sizes.height = window.innerHeight
+window.addEventListener('resize', () => {
+  // Update sizes
+  sizes.width = window.innerWidth
+  sizes.height = window.innerHeight
 
-    // Update camera
-    camera.aspect = sizes.width / sizes.height
-    camera.updateProjectionMatrix()
+  // Update camera
+  camera.aspect = sizes.width / sizes.height
+  camera.updateProjectionMatrix()
 
-    // Update renderer
-    renderer.setSize(sizes.width, sizes.height)
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+  // Update renderer
+  renderer.setSize(sizes.width, sizes.height)
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 })
 
 /**
@@ -110,11 +106,37 @@ controls.target.y = 3.5
 controls.enableDamping = true
 
 /**
+ * Directional light
+ */
+const directionalLight = new THREE.DirectionalLight('white', 6)
+directionalLight.position.set(-4, 6.5, 2.5)
+scene.add(directionalLight)
+gui.add(directionalLight, 'intensity', 0, 10, 0.001).name('Light intensity')
+gui.add(directionalLight.position, 'x', -10, 10, 0.001).name('Light X')
+gui.add(directionalLight.position, 'y', -10, 10, 0.001).name('Light Y')
+gui.add(directionalLight.position, 'z', -10, 10, 0.001).name('Light Z')
+
+
+// shadows
+directionalLight.shadow.mapSize.set(2048, 2048)
+directionalLight.shadow.camera.far = 15
+const directionalLightCameraHelper = new THREE.CameraHelper(directionalLight.shadow.camera)
+
+scene.add(directionalLightCameraHelper)
+directionalLight.castShadow = true
+gui.add(directionalLight, 'castShadow').name('Light shadow')
+
+// target
+directionalLight.target.position.set(0, 4, 0)
+directionalLight.target.updateMatrixWorld()
+
+
+/**
  * Renderer
  */
 const renderer = new THREE.WebGLRenderer({
   antialias: true,
-    canvas: canvas
+  canvas: canvas
 })
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
@@ -133,20 +155,23 @@ gui.add(renderer, 'toneMapping', {
 renderer.toneMappingExposure = 3
 gui.add(renderer, 'toneMappingExposure').min(0).max(10).step(0.001)
 
+// Shadows
+renderer.shadowMap.enabled = true
+renderer.shadowMap.type = THREE.PCFSoftShadowMap
+
 
 /**
  * Animate
  */
-const tick = () =>
-{
-    // Update controls
-    controls.update()
+const tick = () => {
+  // Update controls
+  controls.update()
 
-    // Render
-    renderer.render(scene, camera)
+  // Render
+  renderer.render(scene, camera)
 
-    // Call tick again on the next frame
-    window.requestAnimationFrame(tick)
+  // Call tick again on the next frame
+  window.requestAnimationFrame(tick)
 }
 
 tick()

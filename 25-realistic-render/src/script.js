@@ -61,10 +61,21 @@ rgbeLoader.load('/environmentMaps/0/2k.hdr', (environmentMap) => {
  * Models
  */
 // Helmet
+// gltfLoader.load(
+//   '/models/FlightHelmet/glTF/FlightHelmet.gltf',
+//   (gltf) => {
+//     gltf.scene.scale.set(10, 10, 10)
+//     scene.add(gltf.scene)
+//
+//     updateAllMaterials()
+//   }
+// )
+
+// hamburger
 gltfLoader.load(
-  '/models/FlightHelmet/glTF/FlightHelmet.gltf',
+  '/models/hamburger.glb',
   (gltf) => {
-    gltf.scene.scale.set(10, 10, 10)
+    gltf.scene.scale.set(0.4, 0.4, 0.4)
     scene.add(gltf.scene)
 
     updateAllMaterials()
@@ -157,6 +168,11 @@ gui.add(directionalLight, 'intensity', 0, 10, 0.001).name('Light intensity')
 gui.add(directionalLight.position, 'x', -10, 10, 0.001).name('Light X')
 gui.add(directionalLight.position, 'y', -10, 10, 0.001).name('Light Y')
 gui.add(directionalLight.position, 'z', -10, 10, 0.001).name('Light Z')
+
+directionalLight.shadow.normalBias = 0.027
+directionalLight.shadow.bias = -0.004
+gui.add(directionalLight.shadow, 'normalBias').min(-0.05).max(0.05).step(0.001)
+gui.add(directionalLight.shadow, 'bias').min(-0.05).max(0.05).step(0.001)
 
 
 // shadows

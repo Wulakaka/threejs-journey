@@ -4,14 +4,11 @@ const experience = new Experience(document.querySelector('canvas.webgl'))
 // import * as THREE from 'three'
 
 // import GUI from 'lil-gui'
-// import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+
 // /**
 //  * Loaders
 //  */
-// const gltfLoader = new GLTFLoader()
-// const textureLoader = new THREE.TextureLoader()
-// const cubeTextureLoader = new THREE.CubeTextureLoader()
-//
+
 // /**
 //  * Base
 //  */
@@ -21,9 +18,6 @@ const experience = new Experience(document.querySelector('canvas.webgl'))
 //
 // // Canvas
 // const canvas = document.querySelector('canvas.webgl')
-//
-// // Scene
-// const scene = new THREE.Scene()
 //
 // /**
 //  * Update all materials
@@ -109,9 +103,6 @@ const experience = new Experience(document.querySelector('canvas.webgl'))
 // floor.rotation.x = - Math.PI * 0.5
 // scene.add(floor)
 //
-// /**
-//  * Lights
-//  */
 
 //
 // gui.add(directionalLight, 'intensity').min(0).max(10).step(0.001).name('lightIntensity')
@@ -122,9 +113,6 @@ const experience = new Experience(document.querySelector('canvas.webgl'))
 // /**
 //  * Sizes
 //  */
-
-
-
 
 
 //

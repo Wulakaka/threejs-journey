@@ -14,6 +14,12 @@ export default class World {
     )
     this.scene.add(testMesh)
 
-    this.environment = new Environment()
+    this.resources = this.experience.resources
+
+    this.resources.on('ready', () => {
+      // Setup
+      console.log('resources ready')
+      this.environment = new Environment()
+    })
   }
 }

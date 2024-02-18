@@ -59,34 +59,8 @@ const experience = new Experience(document.querySelector('canvas.webgl'))
 //         const foxAction = foxMixer.clipAction(gltf.animations[0])
 //         foxAction.play()
 //
-//         // Update materials
-//         updateAllMaterials()
 //     }
 // )
-//
-// /**
-//  * Floor
-//  */
-// const floorColorTexture = textureLoader.load('textures/dirt/color.jpg')
-// floorColorTexture.colorSpace = THREE.SRGBColorSpace
-// floorColorTexture.repeat.set(1.5, 1.5)
-// floorColorTexture.wrapS = THREE.RepeatWrapping
-// floorColorTexture.wrapT = THREE.RepeatWrapping
-//
-// const floorNormalTexture = textureLoader.load('textures/dirt/normal.jpg')
-// floorNormalTexture.repeat.set(1.5, 1.5)
-// floorNormalTexture.wrapS = THREE.RepeatWrapping
-// floorNormalTexture.wrapT = THREE.RepeatWrapping
-//
-// const floorGeometry = new THREE.CircleGeometry(5, 64)
-// const floorMaterial = new THREE.MeshStandardMaterial({
-//     map: floorColorTexture,
-//     normalMap: floorNormalTexture
-// })
-// const floor = new THREE.Mesh(floorGeometry, floorMaterial)
-// floor.rotation.x = - Math.PI * 0.5
-// scene.add(floor)
-//
 
 //
 // gui.add(directionalLight, 'intensity').min(0).max(10).step(0.001).name('lightIntensity')

@@ -1,4 +1,4 @@
-import EventEmitter from "./EventEmitter.js";
+import EventEmitter from './EventEmitter.js'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
@@ -8,7 +8,6 @@ export default class Resources extends EventEmitter {
 
     // Options
     this.sources = sources
-    console.log(this.sources)
 
     // Setup
     // 保存已经加载的资源
@@ -38,11 +37,11 @@ export default class Resources extends EventEmitter {
           this.sourceLoaded(source, file)
         })
       } else if (source.type === 'texture') {
-        this.loaders.textureLoader.load(source.path, file => {
+        this.loaders.textureLoader.load(source.path, (file) => {
           this.sourceLoaded(source, file)
         })
       } else if (source.type === 'cubeTexture') {
-        this.loaders.cubeTextureLoader.load(source.path, file => {
+        this.loaders.cubeTextureLoader.load(source.path, (file) => {
           this.sourceLoaded(source, file)
         })
       }
@@ -56,5 +55,4 @@ export default class Resources extends EventEmitter {
       this.trigger('ready')
     }
   }
-
 }

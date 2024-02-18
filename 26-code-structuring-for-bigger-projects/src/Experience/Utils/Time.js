@@ -1,8 +1,8 @@
-import EventEmitter from "./EventEmitter.js";
+import EventEmitter from './EventEmitter.js'
 
-export default class Time extends EventEmitter{
+export default class Time extends EventEmitter {
   constructor() {
-    super();
+    super()
 
     // Setup
     // 保存 experience 开始的时间

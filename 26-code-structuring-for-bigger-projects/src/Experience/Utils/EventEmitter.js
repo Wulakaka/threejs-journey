@@ -67,7 +67,10 @@ export default class EventEmitter {
         if (name.namespace === 'base') {
           // Try to remove from each namespace
           for (const namespace in this.callbacks) {
-            if (this.callbacks[namespace] instanceof Object && this.callbacks[namespace][name.value] instanceof Array) {
+            if (
+              this.callbacks[namespace] instanceof Object &&
+              this.callbacks[namespace][name.value] instanceof Array
+            ) {
               delete this.callbacks[namespace][name.value]
 
               // Remove namespace if empty
@@ -79,7 +82,10 @@ export default class EventEmitter {
         }
 
         // Specified namespace
-        else if (this.callbacks[name.namespace] instanceof Object && this.callbacks[name.namespace][name.value] instanceof Array) {
+        else if (
+          this.callbacks[name.namespace] instanceof Object &&
+          this.callbacks[name.namespace][name.value] instanceof Array
+        ) {
           delete this.callbacks[name.namespace][name.value]
 
           // Remove namespace if empty
@@ -113,13 +119,16 @@ export default class EventEmitter {
     name = this.resolveName(name[0])
 
     // Default namespace
-    if(name.namespace === 'base') {
+    if (name.namespace === 'base') {
       // Try to find callback in each namespace
-      for(const namespace in this.callbacks) {
-        if(this.callbacks[namespace] instanceof Object && this.callbacks[namespace][name.value] instanceof Array) {
+      for (const namespace in this.callbacks) {
+        if (
+          this.callbacks[namespace] instanceof Object &&
+          this.callbacks[namespace][name.value] instanceof Array
+        ) {
           this.callbacks[namespace][name.value].forEach(function (callback) {
             result = callback.apply(this, args)
-            if(typeof finalResult === 'undefined') {
+            if (typeof finalResult === 'undefined') {
               finalResult = result
             }
           })
@@ -166,5 +175,4 @@ export default class EventEmitter {
 
     return newName
   }
-
 }

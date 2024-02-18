@@ -112,13 +112,7 @@ const experience = new Experience(document.querySelector('canvas.webgl'))
 // /**
 //  * Lights
 //  */
-// const directionalLight = new THREE.DirectionalLight('#ffffff', 4)
-// directionalLight.castShadow = true
-// directionalLight.shadow.camera.far = 15
-// directionalLight.shadow.mapSize.set(1024, 1024)
-// directionalLight.shadow.normalBias = 0.05
-// directionalLight.position.set(3.5, 2, - 1.25)
-// scene.add(directionalLight)
+
 //
 // gui.add(directionalLight, 'intensity').min(0).max(10).step(0.001).name('lightIntensity')
 // gui.add(directionalLight.position, 'x').min(- 5).max(5).step(0.001).name('lightX')
@@ -128,34 +122,11 @@ const experience = new Experience(document.querySelector('canvas.webgl'))
 // /**
 //  * Sizes
 //  */
-// const sizes = {
-//     width: window.innerWidth,
-//     height: window.innerHeight
-// }
-//
-// window.addEventListener('resize', () =>
-// {
-//     // Update sizes
-//     sizes.width = window.innerWidth
-//     sizes.height = window.innerHeight
-//
-//     // Update camera
-//     camera.aspect = sizes.width / sizes.height
-//     camera.updateProjectionMatrix()
-//
-//     // Update renderer
-//     renderer.setSize(sizes.width, sizes.height)
-//     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-// })
-//
-// /**
-//  * Camera
-//  */
-// // Base camera
-// const camera = new THREE.PerspectiveCamera(35, sizes.width / sizes.height, 0.1, 100)
-// camera.position.set(6, 4, 8)
-// scene.add(camera)
-//
+
+
+
+
+
 //
 // /**
 //  * Animate

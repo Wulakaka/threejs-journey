@@ -156,24 +156,6 @@ const experience = new Experience(document.querySelector('canvas.webgl'))
 // camera.position.set(6, 4, 8)
 // scene.add(camera)
 //
-// // Controls
-// const controls = new OrbitControls(camera, canvas)
-// controls.enableDamping = true
-//
-// /**
-//  * Renderer
-//  */
-// const renderer = new THREE.WebGLRenderer({
-//     canvas: canvas,
-//     antialias: true
-// })
-// renderer.toneMapping = THREE.CineonToneMapping
-// renderer.toneMappingExposure = 1.75
-// renderer.shadowMap.enabled = true
-// renderer.shadowMap.type = THREE.PCFSoftShadowMap
-// renderer.setClearColor('#211d20')
-// renderer.setSize(sizes.width, sizes.height)
-// renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 //
 // /**
 //  * Animate
@@ -187,8 +169,6 @@ const experience = new Experience(document.querySelector('canvas.webgl'))
 //     const deltaTime = elapsedTime - previousTime
 //     previousTime = elapsedTime
 //
-//     // Update controls
-//     controls.update()
 //
 //     // Fox animation
 //     if(foxMixer)
@@ -196,8 +176,6 @@ const experience = new Experience(document.querySelector('canvas.webgl'))
 //         foxMixer.update(deltaTime)
 //     }
 //
-//     // Render
-//     renderer.render(scene, camera)
 //
 //     // Call tick again on the next frame
 //     window.requestAnimationFrame(tick)

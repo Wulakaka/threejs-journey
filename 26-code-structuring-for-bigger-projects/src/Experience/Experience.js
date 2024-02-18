@@ -2,6 +2,7 @@ import Sizes from "./Utils/Sizes.js";
 import Time from "./Utils/Time.js";
 import * as THREE from 'three'
 import Camera from "./Camera.js";
+import Renderer from "./Renderer.js";
 
 // 使用单例模式
 let instance = null
@@ -23,6 +24,7 @@ export default class Experience {
     this.time = new Time()
     this.scene = new THREE.Scene()
     this.camera = new Camera()
+    this.renderer = new Renderer()
 
     this.sizes.on('resize', () => {
       this.resize()
@@ -35,8 +37,10 @@ export default class Experience {
 
   resize() {
     this.camera.resize()
+    this.renderer.resize()
   }
   update() {
     this.camera.update()
+    this.renderer.update()
   }
 }

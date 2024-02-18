@@ -5,9 +5,6 @@ const experience = new Experience(document.querySelector('canvas.webgl'))
 
 // import GUI from 'lil-gui'
 
-// /**
-//  * Loaders
-//  */
 
 // /**
 //  * Base
@@ -37,24 +34,11 @@ const experience = new Experience(document.querySelector('canvas.webgl'))
 //     })
 // }
 //
-// /**
-//  * Environment map
-//  */
-// const environmentMap = cubeTextureLoader.load([
-//     '/textures/environmentMap/px.jpg',
-//     '/textures/environmentMap/nx.jpg',
-//     '/textures/environmentMap/py.jpg',
-//     '/textures/environmentMap/ny.jpg',
-//     '/textures/environmentMap/pz.jpg',
-//     '/textures/environmentMap/nz.jpg'
-// ])
-//
-// environmentMap.colorSpace = THREE.SRGBColorSpace
-//
+
+
 // // scene.background = environmentMap
-// scene.environment = environmentMap
+
 //
-// debugObject.envMapIntensity = 0.4
 // gui.add(debugObject, 'envMapIntensity').min(0).max(4).step(0.001).onChange(updateAllMaterials)
 //
 // /**
@@ -109,10 +93,7 @@ const experience = new Experience(document.querySelector('canvas.webgl'))
 // gui.add(directionalLight.position, 'x').min(- 5).max(5).step(0.001).name('lightX')
 // gui.add(directionalLight.position, 'y').min(- 5).max(5).step(0.001).name('lightY')
 // gui.add(directionalLight.position, 'z').min(- 5).max(5).step(0.001).name('lightZ')
-//
-// /**
-//  * Sizes
-//  */
+
 
 
 //

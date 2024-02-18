@@ -1,11 +1,11 @@
-import Sizes from "./Utils/Sizes.js";
-import Time from "./Utils/Time.js";
+import Sizes from './Utils/Sizes.js'
+import Time from './Utils/Time.js'
 import * as THREE from 'three'
-import Camera from "./Camera.js";
-import Renderer from "./Renderer.js";
-import World from "./World/World.js";
-import Resources from "./Utils/Resources.js";
-import sources from "./sources.js";
+import Camera from './Camera.js'
+import Renderer from './Renderer.js'
+import World from './World/World.js'
+import Resources from './Utils/Resources.js'
+import sources from './sources.js'
 
 // 使用单例模式
 let instance = null
@@ -47,6 +47,8 @@ export default class Experience {
   }
   update() {
     this.camera.update()
+    // 要在 renderer 之前更新 world
+    this.world.update()
     this.renderer.update()
   }
 }

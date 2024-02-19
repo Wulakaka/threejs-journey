@@ -53,4 +53,30 @@ export default class Experience {
     this.world.update()
     this.renderer.update()
   }
+  destroy() {
+    this.time.off('tick')
+    this.sizes.off('resize')
+    this.time.destroy()
+    this.sizes.destroy()
+
+    // dispose geometries, materials, textures, etc.
+    this.scene.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        child.geometry.dispose()
+        for (const key in child.material) {
+          const value = child.material[key]
+          if (value && typeof value.dispose === 'function') {
+            value.dispose()
+          }
+        }
+      }
+    })
+    // dispose renderer
+    this.renderer.instance.dispose()
+
+    // destroy debug
+    if (this.debug.active) {
+      this.debug.ui.destroy()
+    }
+  }
 }

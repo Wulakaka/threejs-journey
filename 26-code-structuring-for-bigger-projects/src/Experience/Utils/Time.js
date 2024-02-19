@@ -14,12 +14,15 @@ export default class Time extends EventEmitter {
     // 保存距离上一帧的时间间隔
     this.delta = 16
 
+    this.isDestroyed = false
+
     window.requestAnimationFrame(() => {
       this.tick()
     })
   }
 
   tick() {
+    if (this.isDestroyed) return
     const currentTime = Date.now()
     this.delta = currentTime - this.current
     this.current = currentTime
@@ -30,5 +33,9 @@ export default class Time extends EventEmitter {
     window.requestAnimationFrame(() => {
       this.tick()
     })
+  }
+
+  destroy() {
+    this.isDestroyed = true
   }
 }

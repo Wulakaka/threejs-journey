@@ -26,6 +26,34 @@ export default class Environment {
     this.sunlight.shadow.normalBias = 0.05
     this.sunlight.position.set(3.5, 2, -1.25)
     this.scene.add(this.sunlight)
+
+    // Debug
+    if (this.debug.active) {
+      this.debugFolder
+        .add(this.sunlight, 'intensity')
+        .name('lightIntensity')
+        .min(0)
+        .max(4)
+        .step(0.001)
+      this.debugFolder
+        .add(this.sunlight.position, 'x')
+        .min(-5)
+        .max(5)
+        .step(0.001)
+        .name('lightX')
+      this.debugFolder
+        .add(this.sunlight.position, 'y')
+        .min(-5)
+        .max(5)
+        .step(0.001)
+        .name('lightY')
+      this.debugFolder
+        .add(this.sunlight.position, 'z')
+        .min(-5)
+        .max(5)
+        .step(0.001)
+        .name('lightZ')
+    }
   }
 
   setEnvironmentMap() {

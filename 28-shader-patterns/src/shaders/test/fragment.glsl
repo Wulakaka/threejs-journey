@@ -1,7 +1,17 @@
+#define PI 3.1415926535897932384626433832795
+
 varying vec2 vUv;
 float random(vec2 st)
 {
     return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
+}
+
+vec2 rotate(vec2 uv, float rotation, vec2 mid)
+{
+    return vec2(
+        cos(rotation) * (uv.x - mid.x) + sin(rotation) * (uv.y - mid.y) + mid.x,
+        cos(rotation) * (uv.y - mid.y) - sin(rotation) * (uv.x - mid.x) + mid.y
+    );
 }
 void main()
 {
@@ -70,6 +80,83 @@ void main()
 //    Pattern 22
 //    float strength = floor(vUv.x * 10.0) / 10.0 * floor(vUv.y * 10.0) / 10.0;
 //    Pattern 23
-    float strength = random(vUv);
+//    float strength = random(vUv);
+//    Pattern 24
+//    vec2 gridUv = vec2(floor(vUv.x * 10.0) / 10.0, floor(vUv.y * 10.0) / 10.0);
+//    float strength = random(gridUv);
+//    Pattern 25
+//    vec2 gridUv = vec2(floor(vUv.x * 10.0) / 10.0, floor((vUv.y + vUv.x * 0.5)* 10.0) / 10.0 );
+//    float strength = random(gridUv);
+//    Pattern 26
+//    float strength = length(vUv);
+//    Pattern 27
+//    float strength = distance(vUv, vec2(0.5));
+//    Pattern 28
+//    float strength = 1.0 - distance(vUv, vec2(0.5));
+//    Pattern 29
+//    float strength = 0.015 / distance(vUv, vec2(0.5));
+//    Pattern 30
+//    x 方向上与上个例子不同
+//    vUv.x * 0.3 + 0.35 中的第二个参数可以带入 vUv.x = 0.5 时，结果为 0.5
+//    float strength = 0.015 / distance(vec2(vUv.x * 0.3 + 0.35, vUv.y), vec2(0.5));
+//    教程中的例子放大了整理，并变更了 y 轴
+//    float strength = 0.15 / distance(vec2(vUv.x, (vUv.y - 0.5) * 5.0 + 0.5), vec2(0.5));
+//    Pattern 31
+//    float strength = 0.15 / distance(vec2(vUv.x, (vUv.y - 0.5) * 5.0 + 0.5), vec2(0.5));
+//    strength *= 0.15 / distance(vec2(vUv.y, (vUv.x - 0.5) * 5.0 + 0.5), vec2(0.5));
+//    Pattern 32
+//    vec2 rotatedUv = rotate(vUv, PI / 4.0, vec2(0.5));
+//    float strength = 0.15 / distance(vec2(rotatedUv.x, (rotatedUv.y - 0.5) * 5.0 + 0.5), vec2(0.5));
+//    strength *= 0.15 / distance(vec2(rotatedUv.y, (rotatedUv.x - 0.5) * 5.0 + 0.5), vec2(0.5));
+//    Pattern 33
+//    也可以是 float strength = step(0.25, distance(vUv, vec2(0.5)))
+//    float strength = step(0.5, distance(vUv, vec2(0.5)) + 0.25);
+//    Pattern 34
+//    中心到外圈是 0.5 - 0 - 0.5，所以是线性经过了绝对值变换
+//    float strength = abs(distance(vUv, vec2(0.5)) - 0.25);
+//    Pattern 35
+//    float strength = step(0.01, abs(distance(vUv, vec2(0.5)) - 0.25));
+//    Pattern 36
+//    float strength = 1.0 - step(0.01, abs(distance(vUv, vec2(0.5)) - 0.25));
+//    Pattern 37
+//    y 方向上加上了 sin(vUv.x) 函数
+//    vec2 wavedUv = vec2(vUv.x, vUv.y + sin(vUv.x * 30.0) * 0.1);
+//    float strength = 1.0 - step(0.01, abs(distance(wavedUv, vec2(0.5)) - 0.25));
+//    Pattern 38
+//    x 方向上也加上了 sin(vUv.x) 函数
+//    vec2 wavedUv = vec2(vUv.x + sin(vUv.y * 30.0) * 0.1, vUv.y + sin(vUv.x * 30.0) * 0.1);
+//    float strength = 1.0 - step(0.01, abs(distance(wavedUv, vec2(0.5)) - 0.25));
+//    Pattern 39
+//    加大了振幅
+//    vec2 wavedUv = vec2(
+//        vUv.x + sin(vUv.y * 100.0) * 0.1,
+//        vUv.y + sin(vUv.x * 100.0) * 0.1
+//    );
+//    float strength = 1.0 - step(0.01, abs(distance(wavedUv, vec2(0.5)) - 0.25));
+//    Pattern 40
+//    从 y 轴顺时针的弧度制，如果是从 x 轴开始的逆时针，则是 atan(vUv.y, vUv.x)
+//    float strength = atan(vUv.x, vUv.y);
+//    Pattern 41
+//    float angle = atan(vUv.x - 0.5, vUv.y - 0.5);
+//    float strength = angle;
+//    Pattern 42
+//    atan 的返回值是 - PI 到 PI，所以需要除以 PI * 2.0 的范围是 -0.5 到 0.5，最后需要加上 0.5 使得范围变为 0 到 1
+//    -0.5 在正下方
+//    float angle = atan(vUv.x - 0.5, vUv.y - 0.5);
+//    float strength = angle / (PI * 2.0);
+//    strength += 0.5;
+//    Pattern 43
+//    重复出现的考虑使用 mod
+//    float angle = atan(vUv.x - 0.5, vUv.y - 0.5) / (PI * 2.0) + 0.5;
+//    float strength = mod(angle * 20.0, 1.0);
+//    Pattern 44
+//    并不是上一个做了 abs，而是 sin 函数
+//    float angle = atan(vUv.x - 0.5, vUv.y - 0.5) / (PI * 2.0) + 0.5;
+//    float strength = sin(angle * 100.0);
+//    Pattern 45
+//    增加了角度上的 sin 函数
+    float angle = atan(vUv.x - 0.5, vUv.y - 0.5) / (PI * 2.0) + 0.5;
+    float radius = 0.25 + sin(angle * 100.0) * 0.02;
+    float strength = 1.0 - step(0.01, abs(distance(vUv, vec2(0.5)) - radius));
 gl_FragColor = vec4(vec3(strength), 1.0);
 }

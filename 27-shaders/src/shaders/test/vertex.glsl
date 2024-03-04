@@ -4,6 +4,8 @@ uniform mat4 modelMatrix;
 
 attribute float aRandom;
 
+varying float vRandom;
+
 // 不同顶点对应的值不同
 attribute vec3 position;
 
@@ -16,4 +18,6 @@ void main() {
   vec4 projectedPosition = projectionMatrix * viewPosition;
 
   gl_Position = projectedPosition;
+
+  vRandom = aRandom;
 }

@@ -31,6 +31,7 @@ const geometry = new THREE.PlaneGeometry(1, 1, 32, 32);
 const material = new THREE.RawShaderMaterial({
   vertexShader: testVertexShader,
   fragmentShader: testFragmentShader,
+  transparent: true,
 });
 
 // Mesh

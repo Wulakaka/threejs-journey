@@ -27,20 +27,25 @@ const textureLoader = new THREE.TextureLoader();
 // Geometry
 const geometry = new THREE.PlaneGeometry(1, 1, 32, 32);
 
-const count = geometry.attributes.position.count
-const randoms = new Float32Array(count)
+const count = geometry.attributes.position.count;
+const randoms = new Float32Array(count);
 
-for(let i = 0; i < count; i++) {
-    randoms[i] = Math.random()
+for (let i = 0; i < count; i++) {
+  randoms[i] = Math.random();
 }
 
-geometry.setAttribute('aRandom', new THREE.BufferAttribute(randoms, 1))
+geometry.setAttribute("aRandom", new THREE.BufferAttribute(randoms, 1));
 
 // Material
 const material = new THREE.RawShaderMaterial({
   vertexShader: testVertexShader,
   fragmentShader: testFragmentShader,
   transparent: true,
+  uniforms: {
+    uFrenquency: {
+      value: new THREE.Vector2(10, 5),
+    },
+  },
 });
 
 // Mesh

@@ -26,8 +26,15 @@ const geometry = new THREE.PlaneGeometry(1, 1, 32, 32)
 const material = new THREE.ShaderMaterial({
     vertexShader: testVertexShader,
     fragmentShader: testFragmentShader,
-    side: THREE.DoubleSide
+    side: THREE.DoubleSide,
+    uniforms: {
+        uFrequency: {
+          value: 20
+        }
+    }
 })
+
+gui.add(material.uniforms.uFrequency, 'value').min(0).max(100).step(0.01).name('Frequency')
 
 // Mesh
 const mesh = new THREE.Mesh(geometry, material)

@@ -1,5 +1,7 @@
 #define PI 3.1415926535897932384626433832795
 
+uniform float uFrequency;
+
 varying vec2 vUv;
 float random(vec2 st)
 {
@@ -218,7 +220,7 @@ void main()
 //    Pattern 49
 //    float strength = sin(cnoise(vUv * 10.0) * 20.0);
 //    Pattern 50
-//    float strength = step(0.9, sin(cnoise(vUv * 10.0) * 20.0));
+    float strength = step(0.9, sin(cnoise(vUv * 10.0) * uFrequency));
 
     vec3 blackColor = vec3(0.0);
     vec3 uvColor = vec3(vUv, 1.0);

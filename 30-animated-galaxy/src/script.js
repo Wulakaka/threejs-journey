@@ -1,6 +1,8 @@
 import * as THREE from 'three'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js'
 import GUI from 'lil-gui'
+import galaxyVertexShader from './shaders/galaxy/vertex.glsl'
+import galaxyFragmentShader from './shaders/galaxy/fragment.glsl'
 
 /**
  * Base
@@ -32,10 +34,8 @@ let geometry = null
 let material = null
 let points = null
 
-const generateGalaxy = () =>
-{
-    if(points !== null)
-    {
+const generateGalaxy = () => {
+    if (points !== null) {
         geometry.dispose()
         material.dispose()
         scene.remove(points)
@@ -52,8 +52,7 @@ const generateGalaxy = () =>
     const insideColor = new THREE.Color(parameters.insideColor)
     const outsideColor = new THREE.Color(parameters.outsideColor)
 
-    for(let i = 0; i < parameters.count; i++)
-    {
+    for (let i = 0; i < parameters.count; i++) {
         const i3 = i * 3
 
         // Position
@@ -61,11 +60,11 @@ const generateGalaxy = () =>
 
         const branchAngle = (i % parameters.branches) / parameters.branches * Math.PI * 2
 
-        const randomX = Math.pow(Math.random(), parameters.randomnessPower) * (Math.random() < 0.5 ? 1 : - 1) * parameters.randomness * radius
-        const randomY = Math.pow(Math.random(), parameters.randomnessPower) * (Math.random() < 0.5 ? 1 : - 1) * parameters.randomness * radius
-        const randomZ = Math.pow(Math.random(), parameters.randomnessPower) * (Math.random() < 0.5 ? 1 : - 1) * parameters.randomness * radius
+        const randomX = Math.pow(Math.random(), parameters.randomnessPower) * (Math.random() < 0.5 ? 1 : -1) * parameters.randomness * radius
+        const randomY = Math.pow(Math.random(), parameters.randomnessPower) * (Math.random() < 0.5 ? 1 : -1) * parameters.randomness * radius
+        const randomZ = Math.pow(Math.random(), parameters.randomnessPower) * (Math.random() < 0.5 ? 1 : -1) * parameters.randomness * radius
 
-        positions[i3    ] = Math.cos(branchAngle) * radius + randomX
+        positions[i3] = Math.cos(branchAngle) * radius + randomX
         positions[i3 + 1] = randomY
         positions[i3 + 2] = Math.sin(branchAngle) * radius + randomZ
 
@@ -73,7 +72,7 @@ const generateGalaxy = () =>
         const mixedColor = insideColor.clone()
         mixedColor.lerp(outsideColor, radius / parameters.radius)
 
-        colors[i3    ] = mixedColor.r
+        colors[i3] = mixedColor.r
         colors[i3 + 1] = mixedColor.g
         colors[i3 + 2] = mixedColor.b
     }
@@ -84,12 +83,12 @@ const generateGalaxy = () =>
     /**
      * Material
      */
-    material = new THREE.PointsMaterial({
-        size: parameters.size,
-        sizeAttenuation: true,
+    material = new THREE.ShaderMaterial({
         depthWrite: false,
         blending: THREE.AdditiveBlending,
-        vertexColors: true
+        vertexColors: true,
+        vertexShader: galaxyVertexShader,
+        fragmentShader: galaxyFragmentShader,
     })
 
     /**
@@ -117,8 +116,7 @@ const sizes = {
     height: window.innerHeight
 }
 
-window.addEventListener('resize', () =>
-{
+window.addEventListener('resize', () => {
     // Update sizes
     sizes.width = window.innerWidth
     sizes.height = window.innerHeight
@@ -160,8 +158,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
  */
 const clock = new THREE.Clock()
 
-const tick = () =>
-{
+const tick = () => {
     const elapsedTime = clock.getElapsedTime()
 
     // Update controls

@@ -1,7 +1,7 @@
 attribute float aScale;
-
 uniform float uSize;
 
+varying vec3 vColor;
 void main() {
 /**
     * The vertex shader's main function is called for each vertex in the geometry.
@@ -33,4 +33,8 @@ void main() {
     //    Size attenuation
     //    Size of the point is calculated based on the distance from the camera.
     gl_PointSize *= (1.0 / -viewPosition.z);
+
+    // Color
+    // color 是 vertex shader 中已有的 attribute
+    vColor = color;
 }

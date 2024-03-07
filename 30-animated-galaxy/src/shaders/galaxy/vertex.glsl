@@ -30,4 +30,7 @@ void main() {
 
     // Size
     gl_PointSize = uSize * aScale;
+    //    Size attenuation
+    //    Size of the point is calculated based on the distance from the camera.
+    gl_PointSize *= (1.0 / -viewPosition.z);
 }

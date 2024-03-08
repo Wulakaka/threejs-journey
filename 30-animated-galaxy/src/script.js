@@ -29,6 +29,7 @@ parameters.randomness = 0.2
 parameters.randomnessPower = 3
 parameters.insideColor = '#ff6030'
 parameters.outsideColor = '#1b3984'
+parameters.timeScale = 0.2
 
 let geometry = null
 let material = null
@@ -103,6 +104,7 @@ const generateGalaxy = () => {
         fragmentShader: galaxyFragmentShader,
         uniforms: {
             uTime: {value: 0},
+            uTimeScale: {value: parameters.timeScale},
             uSize: {value: 30 * renderer.getPixelRatio()},
         }
     })
@@ -122,6 +124,7 @@ gui.add(parameters, 'randomness').min(0).max(2).step(0.001).onFinishChange(gener
 gui.add(parameters, 'randomnessPower').min(1).max(10).step(0.001).onFinishChange(generateGalaxy)
 gui.addColor(parameters, 'insideColor').onFinishChange(generateGalaxy)
 gui.addColor(parameters, 'outsideColor').onFinishChange(generateGalaxy)
+gui.add(parameters, 'timeScale').min(0).max(1).step(0.001).onFinishChange(generateGalaxy)
 
 /**
  * Sizes

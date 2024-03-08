@@ -2,6 +2,7 @@ attribute float aScale;
 attribute vec3 aRandomness;
 uniform float uSize;
 uniform float uTime;
+uniform float uTimeScale;
 
 varying vec3 vColor;
 void main() {
@@ -30,7 +31,7 @@ void main() {
     // 距离中心的角度，为啥是距离中心？因为在设置位置信息的时候，是以中心为原点的
     float angle = atan(modelPosition.x, modelPosition.z);
     float distanceToCenter = length(modelPosition.xz);
-    float angleOffset = 1.0 / distanceToCenter * uTime * 0.2;
+    float angleOffset = 1.0 / distanceToCenter * uTime * uTimeScale;
     angle += angleOffset;
     modelPosition.x = sin(angle) * distanceToCenter;
     modelPosition.z = cos(angle) * distanceToCenter;

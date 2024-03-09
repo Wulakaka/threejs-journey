@@ -63,11 +63,44 @@ const mapTexture = textureLoader.load('/models/LeePerrySmith/color.jpg')
 mapTexture.colorSpace = THREE.SRGBColorSpace
 const normalTexture = textureLoader.load('/models/LeePerrySmith/normal.jpg')
 
+const customUniforms = {
+    uTime: { value: 0 }
+}
+
 // Material
 const material = new THREE.MeshStandardMaterial( {
     map: mapTexture,
     normalMap: normalTexture
 })
+
+material.onBeforeCompile = (shader) => {
+    console.log(shader.vertexShader)
+    shader.uniforms.uTime = customUniforms.uTime
+    shader.vertexShader = shader.vertexShader.replace(
+        '#include <common>',
+        `
+        #include <common>
+        
+        uniform float uTime;
+        
+        mat2 get2dRotateMatrix(float _angle)
+        {
+            return mat2(cos(_angle), - sin(_angle), sin(_angle), cos(_angle));
+        }
+        
+        `
+    )
+    shader.vertexShader = shader.vertexShader.replace(
+        '#include <begin_vertex>',
+        `
+        #include <begin_vertex>
+        
+        float angle = (position.y + uTime)* 0.9 ;
+        
+        transformed.xz = get2dRotateMatrix(angle) * transformed.xz;
+        `
+    )
+}
 
 /**
  * Models
@@ -155,6 +188,8 @@ const clock = new THREE.Clock()
 const tick = () =>
 {
     const elapsedTime = clock.getElapsedTime()
+
+    customUniforms.uTime.value = elapsedTime
 
     // Update controls
     controls.update()

@@ -1,8 +1,8 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import GUI from 'lil-gui'
-import testVertexShader from './shaders/test/vertex.glsl'
-import testFragmentShader from './shaders/test/fragment.glsl'
+import testVertexShader from './shaders/sun/vertex.glsl'
+import testFragmentShader from './shaders/sun/fragment.glsl'
 
 /**
  * Base
@@ -30,6 +30,9 @@ const material = new THREE.ShaderMaterial({
     uniforms: {
         uFrequency: {
           value: 20
+        },
+        uTime: {
+            value: 0
         }
     }
 })
@@ -87,8 +90,12 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 /**
  * Animate
  */
+const clock = new THREE.Clock()
 const tick = () =>
 {
+    const elapsedTime = clock.getElapsedTime()
+    material.uniforms.uTime.value = elapsedTime
+
     // Update controls
     controls.update()
 

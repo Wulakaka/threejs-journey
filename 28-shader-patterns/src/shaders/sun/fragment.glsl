@@ -2,7 +2,7 @@ uniform float uTime;
 
 varying vec2 vUv;
 
-vec3 rgb2hsb( in vec3 c ){
+vec3 rgb2hsb(in vec3 c) {
     vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
     vec4 p = mix(vec4(c.bg, K.wz),
                  vec4(c.gb, K.xy),
@@ -15,6 +15,17 @@ vec3 rgb2hsb( in vec3 c ){
     return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)),
                 d / (q.x + e),
                 q.x);
+}
+
+//  Function from Iñigo Quiles
+//  https://www.shadertoy.com/view/MsS3Wc
+vec3 hsb2rgb(in vec3 c) {
+    vec3 rgb = clamp(abs(mod(c.x * 6.0 + vec3(0.0, 4.0, 2.0),
+                             6.0) - 3.0) - 1.0,
+                     0.0,
+                     1.0);
+    rgb = rgb * rgb * (3.0 - 2.0 * rgb);
+    return c.z * mix(vec3(1.0), rgb, c.y);
 }
 
 void main() {
@@ -32,8 +43,13 @@ void main() {
 
     vec3 colorRed = vec3(214, 140, 98) / 255.0;
     vec3 colorBlue = vec3(99, 119, 167) / 255.0;
-
     vec3 color = mix(colorRed, colorBlue, strength);
+
+//    strength = clamp(strength, 0.0, 1.0);
+//    vec3 colorRed = vec3(0.0, 1.0, 1.0);
+//    vec3 colorPurple = vec3(1.0, 1.0, 1.0);
+//    vec3 color = mix(colorRed, colorPurple, strength);
+//    color = hsb2rgb(color);
 
     gl_FragColor = vec4(color, 1.0);
 

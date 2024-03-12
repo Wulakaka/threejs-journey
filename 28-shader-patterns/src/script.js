@@ -1,8 +1,8 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import GUI from 'lil-gui'
-import testVertexShader from './shaders/sun/vertex.glsl'
-import testFragmentShader from './shaders/sun/fragment.glsl'
+import testVertexShader from './shaders/rectangle/vertex.glsl'
+import testFragmentShader from './shaders/rectangle/fragment.glsl'
 
 /**
  * Base

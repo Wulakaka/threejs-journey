@@ -111,6 +111,7 @@ const smokeMaterial = new THREE.ShaderMaterial({
   fragmentShader: coffeeSmokeFragmentShader,
   side: THREE.DoubleSide,
   transparent: true,
+  depthWrite: false, // 处理后面被遮挡的问题
   uniforms: {
     uPerlin: new THREE.Uniform(perlinTexture),
     uTime: new THREE.Uniform(0)

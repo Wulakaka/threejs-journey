@@ -10,7 +10,7 @@ void main() {
     //    变化更锐利
     stripes = pow(stripes, 2.0);
 
-    gl_FragColor = vec4(stripes, stripes, stripes, stripes);
+    gl_FragColor = vec4(1.0, 1.0, 1.0, stripes);
 
     #include <tonemapping_fragment>
     #include <colorspace_fragment>

@@ -79,12 +79,16 @@ gui
  */
 
 const materialParameters = {}
-materialParameters.color = new THREE.Color('#70c1ff')
+materialParameters.colorFrom = new THREE.Color('#73ff00')
+materialParameters.colorTo = new THREE.Color('#70c1ff')
 
-gui.addColor(materialParameters, 'color').onChange(() => {
+gui.addColor(materialParameters, 'colorFrom').onChange(() => {
   // 也可以用 set 方法
   // material.uniforms.uColor.value.set(materialParameters.color)
-  material.uniforms.uColor.value = materialParameters.color
+  material.uniforms.uColorFrom.value = materialParameters.colorFrom
+})
+gui.addColor(materialParameters, 'colorTo').onChange(() => {
+  material.uniforms.uColorTo.value = materialParameters.colorTo
 })
 
 const material = new THREE.ShaderMaterial({
@@ -93,7 +97,8 @@ const material = new THREE.ShaderMaterial({
   transparent: true,
   uniforms: {
     uTime: new THREE.Uniform(0),
-    uColor: new THREE.Uniform(materialParameters.color)
+    uColorFrom: new THREE.Uniform(materialParameters.colorFrom),
+    uColorTo: new THREE.Uniform(materialParameters.colorTo)
   },
   side: THREE.DoubleSide,
   depthWrite: false, // 处理透明冲突，不渲染到 depth buffer

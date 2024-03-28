@@ -10,7 +10,6 @@ void main() {
     gl_Position = projectedPosition;
 
     vPosition = modelPosition.xyz;
-
     vec4 modelNormal = modelMatrix * vec4(normal, 0.0);
     vNormal = modelNormal.xyz;
 }

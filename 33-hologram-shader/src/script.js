@@ -83,7 +83,10 @@ const material = new THREE.ShaderMaterial({
     transparent: true,
     uniforms: {
         uTime: new THREE.Uniform(0)
-    }
+    },
+    side: THREE.DoubleSide,
+    depthWrite: false, // 处理透明冲突，不渲染到 depth buffer
+    blending: THREE.AdditiveBlending, // 调整混合模式，让重叠处的光更亮
 })
 
 /**

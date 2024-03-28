@@ -1,4 +1,5 @@
 uniform float uTime;
+uniform vec3 uColor;
 
 varying vec3 vPosition;
 varying vec3 vNormal;
@@ -39,7 +40,7 @@ void main() {
     holographic += 1.25 * fresnel;
     holographic *= falloff;
 
-    gl_FragColor = vec4(1.0, 1.0, 1.0, holographic);
+    gl_FragColor = vec4(uColor, holographic);
 
     #include <tonemapping_fragment>
     #include <colorspace_fragment>

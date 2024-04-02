@@ -99,12 +99,15 @@ const textures = [
 //   position: 粒子中心位置
 const createFirework = (count, position, size, texture) => {
   const positionsArray = new Float32Array(count * 3);
+  const sizesArray = new Float32Array(count);
 
   for (let i = 0; i < count; i++) {
     const i3 = i * 3;
     positionsArray[i3 + 0] = Math.random() - 0.5;
     positionsArray[i3 + 1] = Math.random() - 0.5;
     positionsArray[i3 + 2] = Math.random() - 0.5;
+
+    sizesArray[i] = Math.random();
   }
 
   //   Geometry
@@ -114,6 +117,8 @@ const createFirework = (count, position, size, texture) => {
     "position",
     new THREE.BufferAttribute(positionsArray, 3),
   );
+
+  geometry.setAttribute("aSize", new THREE.BufferAttribute(sizesArray, 1));
 
   // material
   texture.flipY = false;
@@ -127,6 +132,7 @@ const createFirework = (count, position, size, texture) => {
     },
     transparent: true,
     depthWrite: false,
+    blending: THREE.AdditiveBlending,
   });
 
   // Points

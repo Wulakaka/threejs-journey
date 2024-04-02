@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import GUI from "lil-gui";
+import { gsap } from "gsap";
 import fireworksVertexShader from "./shaders/fireworks/vertex.glsl";
 import fireworksFragmentShader from "./shaders/fireworks/fragment.glsl";
 
@@ -140,6 +141,7 @@ const createFirework = (count, position, size, texture, radius, color) => {
       uTexture: new THREE.Uniform(texture),
       uResolution: new THREE.Uniform(sizes.resolution),
       uColor: new THREE.Uniform(color),
+      uProgress: new THREE.Uniform(0),
     },
     transparent: true,
     depthWrite: false,
@@ -150,6 +152,19 @@ const createFirework = (count, position, size, texture, radius, color) => {
   const firework = new THREE.Points(geometry, material);
   firework.position.copy(position);
   scene.add(firework);
+
+  // Animation
+  const destroy = () => {
+    scene.remove(firework);
+    geometry.dispose();
+    material.dispose();
+  };
+  gsap.to(material.uniforms.uProgress, {
+    value: 1,
+    duration: 3,
+    ease: "linear",
+    onComplete: destroy,
+  });
 };
 
 createFirework(
@@ -160,6 +175,17 @@ createFirework(
   1,
   new THREE.Color("#8affff"),
 );
+
+window.addEventListener("click", () => {
+  createFirework(
+    500,
+    new THREE.Vector3(),
+    0.5,
+    textures[7],
+    1,
+    new THREE.Color("#8affff"),
+  );
+});
 
 /**
  * Animate

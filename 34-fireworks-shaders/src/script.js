@@ -97,15 +97,25 @@ const textures = [
 // 由于最终是通过点击触发，所以通过函数创建
 //   count: 粒子数量
 //   position: 粒子中心位置
-const createFirework = (count, position, size, texture) => {
+//   size: 粒子大小
+//   texture: 粒子纹理
+const createFirework = (count, position, size, texture, radius) => {
   const positionsArray = new Float32Array(count * 3);
   const sizesArray = new Float32Array(count);
 
   for (let i = 0; i < count; i++) {
     const i3 = i * 3;
-    positionsArray[i3 + 0] = Math.random() - 0.5;
-    positionsArray[i3 + 1] = Math.random() - 0.5;
-    positionsArray[i3 + 2] = Math.random() - 0.5;
+
+    const spherical = new THREE.Spherical(
+      radius,
+      Math.random() * Math.PI,
+      Math.random() * Math.PI * 2,
+    );
+    const position = new THREE.Vector3();
+    position.setFromSpherical(spherical);
+    positionsArray[i3 + 0] = position.x;
+    positionsArray[i3 + 1] = position.y;
+    positionsArray[i3 + 2] = position.z;
 
     sizesArray[i] = Math.random();
   }
@@ -141,7 +151,7 @@ const createFirework = (count, position, size, texture) => {
   scene.add(firework);
 };
 
-createFirework(500, new THREE.Vector3(), 0.5, textures[7]);
+createFirework(500, new THREE.Vector3(), 0.5, textures[7], 1);
 
 /**
  * Animate

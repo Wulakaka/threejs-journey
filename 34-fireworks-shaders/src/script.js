@@ -99,7 +99,7 @@ const textures = [
 //   position: 粒子中心位置
 //   size: 粒子大小
 //   texture: 粒子纹理
-const createFirework = (count, position, size, texture, radius) => {
+const createFirework = (count, position, size, texture, radius, color) => {
   const positionsArray = new Float32Array(count * 3);
   const sizesArray = new Float32Array(count);
 
@@ -107,7 +107,7 @@ const createFirework = (count, position, size, texture, radius) => {
     const i3 = i * 3;
 
     const spherical = new THREE.Spherical(
-      radius,
+      radius * (Math.random() * 0.2 + 0.8),
       Math.random() * Math.PI,
       Math.random() * Math.PI * 2,
     );
@@ -139,6 +139,7 @@ const createFirework = (count, position, size, texture, radius) => {
       uSize: new THREE.Uniform(size),
       uTexture: new THREE.Uniform(texture),
       uResolution: new THREE.Uniform(sizes.resolution),
+      uColor: new THREE.Uniform(color),
     },
     transparent: true,
     depthWrite: false,
@@ -151,7 +152,14 @@ const createFirework = (count, position, size, texture, radius) => {
   scene.add(firework);
 };
 
-createFirework(500, new THREE.Vector3(), 0.5, textures[7], 1);
+createFirework(
+  500,
+  new THREE.Vector3(),
+  0.5,
+  textures[7],
+  1,
+  new THREE.Color("#8affff"),
+);
 
 /**
  * Animate

@@ -19,17 +19,6 @@ const scene = new THREE.Scene();
 // Loaders
 const textureLoader = new THREE.TextureLoader();
 
-const textures = [
-  textureLoader.load("/particles/1.png"),
-  textureLoader.load("/particles/2.png"),
-  textureLoader.load("/particles/3.png"),
-  textureLoader.load("/particles/4.png"),
-  textureLoader.load("/particles/5.png"),
-  textureLoader.load("/particles/6.png"),
-  textureLoader.load("/particles/7.png"),
-  textureLoader.load("/particles/8.png"),
-];
-
 /**
  * Sizes
  */
@@ -94,6 +83,17 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
  * Fireworks
  */
 
+const textures = [
+  textureLoader.load("/particles/1.png"),
+  textureLoader.load("/particles/2.png"),
+  textureLoader.load("/particles/3.png"),
+  textureLoader.load("/particles/4.png"),
+  textureLoader.load("/particles/5.png"),
+  textureLoader.load("/particles/6.png"),
+  textureLoader.load("/particles/7.png"),
+  textureLoader.load("/particles/8.png"),
+];
+
 // 由于最终是通过点击触发，所以通过函数创建
 //   count: 粒子数量
 //   position: 粒子中心位置
@@ -116,6 +116,7 @@ const createFirework = (count, position, size, texture) => {
   );
 
   // material
+  texture.flipY = false;
   const material = new THREE.ShaderMaterial({
     vertexShader: fireworksVertexShader,
     fragmentShader: fireworksFragmentShader,
@@ -124,6 +125,8 @@ const createFirework = (count, position, size, texture) => {
       uTexture: new THREE.Uniform(texture),
       uResolution: new THREE.Uniform(sizes.resolution),
     },
+    transparent: true,
+    depthWrite: false,
   });
 
   // Points

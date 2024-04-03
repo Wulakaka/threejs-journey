@@ -182,16 +182,21 @@ createFirework(
   new THREE.Color("#8affff"),
 );
 
-window.addEventListener("click", () => {
-  createFirework(
-    500,
-    new THREE.Vector3(),
-    0.5,
-    textures[7],
-    1,
-    new THREE.Color("#8affff"),
+const createRandomFirework = () => {
+  const count = Math.round(Math.random() * 1000);
+  const position = new THREE.Vector3(
+    Math.random() * 4 - 2,
+    Math.random() * 4 - 2,
+    Math.random() * 4 - 2,
   );
-});
+  const size = Math.random() * 0.5 + 0.5;
+  const texture = textures[Math.floor(Math.random() * textures.length)];
+  const radius = Math.random() * 2 + 1;
+  const color = new THREE.Color(`hsl(${Math.random() * 360}, 100%, 50%)`);
+  createFirework(count, position, size, texture, radius, color);
+};
+
+window.addEventListener("click", createRandomFirework);
 
 /**
  * Animate

@@ -108,11 +108,13 @@ const createFirework = (count, position, size, texture, radius, color) => {
   for (let i = 0; i < count; i++) {
     const i3 = i * 3;
 
-    const spherical = new THREE.Spherical(
-      radius * (Math.random() * 0.2 + 0.8),
-      Math.random() * Math.PI,
-      Math.random() * Math.PI * 2,
-    );
+    const r = radius * (0.8 + Math.random() * 0.2);
+    const theta = Math.random() * Math.PI * 2;
+
+    const y = Math.random() * 2 - 1;
+    const phi = Math.acos(y);
+
+    const spherical = new THREE.Spherical(r, phi, theta);
     const position = new THREE.Vector3();
     position.setFromSpherical(spherical);
     positionsArray[i3 + 0] = position.x;
@@ -183,15 +185,15 @@ createFirework(
 );
 
 const createRandomFirework = () => {
-  const count = Math.round(Math.random() * 1000);
+  const count = 1000 + Math.round(Math.random() * 500);
   const position = new THREE.Vector3(
-    Math.random() * 4 - 2,
-    Math.random() * 4 - 2,
-    Math.random() * 4 - 2,
+    Math.random() * 2 - 1,
+    Math.random() * 2 - 1,
+    Math.random() * 2 - 1,
   );
   const size = Math.random() * 0.5 + 0.5;
   const texture = textures[Math.floor(Math.random() * textures.length)];
-  const radius = Math.random() * 2 + 1;
+  const radius = Math.random() + 0.4;
   const color = new THREE.Color(`hsl(${Math.random() * 360}, 100%, 50%)`);
   createFirework(count, position, size, texture, radius, color);
 };

@@ -95,6 +95,31 @@ const textures = [
   textureLoader.load("/particles/8.png"),
 ];
 
+const getPositionSpherical = () => {
+  const theta = Math.random() * Math.PI * 2;
+  let y = Math.random() * 2 - 1;
+  const phi = Math.acos(y);
+
+  const spherical = new THREE.Spherical(1, phi, theta);
+  const position = new THREE.Vector3();
+  position.setFromSpherical(spherical);
+  return position;
+};
+
+// 菲波那契网格
+const getPosition = (n, N) => {
+  const phi = (Math.sqrt(5) - 1) / 2;
+  const z = (2 * n) / N - 1;
+  const x = (1 - z ** 2) ** 0.5 * Math.cos(2 * Math.PI * n * phi);
+  const y = (1 - z ** 2) ** 0.5 * Math.sin(2 * Math.PI * n * phi);
+
+  return {
+    x,
+    y,
+    z,
+  };
+};
+
 // 由于最终是通过点击触发，所以通过函数创建
 //   count: 粒子数量
 //   position: 粒子中心位置
@@ -109,17 +134,12 @@ const createFirework = (count, position, size, texture, radius, color) => {
     const i3 = i * 3;
 
     const r = radius * (0.8 + Math.random() * 0.2);
-    const theta = Math.random() * Math.PI * 2;
 
-    const y = Math.random() * 2 - 1;
-    const phi = Math.acos(y);
+    const { x, y, z } = getPosition(i, count);
 
-    const spherical = new THREE.Spherical(r, phi, theta);
-    const position = new THREE.Vector3();
-    position.setFromSpherical(spherical);
-    positionsArray[i3 + 0] = position.x;
-    positionsArray[i3 + 1] = position.y;
-    positionsArray[i3 + 2] = position.z;
+    positionsArray[i3 + 0] = x * r;
+    positionsArray[i3 + 1] = z * r;
+    positionsArray[i3 + 2] = y * r;
 
     sizesArray[i] = Math.random();
     timeMultipliersArray[i] = 1 + Math.random();

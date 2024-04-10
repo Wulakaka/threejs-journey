@@ -1,9 +1,12 @@
 attribute float aSize;
 attribute float aTimeMultiplier;
+attribute float aColorHue;
 
 uniform float uSize;
 uniform vec2 uResolution;
 uniform float uProgress;
+
+varying float vColorHue;
 
 float remap(float value, float originMin, float originMax, float destinationMin, float destinationMax)
 {
@@ -86,4 +89,6 @@ void main() {
 
     if (gl_PointSize < 1.0)
     gl_Position = vec4(9999.9); // Hide particles when they are too small
+
+    vColorHue = aColorHue;
 }

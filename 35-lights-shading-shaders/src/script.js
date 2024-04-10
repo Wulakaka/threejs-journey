@@ -119,15 +119,34 @@ gltfLoader.load("./suzanne.glb", (gltf) => {
   scene.add(suzanne);
 });
 
+/**
+ * Light helpers
+ */
 // DirectionalLight Helper
 const directionalLightHelper = new THREE.Mesh(
   new THREE.PlaneGeometry(),
   new THREE.MeshBasicMaterial(),
 );
+directionalLightHelper.material.color.setRGB(0.1, 0.1, 1.0);
 directionalLightHelper.position.set(0.0, 0.0, 3.0);
 directionalLightHelper.material.side = THREE.DoubleSide;
-directionalLightHelper.material.color.setRGB(0.1, 0.1, 1.0);
 scene.add(directionalLightHelper);
+
+// PointLight Helper
+const pointLightHelper = new THREE.Mesh(
+  new THREE.IcosahedronGeometry(0.1, 2),
+  new THREE.MeshBasicMaterial(),
+);
+pointLightHelper.material.color.setRGB(1.0, 0.1, 0.1);
+pointLightHelper.position.set(0.0, 2.5, 0.0);
+scene.add(pointLightHelper);
+const pointLightHelper2 = new THREE.Mesh(
+  new THREE.IcosahedronGeometry(0.1, 2),
+  new THREE.MeshBasicMaterial(),
+);
+pointLightHelper2.material.color.setRGB(0.1, 1.0, 0.5);
+pointLightHelper2.position.set(2.0, 2.0, 2.0);
+scene.add(pointLightHelper2);
 
 /**
  * Animate

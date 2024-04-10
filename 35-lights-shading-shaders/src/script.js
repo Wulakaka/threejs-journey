@@ -93,6 +93,14 @@ gui.addColor(materialParameters, "color").onChange(() => {
   material.uniforms.uColor.value.set(materialParameters.color);
 });
 
+// 半球光
+// const material = new THREE.MeshStandardMaterial({
+//   color: materialParameters.color,
+// });
+
+// const hemisphereLight = new THREE.HemisphereLight(0xff0000, 0x0000ff, 10);
+// scene.add(hemisphereLight);
+
 /**
  * Objects
  */

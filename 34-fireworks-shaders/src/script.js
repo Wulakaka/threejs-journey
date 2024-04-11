@@ -5,6 +5,9 @@ import { gsap } from "gsap";
 import fireworksVertexShader from "./shaders/fireworks/vertex.glsl";
 import fireworksFragmentShader from "./shaders/fireworks/fragment.glsl";
 import getBoxFacePosition2 from "./utils/getBoxFacePosition.js";
+import getBoxEdgePosition from "./utils/getBoxEdgePosition.js";
+import getSpherePosition from "./utils/getSpherePosition.js";
+import getSquarePosition from "./utils/getSquarePosition.js";
 
 /**
  * Base
@@ -106,13 +109,27 @@ const createFirework = (count, position, size, texture, radius, color) => {
   const sizesArray = new Float32Array(count);
   const timeMultipliersArray = new Float32Array(count);
   const colorHuesArray = new Float32Array(count);
-
+  const generateIndex = Math.floor(Math.random() * 4);
   for (let i = 0; i < count; i++) {
     const i3 = i * 3;
 
     const r = radius * (0.8 + Math.random() * 0.2);
+    let x, y, z;
 
-    const { x, y, z } = getBoxFacePosition2(i, count);
+    switch (generateIndex) {
+      case 0:
+        ({ x, y, z } = getBoxEdgePosition(i, count));
+        break;
+      case 1:
+        ({ x, y, z } = getBoxFacePosition2(i, count));
+        break;
+      case 2:
+        ({ x, y, z } = getSpherePosition(i, count));
+        break;
+      case 3:
+        ({ x, y, z } = getSquarePosition(i, count));
+        break;
+    }
 
     positionsArray[i3 + 0] = x * r;
     positionsArray[i3 + 1] = z * r;

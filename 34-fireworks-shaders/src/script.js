@@ -4,6 +4,7 @@ import GUI from "lil-gui";
 import { gsap } from "gsap";
 import fireworksVertexShader from "./shaders/fireworks/vertex.glsl";
 import fireworksFragmentShader from "./shaders/fireworks/fragment.glsl";
+import getBoxFacePosition2 from "./utils/getBoxFacePosition.js";
 
 /**
  * Base
@@ -95,101 +96,6 @@ const textures = [
   textureLoader.load("/particles/8.png"),
 ];
 
-const getPositionSpherical = () => {
-  const theta = Math.random() * Math.PI * 2;
-  let y = Math.random() * 2 - 1;
-  const phi = Math.acos(y);
-
-  const spherical = new THREE.Spherical(1, phi, theta);
-  const position = new THREE.Vector3();
-  position.setFromSpherical(spherical);
-  return position;
-};
-
-// 菲波那契网格
-const getPosition = (n, N) => {
-  const phi = (Math.sqrt(5) - 1) / 2;
-  const z = (2 * n) / N - 1;
-  const x = (1 - z ** 2) ** 0.5 * Math.cos(2 * Math.PI * n * phi);
-  const y = (1 - z ** 2) ** 0.5 * Math.sin(2 * Math.PI * n * phi);
-
-  return {
-    x,
-    y,
-    z,
-  };
-};
-
-const getSquarePosition = (n, N) => {
-  // 每边数量
-  const count = Math.ceil(Math.sqrt(N));
-  // 通过n计算在第几行第几列
-  const x = (n % count) / count;
-  const y = Math.floor(n / count) / count;
-  return {
-    x: x * 2 - 1,
-    y: y * 2 - 1,
-    z: 0,
-  };
-};
-const getBoxPosition = (n, N) => {
-  const count = Math.ceil(N ** (1 / 3));
-  const x = (n % count) / count;
-  const y = (Math.floor(n / count) % count) / count;
-  const z = Math.floor(n / count ** 2) / count;
-  return {
-    x: x * 2 - 1,
-    y: y * 2 - 1,
-    z: z * 2 - 1,
-  };
-};
-const getBoxFacePosition = (n, N) => {
-  const faceCount = Math.ceil(N / 6);
-  // 通过n计算在第几个面
-  const face = Math.floor(n / faceCount);
-  // 通过n计算在面的第几个
-  const faceIndex = n % faceCount;
-  const { x, y } = getSquarePosition(faceIndex, faceCount);
-  switch (face) {
-    case 0:
-      return {
-        x,
-        y,
-        z: 1,
-      };
-    case 1:
-      return {
-        x: -x,
-        y: -y,
-        z: -1,
-      };
-    case 2:
-      return {
-        x: x,
-        y: -1,
-        z: y,
-      };
-    case 3:
-      return {
-        x: -x,
-        y: 1,
-        z: -y,
-      };
-    case 4:
-      return {
-        x: 1,
-        y: x,
-        z: -y,
-      };
-    case 5:
-      return {
-        x: -1,
-        y: -x,
-        z: y,
-      };
-  }
-};
-
 // 由于最终是通过点击触发，所以通过函数创建
 //   count: 粒子数量
 //   position: 粒子中心位置
@@ -206,7 +112,7 @@ const createFirework = (count, position, size, texture, radius, color) => {
 
     const r = radius * (0.8 + Math.random() * 0.2);
 
-    const { x, y, z } = getBoxFacePosition(i, count);
+    const { x, y, z } = getBoxFacePosition2(i, count);
 
     positionsArray[i3 + 0] = x * r;
     positionsArray[i3 + 1] = z * r;

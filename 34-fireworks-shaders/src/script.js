@@ -8,6 +8,7 @@ import getBoxFacePosition2 from "./utils/getBoxFacePosition.js";
 import getBoxEdgePosition from "./utils/getBoxEdgePosition.js";
 import getSpherePosition from "./utils/getSpherePosition.js";
 import getSquarePosition from "./utils/getSquarePosition.js";
+import getCirclePosition from "./utils/getCirclePosition.js";
 
 /**
  * Base
@@ -99,6 +100,14 @@ const textures = [
   textureLoader.load("/particles/8.png"),
 ];
 
+const generateFns = [
+  getBoxEdgePosition,
+  getBoxFacePosition2,
+  getSpherePosition,
+  getSquarePosition,
+  getCirclePosition,
+];
+
 // 由于最终是通过点击触发，所以通过函数创建
 //   count: 粒子数量
 //   position: 粒子中心位置
@@ -109,27 +118,14 @@ const createFirework = (count, position, size, texture, radius, color) => {
   const sizesArray = new Float32Array(count);
   const timeMultipliersArray = new Float32Array(count);
   const colorHuesArray = new Float32Array(count);
-  const generateIndex = Math.floor(Math.random() * 4);
+  const generateFn =
+    generateFns[Math.floor(Math.random() * generateFns.length)];
   for (let i = 0; i < count; i++) {
     const i3 = i * 3;
 
-    const r = radius * (0.8 + Math.random() * 0.2);
-    let x, y, z;
-
-    switch (generateIndex) {
-      case 0:
-        ({ x, y, z } = getBoxEdgePosition(i, count));
-        break;
-      case 1:
-        ({ x, y, z } = getBoxFacePosition2(i, count));
-        break;
-      case 2:
-        ({ x, y, z } = getSpherePosition(i, count));
-        break;
-      case 3:
-        ({ x, y, z } = getSquarePosition(i, count));
-        break;
-    }
+    const randomRange = 0;
+    const r = radius * (1 - randomRange + Math.random() * randomRange);
+    const { x, y, z } = generateFn(i, count);
 
     positionsArray[i3 + 0] = x * r;
     positionsArray[i3 + 1] = z * r;

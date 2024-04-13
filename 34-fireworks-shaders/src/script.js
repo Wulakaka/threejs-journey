@@ -9,6 +9,7 @@ import getBoxEdgePosition from "./utils/getBoxEdgePosition.js";
 import getSpherePosition from "./utils/getSpherePosition.js";
 import getSquarePosition from "./utils/getSquarePosition.js";
 import getCirclePosition from "./utils/getCirclePosition.js";
+import calculatePointCoordinates from "./utils/getTrianglePosition.js";
 
 /**
  * Base
@@ -106,6 +107,7 @@ const generateFns = [
   getSpherePosition,
   getSquarePosition,
   getCirclePosition,
+  calculatePointCoordinates,
 ];
 
 // 由于最终是通过点击触发，所以通过函数创建

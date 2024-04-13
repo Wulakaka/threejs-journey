@@ -10,7 +10,7 @@ import getSpherePosition from "./utils/getSpherePosition.js";
 import getSquarePosition from "./utils/getSquarePosition.js";
 import getCirclePosition from "./utils/getCirclePosition.js";
 import calculatePointCoordinates from "./utils/getTrianglePosition.js";
-
+import fireworkSound from "../static/sound.mp3";
 /**
  * Base
  */
@@ -85,6 +85,20 @@ const renderer = new THREE.WebGLRenderer({
 });
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+// Sound
+const playSound = () => {
+  const sound = new Audio(fireworkSound);
+  setTimeout(() => {
+    sound.currentTime = 0;
+    sound.volume = 1;
+    sound.play();
+
+    setTimeout(() => {
+      sound.remove();
+    }, 6000);
+  }, 600);
+};
 
 /**
  * Fireworks
@@ -213,6 +227,7 @@ const createRandomFirework = () => {
   const radius = Math.random() + 0.4;
   const color = new THREE.Color(`hsl(${Math.random() * 360}, 100%, 50%)`);
   createFirework(count, position, size, texture, radius, color);
+  playSound();
 };
 
 window.addEventListener("click", createRandomFirework);

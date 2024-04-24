@@ -2,8 +2,10 @@ uniform vec3 uColor;
 uniform vec2 uResolution;
 uniform float uShadowRepetitions;
 uniform vec3 uShadowColor;
+uniform vec3 uShadowDirection;
 uniform float uLightRepetitions;
 uniform vec3 uLightColor;
+uniform vec3 uLightPosition;
 
 varying vec3 vNormal;
 varying vec3 vPosition;
@@ -50,7 +52,7 @@ void main()
         vec3(1.0, 1.0, 1.0), // Light color
         1.0,                 // Light intensity
         normal,              // Normal
-        vec3(1.0, 1.0, 0.0), // Light position
+        uLightPosition, // Light position
         viewDirection,       // View direction
         1.0                  // Specular power
     );
@@ -61,7 +63,7 @@ void main()
     color = halftone(
         color,                 // Input color
         uShadowRepetitions,    // Repetitions
-        vec3(0.0, - 1.0, 0.0), // Direction
+        normalize(uShadowDirection), // Direction
         - 0.8,                 // Low
         1.5,                   // High
         uShadowColor,   // Point color
@@ -71,7 +73,7 @@ void main()
     color = halftone(
         color,                 // Input color
         uLightRepetitions,    // Repetitions
-        vec3(1.0, 1.0, 0.0), // Direction
+        normalize(uLightPosition), // Direction
         0.5,                 // Low
         1.5,                 // High
         uLightColor,   // Point color

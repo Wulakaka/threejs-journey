@@ -94,6 +94,8 @@ const materialParameters = {};
 materialParameters.color = "#ff794d";
 materialParameters.shadowColor = "#8e19b8";
 materialParameters.lightColor = "#e5ffe0";
+materialParameters.shadowDirection = new THREE.Vector3(0, -1, 0);
+materialParameters.lightPosition = new THREE.Vector3(1, 1, 0);
 
 const material = new THREE.ShaderMaterial({
   vertexShader: halftoneVertexShader,
@@ -113,10 +115,12 @@ const material = new THREE.ShaderMaterial({
     uShadowColor: new THREE.Uniform(
       new THREE.Color(materialParameters.shadowColor),
     ),
+    uShadowDirection: new THREE.Uniform(materialParameters.shadowDirection),
     uLightRepetitions: new THREE.Uniform(130),
     uLightColor: new THREE.Uniform(
       new THREE.Color(materialParameters.lightColor),
     ),
+    uLightPosition: new THREE.Uniform(materialParameters.lightPosition),
   },
 });
 
@@ -133,6 +137,39 @@ gui
 gui.addColor(materialParameters, "shadowColor").onChange(() => {
   material.uniforms.uShadowColor.value.set(materialParameters.shadowColor);
 });
+gui
+  .add(materialParameters.shadowDirection, "x")
+  .min(-5)
+  .max(5)
+  .step(0.01)
+  .name("shadow direction X")
+  .onChange(() => {
+    material.uniforms.uShadowDirection.value.copy(
+      materialParameters.shadowDirection,
+    );
+  });
+gui
+  .add(materialParameters.shadowDirection, "y")
+  .min(-5)
+  .max(5)
+  .step(0.01)
+  .name("shadow direction Y")
+  .onChange(() => {
+    material.uniforms.uShadowDirection.value.copy(
+      materialParameters.shadowDirection,
+    );
+  });
+gui
+  .add(materialParameters.shadowDirection, "z")
+  .min(-5)
+  .max(5)
+  .step(0.01)
+  .name("shadow direction Z")
+  .onChange(() => {
+    material.uniforms.uShadowDirection.value.copy(
+      materialParameters.shadowDirection,
+    );
+  });
 
 gui
   .add(material.uniforms.uLightRepetitions, "value")
@@ -143,6 +180,39 @@ gui
 gui.addColor(materialParameters, "lightColor").onChange(() => {
   material.uniforms.uLightColor.value.set(materialParameters.lightColor);
 });
+gui
+  .add(materialParameters.lightPosition, "x")
+  .min(-5)
+  .max(5)
+  .step(0.01)
+  .name("light position X")
+  .onChange(() => {
+    material.uniforms.uLightPosition.value.copy(
+      materialParameters.lightPosition,
+    );
+  });
+gui
+  .add(materialParameters.lightPosition, "y")
+  .min(-5)
+  .max(5)
+  .step(0.01)
+  .name("light position Y")
+  .onChange(() => {
+    material.uniforms.uLightPosition.value.copy(
+      materialParameters.lightPosition,
+    );
+  });
+gui
+  .add(materialParameters.lightPosition, "z")
+  .min(-5)
+  .max(5)
+  .step(0.01)
+  .name("light position Z")
+  .onChange(() => {
+    material.uniforms.uLightPosition.value.copy(
+      materialParameters.lightPosition,
+    );
+  });
 
 /**
  * Objects

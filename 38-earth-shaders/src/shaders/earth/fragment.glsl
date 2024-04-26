@@ -25,8 +25,7 @@ void main()
     // clouds
     float cloudsMix = texture(uSpecularCloudsTexture, vUv).g;
     cloudsMix = smoothstep(0.5, 1.0, cloudsMix);
-    cloudsMix *= dayMix;
-    color = mix(color, vec3(1.0), cloudsMix);
+    color = mix(color, vec3(dayMix), cloudsMix);
 
     // Final color
     gl_FragColor = vec4(color, 1.0);

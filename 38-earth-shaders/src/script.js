@@ -20,9 +20,13 @@ const scene = new THREE.Scene();
 const textureLoader = new THREE.TextureLoader();
 const dayTexture = textureLoader.load("/earth/day.jpg");
 dayTexture.colorSpace = THREE.SRGBColorSpace;
+// 设置各向异性过滤，提高纹理质量
+dayTexture.anisotropy = 8;
 const nightTexture = textureLoader.load("/earth/night.jpg");
 nightTexture.colorSpace = THREE.SRGBColorSpace;
+nightTexture.anisotropy = 8;
 const specularTexture = textureLoader.load("/earth/specular.jpg");
+specularTexture.anisotropy = 8;
 
 /**
  * Earth

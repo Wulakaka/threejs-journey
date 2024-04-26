@@ -25,8 +25,8 @@ dayTexture.anisotropy = 8;
 const nightTexture = textureLoader.load("/earth/night.jpg");
 nightTexture.colorSpace = THREE.SRGBColorSpace;
 nightTexture.anisotropy = 8;
-const specularTexture = textureLoader.load("/earth/specular.jpg");
-specularTexture.anisotropy = 8;
+const specularCloudsTexture = textureLoader.load("/earth/specularClouds.jpg");
+specularCloudsTexture.anisotropy = 8;
 
 /**
  * Earth
@@ -39,7 +39,7 @@ const earthMaterial = new THREE.ShaderMaterial({
   uniforms: {
     uDayTexture: new THREE.Uniform(dayTexture),
     uNightTexture: new THREE.Uniform(nightTexture),
-    uSpecularTexture: new THREE.Uniform(specularTexture),
+    uSpecularCloudsTexture: new THREE.Uniform(specularCloudsTexture),
     uSunDirection: new THREE.Uniform(new THREE.Vector3(0, 0, 1)),
   },
 });

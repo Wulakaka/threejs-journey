@@ -6,6 +6,8 @@ uniform sampler2D uDayTexture;
 uniform sampler2D uNightTexture;
 uniform sampler2D uSpecularCloudsTexture;
 uniform vec3 uSunDirection;
+uniform vec3 uAtmosphereDayColor;
+uniform vec3 uAtmosphereTwilightColor;
 
 void main()
 {
@@ -26,6 +28,16 @@ void main()
     float cloudsMix = texture(uSpecularCloudsTexture, vUv).g;
     cloudsMix = smoothstep(0.5, 1.0, cloudsMix);
     color = mix(color, vec3(dayMix), cloudsMix);
+
+    // Fresnel
+    float fresnel = dot(viewDirection, normal) + 1.0;
+    fresnel = pow(fresnel, 2.0);
+
+    // Atmosphere
+    float atmosphereDayMix = smoothstep(-0.5, 1.0, sunOrientation);
+    vec3 atmosphereColor = mix(uAtmosphereTwilightColor, uAtmosphereDayColor, atmosphereDayMix);
+    // 乘以 atmosphereDayMix 使得在夜晚不显示大气层
+    color = mix(color, atmosphereColor, fresnel * atmosphereDayMix);
 
     // Final color
     gl_FragColor = vec4(color, 1.0);

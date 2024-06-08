@@ -31,6 +31,9 @@ specularCloudsTexture.anisotropy = 8;
 /**
  * Earth
  */
+const earthParameters = {}
+earthParameters.atmosphereDayColor = '#00aaff'
+earthParameters.atmosphereTwilightColor = '#ff6600'
 // Mesh
 const earthGeometry = new THREE.SphereGeometry(2, 64, 64);
 const earthMaterial = new THREE.ShaderMaterial({
@@ -41,10 +44,19 @@ const earthMaterial = new THREE.ShaderMaterial({
     uNightTexture: new THREE.Uniform(nightTexture),
     uSpecularCloudsTexture: new THREE.Uniform(specularCloudsTexture),
     uSunDirection: new THREE.Uniform(new THREE.Vector3(0, 0, 1)),
+    uAtmosphereDayColor: new THREE.Uniform(new THREE.Color(earthParameters.atmosphereDayColor)),
+    uAtmosphereTwilightColor: new THREE.Uniform(new THREE.Color(earthParameters.atmosphereTwilightColor)),
   },
 });
 const earth = new THREE.Mesh(earthGeometry, earthMaterial);
 scene.add(earth);
+
+gui.addColor(earthParameters, 'atmosphereDayColor').onChange(() => {
+  earthMaterial.uniforms.uAtmosphereDayColor.value.set(earthParameters.atmosphereDayColor);
+})
+gui.addColor(earthParameters, 'atmosphereTwilightColor').onChange(() => {
+  earthMaterial.uniforms.uAtmosphereTwilightColor.value.set(earthParameters.atmosphereTwilightColor);
+})
 
 /** sun
  *

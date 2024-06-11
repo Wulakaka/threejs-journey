@@ -108,6 +108,7 @@ const updateSun = () => {
   sunDirection.setFromSpherical(sunSpherical);
   sun.position.copy(sunDirection).multiplyScalar(4);
   earthMaterial.uniforms.uSunDirection.value.copy(sunDirection);
+  atmosphereMaterial.uniforms.uSunDirection.value.copy(sunDirection);
 };
 
 updateSun();

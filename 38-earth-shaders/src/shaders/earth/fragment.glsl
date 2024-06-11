@@ -25,7 +25,8 @@ void main()
     color = mix(nightColor, dayColor, dayMix);
 
     // clouds
-    float cloudsMix = texture(uSpecularCloudsTexture, vUv).g;
+    vec3 specularCloudColor = texture(uSpecularCloudsTexture, vUv).rgb;
+    float cloudsMix = specularCloudColor.g;
     cloudsMix = smoothstep(0.5, 1.0, cloudsMix);
     color = mix(color, vec3(dayMix), cloudsMix);
 
@@ -38,6 +39,23 @@ void main()
     vec3 atmosphereColor = mix(uAtmosphereTwilightColor, uAtmosphereDayColor, atmosphereDayMix);
     // 乘以 atmosphereDayMix 使得在夜晚不显示大气层
     color = mix(color, atmosphereColor, fresnel * atmosphereDayMix);
+
+    // Specular 镜面反射
+    // 反射向量
+    vec3 reflection = reflect(-uSunDirection, normal);
+    // 与viewDirection 的点乘得出镜面反射的强度
+    float specular = dot(-reflection, viewDirection);
+    specular = max(specular, 0.0);
+    // 让反射区域变小
+    specular = pow(specular, 32.0);
+    // 乘以 specularCloudColor.r 使得在陆地区域不反射
+    specular *= specularCloudColor.r;
+    // 在边缘处使用 atmosphere 的颜色
+    // 先使用 mix 让中心变成白色，边缘处变成大气层颜色，fresnel 的效果就是中间黑，边缘强
+    vec3 specularColor = mix(vec3(1.0), atmosphereColor, fresnel);
+    // 最后乘以 specular 让反射区域在中间时显示白色，在边缘时显示大气层颜色
+    // 此时的 specular 作为一个强度值，类似于蒙版
+    color += specular * specularColor;
 
     // Final color
     gl_FragColor = vec4(color, 1.0);

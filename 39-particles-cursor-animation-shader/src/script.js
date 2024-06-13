@@ -16,6 +16,37 @@ const scene = new THREE.Scene();
 const textureLoader = new THREE.TextureLoader();
 
 /**
+ * Displacement
+ *
+ */
+const displacement = {};
+
+// 2d canvas
+displacement.canvas = document.createElement("canvas");
+// 这里的尺寸要与图片的尺寸一致
+displacement.canvas.width = 128;
+displacement.canvas.height = 128;
+displacement.canvas.style.position = "absolute";
+displacement.canvas.style.top = "0";
+displacement.canvas.style.left = "0";
+displacement.canvas.style.width = "256px";
+displacement.canvas.style.height = "256px";
+displacement.canvas.style.zIndex = "10";
+document.body.appendChild(displacement.canvas);
+
+// 2d context
+displacement.context = displacement.canvas.getContext("2d");
+displacement.context.fillRect(0, 0, 128, 128);
+
+// glow image
+displacement.glowImage = new Image();
+displacement.glowImage.src = "/glow.png";
+
+// setTimeout(() => {
+//   displacement.context.drawImage(displacement.glowImage, 0, 0, 128, 128);
+// }, 100);
+
+/**
  * Sizes
  */
 const sizes = {

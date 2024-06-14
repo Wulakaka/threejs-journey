@@ -36,15 +36,13 @@ document.body.appendChild(displacement.canvas);
 
 // 2d context
 displacement.context = displacement.canvas.getContext("2d");
-displacement.context.fillRect(0, 0, 128, 128);
 
 // glow image
 displacement.glowImage = new Image();
 displacement.glowImage.src = "/glow.png";
 
-// setTimeout(() => {
-//   displacement.context.drawImage(displacement.glowImage, 0, 0, 128, 128);
-// }, 100);
+// texture
+displacement.texture = new THREE.CanvasTexture(displacement.canvas);
 
 /**
  * Sizes
@@ -120,6 +118,7 @@ const particlesMaterial = new THREE.ShaderMaterial({
       ),
     ),
     uPictureTexture: new THREE.Uniform(textureLoader.load("/picture-1.png")),
+    uDisplacementTexture: new THREE.Uniform(displacement.texture),
   },
 });
 const particles = new THREE.Points(particlesGeometry, particlesMaterial);
@@ -152,6 +151,8 @@ window.addEventListener("pointermove", (event) => {
 const tick = () => {
   // Update controls
   controls.update();
+
+  displacement.texture.needsUpdate = true;
 
   /**
    * Raycaster

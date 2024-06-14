@@ -188,6 +188,7 @@ const tick = () => {
   // glow
   const glowSize = displacement.canvas.width * 0.25;
   displacement.context.save();
+  displacement.context.globalAlpha = 0.2;
   displacement.context.globalCompositeOperation = "lighten";
   displacement.context.drawImage(
     displacement.glowImage,

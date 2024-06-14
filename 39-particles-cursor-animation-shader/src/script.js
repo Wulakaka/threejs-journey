@@ -125,12 +125,77 @@ const particlesMaterial = new THREE.ShaderMaterial({
 const particles = new THREE.Points(particlesGeometry, particlesMaterial);
 scene.add(particles);
 
+displacement.interactivePlane = new THREE.Mesh(
+  new THREE.PlaneGeometry(10, 10, 1, 1),
+  new THREE.MeshBasicMaterial({
+    color: "red",
+  }),
+);
+displacement.interactivePlane.visible = false;
+scene.add(displacement.interactivePlane);
+
+// Raycaster
+displacement.raycaster = new THREE.Raycaster();
+
+// coordinates
+displacement.screenCursor = new THREE.Vector2(9999, 9999);
+displacement.canvasCursor = new THREE.Vector2(9999, 9999);
+
+window.addEventListener("pointermove", (event) => {
+  displacement.screenCursor.x = (event.clientX / sizes.width) * 2 - 1;
+  displacement.screenCursor.y = -(event.clientY / sizes.height) * 2 + 1;
+});
+
 /**
  * Animate
  */
 const tick = () => {
   // Update controls
   controls.update();
+
+  /**
+   * Raycaster
+   */
+  displacement.raycaster.setFromCamera(displacement.screenCursor, camera);
+  const intersections = displacement.raycaster.intersectObject(
+    displacement.interactivePlane,
+  );
+  if (intersections.length) {
+    const uv = intersections[0].uv;
+    displacement.canvasCursor.x = uv.x * displacement.canvas.width;
+    displacement.canvasCursor.y = (1 - uv.y) * displacement.canvas.height;
+  } else {
+    displacement.canvasCursor.x = 9999;
+    displacement.canvasCursor.y = 9999;
+  }
+
+  /**
+   * Displacement
+   */
+  // fade out
+  displacement.context.save();
+  displacement.context.globalCompositeOperation = "source-over";
+  displacement.context.globalAlpha = 0.02;
+  displacement.context.fillRect(
+    0,
+    0,
+    displacement.canvas.width,
+    displacement.canvas.height,
+  );
+  displacement.context.restore();
+
+  // glow
+  const glowSize = displacement.canvas.width * 0.25;
+  displacement.context.save();
+  displacement.context.globalCompositeOperation = "lighten";
+  displacement.context.drawImage(
+    displacement.glowImage,
+    displacement.canvasCursor.x - glowSize / 2,
+    displacement.canvasCursor.y - glowSize / 2,
+    glowSize,
+    glowSize,
+  );
+  displacement.context.restore();
 
   // Render
   renderer.render(scene, camera);

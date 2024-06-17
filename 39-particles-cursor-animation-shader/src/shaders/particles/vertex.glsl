@@ -13,7 +13,7 @@ void main()
     // edge1 为了处理 canvas 无法变为全黑的 bug
     // edge2 可以使 particle 停留一段时间再开始回到初始位置
     displacementIntensity =smoothstep(0.1, 0.3, displacementIntensity);
-    vec3 displacement = vec3(cos(aAngle), sin(aAngle), 1.0);
+    vec3 displacement = vec3(cos(aAngle) * 0.4, sin(aAngle) * 0.4, 1.0);
     displacement = normalize(displacement);
     displacement *= displacementIntensity;
     displacement *= 2.0;

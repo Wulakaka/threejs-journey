@@ -106,6 +106,28 @@ renderer.setPixelRatio(sizes.pixelRatio);
  * Particles
  */
 const particlesGeometry = new THREE.PlaneGeometry(10, 10, 128, 128);
+const intensitiesArray = new Float32Array(
+  particlesGeometry.attributes.position.count,
+);
+const anglesArray = new Float32Array(
+  particlesGeometry.attributes.position.count,
+);
+for (let i = 0; i < particlesGeometry.attributes.position.count; i++) {
+  intensitiesArray[i] = Math.random();
+  anglesArray[i] = Math.random() * Math.PI * 2;
+}
+particlesGeometry.setAttribute(
+  "aIntensity",
+  new THREE.BufferAttribute(intensitiesArray, 1),
+);
+particlesGeometry.setAttribute(
+  "aAngle",
+  new THREE.BufferAttribute(anglesArray, 1),
+);
+// 不使用 index，为了让传给GPU的 vertex 更少
+particlesGeometry.setIndex(null);
+// normal 是无用数据
+particlesGeometry.deleteAttribute("normal");
 
 const particlesMaterial = new THREE.ShaderMaterial({
   vertexShader: particlesVertexShader,
@@ -120,7 +142,9 @@ const particlesMaterial = new THREE.ShaderMaterial({
     uPictureTexture: new THREE.Uniform(textureLoader.load("/picture-1.png")),
     uDisplacementTexture: new THREE.Uniform(displacement.texture),
   },
+  // blending: THREE.AdditiveBlending,
 });
+
 const particles = new THREE.Points(particlesGeometry, particlesMaterial);
 scene.add(particles);
 
@@ -128,6 +152,7 @@ displacement.interactivePlane = new THREE.Mesh(
   new THREE.PlaneGeometry(10, 10, 1, 1),
   new THREE.MeshBasicMaterial({
     color: "red",
+    side: THREE.DoubleSide,
   }),
 );
 displacement.interactivePlane.visible = false;
@@ -139,6 +164,7 @@ displacement.raycaster = new THREE.Raycaster();
 // coordinates
 displacement.screenCursor = new THREE.Vector2(9999, 9999);
 displacement.canvasCursor = new THREE.Vector2(9999, 9999);
+displacement.canvasPreviousCursor = new THREE.Vector2(9999, 9999);
 
 window.addEventListener("pointermove", (event) => {
   displacement.screenCursor.x = (event.clientX / sizes.width) * 2 - 1;
@@ -185,10 +211,21 @@ const tick = () => {
   );
   displacement.context.restore();
 
-  // glow
-  const glowSize = displacement.canvas.width * 0.25;
+  // Speed alpha
+  // 移动距离的大小代表了速度
+  const cursorDistance = displacement.canvasPreviousCursor.distanceTo(
+    displacement.canvasCursor,
+  );
+  // 速度过快也不能超过1
+  const alpha = Math.min(cursorDistance * 0.1, 1);
+
+  // draw glow
+  displacement.canvasPreviousCursor.copy(displacement.canvasCursor);
+  const glowSize =
+    displacement.canvas.width * 0.25 * Math.min(cursorDistance * 0.5, 1);
   displacement.context.save();
-  displacement.context.globalAlpha = 0.2;
+  // 根据移动速度的快慢决定绘制 glow 的透明度
+  displacement.context.globalAlpha = alpha * 0.2;
   displacement.context.globalCompositeOperation = "lighten";
   displacement.context.drawImage(
     displacement.glowImage,

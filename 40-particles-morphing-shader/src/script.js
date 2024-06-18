@@ -93,29 +93,44 @@ renderer.setClearColor(debugObject.clearColor);
 /**
  * Particles
  */
-const particles = {};
 
-// Geometry
-particles.geometry = new THREE.SphereGeometry(3);
+let particles = null;
 
-// Material
-particles.material = new THREE.ShaderMaterial({
-  vertexShader: particlesVertexShader,
-  fragmentShader: particlesFragmentShader,
-  uniforms: {
-    uSize: new THREE.Uniform(0.4),
-    uResolution: new THREE.Uniform(
-      new THREE.Vector2(
-        sizes.width * sizes.pixelRatio,
-        sizes.height * sizes.pixelRatio,
+// models
+gltfLoader.load("/models.glb", (gltf) => {
+  const positions = gltf.scene.children.map(
+    (child) => child.geometry.attributes.position,
+  );
+  console.log(positions);
+
+  particles = {};
+
+  // Geometry
+  particles.geometry = new THREE.SphereGeometry(3);
+  // 不用 index
+  particles.geometry.setIndex(null);
+
+  // Material
+  particles.material = new THREE.ShaderMaterial({
+    vertexShader: particlesVertexShader,
+    fragmentShader: particlesFragmentShader,
+    uniforms: {
+      uSize: new THREE.Uniform(0.4),
+      uResolution: new THREE.Uniform(
+        new THREE.Vector2(
+          sizes.width * sizes.pixelRatio,
+          sizes.height * sizes.pixelRatio,
+        ),
       ),
-    ),
-  },
-});
+    },
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+  });
 
-// Points
-particles.points = new THREE.Points(particles.geometry, particles.material);
-scene.add(particles.points);
+  // Points
+  particles.points = new THREE.Points(particles.geometry, particles.material);
+  scene.add(particles.points);
+});
 
 /**
  * Animate

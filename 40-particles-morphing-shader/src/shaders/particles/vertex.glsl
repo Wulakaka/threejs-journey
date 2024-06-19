@@ -16,9 +16,11 @@ void main()
     float noise = simplexNoise3d(position);
     // remap noise，让范围变成 0 - 1
     noise = smoothstep(-1.0, 1.0, noise);
-    noise *= 0.4;
-    progress =  progress / 0.6 - 1.0 / 0.6 * noise;
-    progress = clamp(progress, 0.0, 1.0);
+    // 从动画所需参数出发，比如 duration 和 delay
+    float duration = 0.4;
+    float delay = (1.0 - duration) * noise;
+    float end = delay + duration;
+    progress = smoothstep(delay, end, progress);
     vec3 newPosition = mix(position, aTargetPosition, progress);
 
     // Final position

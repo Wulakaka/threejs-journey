@@ -13,7 +13,10 @@ void main()
     // mixed position
     float progress = uProgress;
     // simplexNoise3d 的返回值为 -1 - 1
-    float noise = simplexNoise3d(position);
+    // 为了使开始和结束都有从部分开始消散的效果，需要计算结束时的 noise
+    float noiseOrigin = simplexNoise3d(position);
+    float noiseTarget = simplexNoise3d(aTargetPosition);
+    float noise = mix(noiseOrigin, noiseTarget, uProgress);
     // remap noise，让范围变成 0 - 1
     noise = smoothstep(-1.0, 1.0, noise);
     // 从动画所需参数出发，比如 duration 和 delay

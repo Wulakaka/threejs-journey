@@ -98,30 +98,56 @@ let particles = null;
 
 // models
 gltfLoader.load("/models.glb", (gltf) => {
+  particles = {};
+
   const positions = gltf.scene.children.map(
     (child) => child.geometry.attributes.position,
   );
-  console.log(positions);
 
-  particles = {};
+  particles.maxCount = 0;
+  positions.forEach((position) => {
+    if (position.count > particles.maxCount) {
+      particles.maxCount = position.count;
+    }
+  });
+  particles.positions = [];
+  positions.forEach((position) => {
+    const targetPosition = new Float32Array(particles.maxCount * 3);
+    for (let i = 0; i < particles.maxCount; i++) {
+      const i3 = i * 3;
+      if (i < position.count) {
+        targetPosition[i3] = position.array[i3];
+        targetPosition[i3 + 1] = position.array[i3 + 1];
+        targetPosition[i3 + 2] = position.array[i3 + 2];
+      } else {
+        const randomIndex = Math.floor(Math.random() * position.count) * 3;
+        targetPosition[i3] = position.array[randomIndex];
+        targetPosition[i3 + 1] = position.array[randomIndex + 1];
+        targetPosition[i3 + 2] = position.array[randomIndex + 2];
+      }
+    }
+
+    particles.positions.push(new THREE.BufferAttribute(targetPosition, 3));
+  });
 
   // Geometry
-  particles.geometry = new THREE.SphereGeometry(3);
-  // 不用 index
-  particles.geometry.setIndex(null);
+  particles.geometry = new THREE.BufferGeometry();
+  particles.geometry.setAttribute("position", particles.positions[1]);
+  particles.geometry.setAttribute("aTargetPosition", particles.positions[3]);
 
   // Material
   particles.material = new THREE.ShaderMaterial({
     vertexShader: particlesVertexShader,
     fragmentShader: particlesFragmentShader,
     uniforms: {
-      uSize: new THREE.Uniform(0.4),
+      uSize: new THREE.Uniform(0.2),
       uResolution: new THREE.Uniform(
         new THREE.Vector2(
           sizes.width * sizes.pixelRatio,
           sizes.height * sizes.pixelRatio,
         ),
       ),
+      uProgress: new THREE.Uniform(0),
     },
     blending: THREE.AdditiveBlending,
     depthWrite: false,
@@ -130,6 +156,14 @@ gltfLoader.load("/models.glb", (gltf) => {
   // Points
   particles.points = new THREE.Points(particles.geometry, particles.material);
   scene.add(particles.points);
+
+  // Tweaks
+  gui
+    .add(particles.material.uniforms.uProgress, "value")
+    .name("uProgress")
+    .min(0)
+    .max(1)
+    .step(0.001);
 });
 
 /**

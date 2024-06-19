@@ -4,9 +4,18 @@ uniform float uProgress;
 
 attribute vec3 aTargetPosition;
 
+varying vec3 vColor;
+
+#include ../includes/simplexNoise3d.glsl
+
 void main()
 {
+    // mixed position
     float progress = uProgress;
+    // simplexNoise3d 的返回值为 -1 - 1
+    float noise = simplexNoise3d(position);
+    // remap noise，让范围变成 0 - 1
+    noise = smoothstep(-1.0, 1.0, noise);
     vec3 newPosition = mix(position, aTargetPosition, progress);
 
     // Final position
@@ -18,4 +27,6 @@ void main()
     // Point size
     gl_PointSize = uSize * uResolution.y;
     gl_PointSize *= (1.0 / - viewPosition.z);
+
+    vColor = vec3(noise);
 }

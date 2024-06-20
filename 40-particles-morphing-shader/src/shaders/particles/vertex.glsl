@@ -5,6 +5,7 @@ uniform vec3 uColorA;
 uniform vec3 uColorB;
 // frequency 决定了 noise 的变化的频率，频率越小，noise 在各顶点的差异越小
 uniform float uNoiseFrequency;
+uniform float uTime;
 
 attribute vec3 aTargetPosition;
 attribute float aSize;

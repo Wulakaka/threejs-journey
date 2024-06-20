@@ -169,6 +169,7 @@ gltfLoader.load("/models.glb", (gltf) => {
       uColorB: new THREE.Uniform(new THREE.Color(particles.colorB)),
       // frequency 决定了 noise 的变化的频率，频率越小，noise 在各顶点的差异越小
       uNoiseFrequency: new THREE.Uniform(0.2),
+      uTime: new THREE.Uniform(0),
     },
     blending: THREE.AdditiveBlending,
     depthWrite: false,
@@ -240,6 +241,10 @@ gltfLoader.load("/models.glb", (gltf) => {
 const tick = () => {
   // Update controls
   controls.update();
+
+  if (particles) {
+    particles.material.uniforms.uTime.value = performance.now();
+  }
 
   // Render normal scene
   renderer.render(scene, camera);

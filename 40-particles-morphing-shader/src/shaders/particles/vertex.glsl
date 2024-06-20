@@ -1,8 +1,13 @@
 uniform vec2 uResolution;
 uniform float uSize;
 uniform float uProgress;
+uniform vec3 uColorA;
+uniform vec3 uColorB;
+// frequency 决定了 noise 的变化的频率，频率越小，noise 在各顶点的差异越小
+uniform float uNoiseFrequency;
 
 attribute vec3 aTargetPosition;
+attribute float aSize;
 
 varying vec3 vColor;
 
@@ -14,8 +19,8 @@ void main()
     float progress = uProgress;
     // simplexNoise3d 的返回值为 -1 - 1
     // 为了使开始和结束都有从部分开始消散的效果，需要计算结束时的 noise
-    float noiseOrigin = simplexNoise3d(position);
-    float noiseTarget = simplexNoise3d(aTargetPosition);
+    float noiseOrigin = simplexNoise3d(position * uNoiseFrequency);
+    float noiseTarget = simplexNoise3d(aTargetPosition * uNoiseFrequency);
     float noise = mix(noiseOrigin, noiseTarget, uProgress);
     // remap noise，让范围变成 0 - 1
     noise = smoothstep(-1.0, 1.0, noise);
@@ -33,8 +38,8 @@ void main()
     gl_Position = projectedPosition;
 
     // Point size
-    gl_PointSize = uSize * uResolution.y;
+    gl_PointSize = aSize * uSize * uResolution.y;
     gl_PointSize *= (1.0 / - viewPosition.z);
 
-    vColor = vec3(noise);
+    vColor = mix(uColorA, uColorB, noise);
 }

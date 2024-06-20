@@ -32,6 +32,14 @@ void main()
     progress = smoothstep(delay, end, progress);
     vec3 newPosition = mix(position, aTargetPosition, progress);
 
+    // 在小范围内来回移动
+    float offsetNoise = simplexNoise3d(newPosition);
+    float movementIntensity = 0.015;
+    float offsetX = sin(uTime * offsetNoise * 0.01) * movementIntensity;
+    float offsetY = sin(uTime * offsetNoise * 0.011) * movementIntensity;
+    float offsetZ = sin(uTime * offsetNoise * 0.009) * movementIntensity;
+    newPosition += vec3(offsetX, offsetY, offsetZ);
+
     // Final position
     vec4 modelPosition = modelMatrix * vec4(newPosition, 1.0);
     vec4 viewPosition = viewMatrix * modelPosition;

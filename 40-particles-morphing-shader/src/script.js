@@ -176,6 +176,8 @@ gltfLoader.load("/models.glb", (gltf) => {
 
   // Points
   particles.points = new THREE.Points(particles.geometry, particles.material);
+  // 不会因为图形不在视角范围内不渲染
+  particles.points.frustumCulled = false;
   scene.add(particles.points);
 
   // Methods

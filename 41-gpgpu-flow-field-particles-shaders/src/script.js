@@ -159,6 +159,32 @@ scene.add(gpgpu.debug);
 const particles = {};
 
 // Geometry
+// 由于发送给 vertex shader 的 texture 对应的每个 vertex 的值是 0 - 1
+// 为了让位置信息变成正常值，需要一个尺寸为 gpgpu.size * gpgpu.size 的 texture 对应的 uv 值
+// 这里不能在 vertex shader 中使用 gl_FragCoord 来获取 uv 值，因为 gl_FragCoord 是屏幕像素坐标
+const particlesUvArray = new Float32Array(baseGeometry.count * 2);
+for (let y = 0; y < gpgpu.size; y++) {
+  for (let x = 0; x < gpgpu.size; x++) {
+    const i = y * gpgpu.size + x;
+    const i2 = i * 2;
+    // 除以 gpgpu.size 是为了让值在 0 - 1 之间
+    // todo 加上 0.5 的目的不是很清晰
+    // 加上 0.5 是为了在vertex shader 中使用 texture() 方法时使用的是像素点中心，而不是左下角点
+    const uvX = (x + 0.5) / gpgpu.size;
+    const uvY = (y + 0.5) / gpgpu.size;
+
+    particlesUvArray[i2 + 0] = uvX;
+    particlesUvArray[i2 + 1] = uvY;
+  }
+}
+particles.geometry = new THREE.BufferGeometry();
+// setDrawRange 用于设置渲染的顶点数量
+// 这里我们设置为 baseGeometry.count，剩余的顶点将不会被渲染
+particles.geometry.setDrawRange(0, baseGeometry.count);
+particles.geometry.setAttribute(
+  "aParticlesUv",
+  new THREE.BufferAttribute(particlesUvArray, 2),
+);
 
 // Material
 particles.material = new THREE.ShaderMaterial({
@@ -172,11 +198,12 @@ particles.material = new THREE.ShaderMaterial({
         sizes.height * sizes.pixelRatio,
       ),
     ),
+    uParticlesTexture: new THREE.Uniform(),
   },
 });
 
 // Points
-particles.points = new THREE.Points(baseGeometry.instance, particles.material);
+particles.points = new THREE.Points(particles.geometry, particles.material);
 scene.add(particles.points);
 
 /**
@@ -207,7 +234,11 @@ const tick = () => {
   controls.update();
 
   // GPGPU Update
+  // 更新 gpgpu 的 uniform
   gpgpu.computation.compute();
+  // 更新 particles.material.uniforms.uParticlesTexture 的值为 gpgpu 的 texture
+  particles.material.uniforms.uParticlesTexture.value =
+    gpgpu.computation.getCurrentRenderTarget(gpgpu.particlesVariable).texture;
 
   // Render normal scene
   renderer.render(scene, camera);

@@ -170,6 +170,7 @@ for (let y = 0; y < gpgpu.size; y++) {
     // 除以 gpgpu.size 是为了让值在 0 - 1 之间
     // todo 加上 0.5 的目的不是很清晰
     // 加上 0.5 是为了在vertex shader 中使用 texture() 方法时使用的是像素点中心，而不是左下角点
+    // 比如当 uv 的值是 vec2(0,0) 时，想要获取的是对应像素点的中心，而不是像素的左下角
     const uvX = (x + 0.5) / gpgpu.size;
     const uvY = (y + 0.5) / gpgpu.size;
 
@@ -179,7 +180,7 @@ for (let y = 0; y < gpgpu.size; y++) {
 }
 particles.geometry = new THREE.BufferGeometry();
 // setDrawRange 用于设置渲染的顶点数量
-// 这里我们设置为 baseGeometry.count，剩余的顶点将不会被渲染
+// 这里我们设置为 baseGeometry.count，因为实际的点数量为 gpgpu.size * gpgpu.size，而实际有用的点数量为 baseGeometry.count
 particles.geometry.setDrawRange(0, baseGeometry.count);
 particles.geometry.setAttribute(
   "aParticlesUv",
@@ -198,6 +199,8 @@ particles.material = new THREE.ShaderMaterial({
         sizes.height * sizes.pixelRatio,
       ),
     ),
+    // 为什么不用 position attribute 传递位置信息？
+    // 因为我们已经将位置信息保存到了 texture 中，无法通过 js 来获取 texture 中的值
     uParticlesTexture: new THREE.Uniform(),
   },
 });

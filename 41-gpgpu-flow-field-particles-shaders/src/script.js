@@ -6,6 +6,7 @@ import { GPUComputationRenderer } from "three/addons/misc/GPUComputationRenderer
 import GUI from "lil-gui";
 import particlesVertexShader from "./shaders/particles/vertex.glsl";
 import particlesFragmentShader from "./shaders/particles/fragment.glsl";
+import gpgpuParticlesShader from "./shaders/gpgpu/particles.glsl";
 
 /**
  * Base
@@ -106,7 +107,36 @@ gpgpu.computation = new GPUComputationRenderer(
   gpgpu.size,
   renderer,
 );
-console.log(gpgpu.computation);
+
+// Base particles
+// 创建一个纹理，用于存储粒子的位置
+const baseParticlesTexture = gpgpu.computation.createTexture();
+
+// Particles variable
+// uParticles 是一个 variable,是传递给 shader 的变量，它的值是 baseParticlesTexture
+gpgpu.particlesVariable = gpgpu.computation.addVariable(
+  "uParticles",
+  gpgpuParticlesShader,
+  baseParticlesTexture,
+);
+gpgpu.computation.setVariableDependencies(gpgpu.particlesVariable, [
+  gpgpu.particlesVariable,
+]);
+
+// Init
+gpgpu.computation.init();
+
+// Debug
+// 通过获取 texture 来创建一个用于 debug 的 mesh
+gpgpu.debug = new THREE.Mesh(
+  new THREE.PlaneGeometry(3, 3),
+  new THREE.MeshBasicMaterial({
+    map: gpgpu.computation.getCurrentRenderTarget(gpgpu.particlesVariable)
+      .texture,
+  }),
+);
+gpgpu.debug.position.x = 3;
+scene.add(gpgpu.debug);
 
 /**
  * Particles
@@ -160,6 +190,9 @@ const tick = () => {
 
   // Update controls
   controls.update();
+
+  // GPGPU Update
+  gpgpu.computation.compute();
 
   // Render normal scene
   renderer.render(scene, camera);

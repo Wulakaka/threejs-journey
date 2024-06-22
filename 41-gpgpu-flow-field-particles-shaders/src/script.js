@@ -112,6 +112,21 @@ gpgpu.computation = new GPUComputationRenderer(
 // 创建一个纹理，用于存储粒子的位置
 const baseParticlesTexture = gpgpu.computation.createTexture();
 
+for (let i = 0; i < baseGeometry.count; i++) {
+  // i3 用于标记 geometry 的位置信息
+  const i3 = i * 3;
+  // i4 用于标记 texture 中的像素信息
+  const i4 = i * 4;
+
+  // 将位置信息保存到 texture
+  baseParticlesTexture.image.data[i4 + 0] =
+    baseGeometry.instance.attributes.position.array[i3 + 0];
+  baseParticlesTexture.image.data[i4 + 1] =
+    baseGeometry.instance.attributes.position.array[i3 + 1];
+  baseParticlesTexture.image.data[i4 + 2] =
+    baseGeometry.instance.attributes.position.array[i3 + 2];
+  baseParticlesTexture.image.data[i4 + 3] = 0;
+}
 // Particles variable
 // uParticles 是一个 variable,是传递给 shader 的变量，它的值是 baseParticlesTexture
 gpgpu.particlesVariable = gpgpu.computation.addVariable(

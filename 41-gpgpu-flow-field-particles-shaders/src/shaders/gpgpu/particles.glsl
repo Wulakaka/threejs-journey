@@ -2,6 +2,8 @@ uniform float uTime;
 uniform float uDeltaTime;
 uniform sampler2D uBase;
 uniform float uFlowFieldInfluence;
+uniform float uFlowFieldStrength;
+uniform float uFlowFieldFrequency;
 
 #include ../includes/simplexNoise4d.glsl
 
@@ -23,22 +25,24 @@ void main() {
     }
     // Alive
     else {
+        float time = uTime * 0.2;
+
         // Strength
         // 乘以 0.2 为了让受影响的区域变小
-        float strength = simplexNoise4d(vec4(base.xyz * 0.2, uTime + 1.0));
+        float strength = simplexNoise4d(vec4(base.xyz * 0.2, time + 1.0));
         // Influence
         float influence = (uFlowFieldInfluence - 0.5) * -2.0;
         strength = smoothstep(influence, 1.0, strength);
 
         vec3 flowField = vec3(
-            simplexNoise4d(vec4(particle.xyz + 1.0, uTime)),
-            simplexNoise4d(vec4(particle.xyz + 2.0, uTime)),
-            simplexNoise4d(vec4(particle.xyz + 3.0, uTime))
+            simplexNoise4d(vec4(particle.xyz * uFlowFieldFrequency + 1.0, time)),
+            simplexNoise4d(vec4(particle.xyz * uFlowFieldFrequency + 2.0, time)),
+            simplexNoise4d(vec4(particle.xyz * uFlowFieldFrequency + 3.0, time))
         );
         // 归一化让 flowfield 表示为方向
         flowField = normalize(flowField);
         // 后面乘以的值是 flowField 游离的偏移
-        particle.xyz += flowField * uDeltaTime * strength * 0.5;
+        particle.xyz += flowField * uDeltaTime * strength * uFlowFieldStrength;
 
         // Decay
         particle.a += uDeltaTime * 0.3;

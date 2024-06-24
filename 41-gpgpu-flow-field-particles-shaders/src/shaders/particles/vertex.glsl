@@ -18,7 +18,10 @@ void main()
     gl_Position = projectedPosition;
 
     // Point size
-    gl_PointSize = aSize * uSize * uResolution.y;
+    float sizeIn = smoothstep(0.0, 0.1, particle.a);
+    float sizeOut = smoothstep(1.0, 0.7, particle.a);
+    float size = min(sizeIn, sizeOut);
+    gl_PointSize = aSize * uSize * size * uResolution.y;
     gl_PointSize *= (1.0 / - viewPosition.z);
 
     // Varyings

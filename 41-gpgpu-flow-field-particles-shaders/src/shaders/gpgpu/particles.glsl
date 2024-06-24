@@ -22,6 +22,10 @@ void main() {
     }
     // Alive
     else {
+        // 乘以 0.2 为了让受影响的区域变小
+        float strength = simplexNoise4d(vec4(base.xyz * 0.2, uTime + 1.0));
+        strength = smoothstep(0.0, 1.0, strength);
+
         vec3 flowField = vec3(
             simplexNoise4d(vec4(particle.xyz + 1.0, uTime)),
             simplexNoise4d(vec4(particle.xyz + 2.0, uTime)),
@@ -30,7 +34,7 @@ void main() {
         // 归一化让 flowfield 表示为方向
         flowField = normalize(flowField);
         // 后面乘以的值是 flowField 游离的偏移
-        particle.xyz += flowField * uDeltaTime * 0.5;
+        particle.xyz += flowField * uDeltaTime * strength * 0.5;
 
         // Decay
         particle.a += uDeltaTime * 0.3;

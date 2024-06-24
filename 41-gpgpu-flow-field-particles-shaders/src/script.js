@@ -165,19 +165,21 @@ const particles = {};
 // 为了让位置信息变成正常值，需要一个尺寸为 gpgpu.size * gpgpu.size 的 texture 对应的 uv 值
 // 这里不能在 vertex shader 中使用 gl_FragCoord 来获取 uv 值，因为 gl_FragCoord 是屏幕像素坐标
 const particlesUvArray = new Float32Array(baseGeometry.count * 2);
+const sizesArray = new Float32Array(baseGeometry.count);
 for (let y = 0; y < gpgpu.size; y++) {
   for (let x = 0; x < gpgpu.size; x++) {
     const i = y * gpgpu.size + x;
     const i2 = i * 2;
     // 除以 gpgpu.size 是为了让值在 0 - 1 之间
-    // todo 加上 0.5 的目的不是很清晰
-    // 加上 0.5 是为了在vertex shader 中使用 texture() 方法时使用的是像素点中心，而不是左下角点
-    // 比如当 uv 的值是 vec2(0,0) 时，想要获取的是对应像素点的中心，而不是像素的左下角
+    // 加上 0.5 是为了在 texture 中获取像素信息时，获取的是每个格子的中心，而不是格子的左下角点
+    // 在当前例子中不加也没关系，因为不存在边界混合的情况，但是某些情况下可能拿不到想要的值
     const uvX = (x + 0.5) / gpgpu.size;
     const uvY = (y + 0.5) / gpgpu.size;
 
     particlesUvArray[i2 + 0] = uvX;
     particlesUvArray[i2 + 1] = uvY;
+
+    sizesArray[i] = Math.random();
   }
 }
 particles.geometry = new THREE.BufferGeometry();
@@ -188,13 +190,21 @@ particles.geometry.setAttribute(
   "aParticlesUv",
   new THREE.BufferAttribute(particlesUvArray, 2),
 );
+particles.geometry.setAttribute(
+  "aColor",
+  baseGeometry.instance.attributes.color,
+);
+particles.geometry.setAttribute(
+  "aSize",
+  new THREE.BufferAttribute(sizesArray, 1),
+);
 
 // Material
 particles.material = new THREE.ShaderMaterial({
   vertexShader: particlesVertexShader,
   fragmentShader: particlesFragmentShader,
   uniforms: {
-    uSize: new THREE.Uniform(0.4),
+    uSize: new THREE.Uniform(0.07),
     uResolution: new THREE.Uniform(
       new THREE.Vector2(
         sizes.width * sizes.pixelRatio,

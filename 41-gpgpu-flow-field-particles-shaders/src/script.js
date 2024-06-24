@@ -127,7 +127,8 @@ for (let i = 0; i < baseGeometry.count; i++) {
     baseGeometry.instance.attributes.position.array[i3 + 1];
   baseParticlesTexture.image.data[i4 + 2] =
     baseGeometry.instance.attributes.position.array[i3 + 2];
-  baseParticlesTexture.image.data[i4 + 3] = 0;
+  // 用 a channel 来控制生命周期
+  baseParticlesTexture.image.data[i4 + 3] = Math.random();
 }
 // Particles variable
 // uParticles 是一个 variable,是传递给 shader 的变量，它的值是 baseParticlesTexture
@@ -139,6 +140,10 @@ gpgpu.particlesVariable = gpgpu.computation.addVariable(
 gpgpu.computation.setVariableDependencies(gpgpu.particlesVariable, [
   gpgpu.particlesVariable,
 ]);
+// 传递原始 texture，为了reset
+gpgpu.computation.variables[0].material.uniforms.uBase = new THREE.Uniform(
+  baseParticlesTexture,
+);
 
 // Init
 gpgpu.computation.init();

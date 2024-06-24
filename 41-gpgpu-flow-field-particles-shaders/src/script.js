@@ -140,8 +140,12 @@ gpgpu.particlesVariable = gpgpu.computation.addVariable(
 gpgpu.computation.setVariableDependencies(gpgpu.particlesVariable, [
   gpgpu.particlesVariable,
 ]);
+
+// Uniforms
 // 传递原始 texture，为了reset
-gpgpu.computation.variables[0].material.uniforms.uBase = new THREE.Uniform(
+gpgpu.particlesVariable.material.uniforms.uTime = new THREE.Uniform(0);
+gpgpu.particlesVariable.material.uniforms.uDeltaTime = new THREE.Uniform(0);
+gpgpu.particlesVariable.material.uniforms.uBase = new THREE.Uniform(
   baseParticlesTexture,
 );
 
@@ -255,6 +259,8 @@ const tick = () => {
 
   // GPGPU Update
   // 更新 gpgpu 的 uniform
+  gpgpu.particlesVariable.material.uniforms.uTime = elapsedTime;
+  gpgpu.particlesVariable.material.uniforms.uDeltaTime.value = deltaTime;
   gpgpu.computation.compute();
   // 更新 particles.material.uniforms.uParticlesTexture 的值为 gpgpu 的 texture
   particles.material.uniforms.uParticlesTexture.value =

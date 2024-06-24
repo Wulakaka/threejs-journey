@@ -88,6 +88,9 @@ renderer.setPixelRatio(sizes.pixelRatio);
 debugObject.clearColor = "#29191f";
 renderer.setClearColor(debugObject.clearColor);
 
+/**
+ * Load model
+ */
 const gltf = await gltfLoader.loadAsync("./model.glb");
 
 /**
@@ -130,6 +133,7 @@ for (let i = 0; i < baseGeometry.count; i++) {
   // 用 a channel 来控制生命周期
   baseParticlesTexture.image.data[i4 + 3] = Math.random();
 }
+
 // Particles variable
 // uParticles 是一个 variable,是传递给 shader 的变量，它的值是 baseParticlesTexture
 gpgpu.particlesVariable = gpgpu.computation.addVariable(
@@ -142,9 +146,9 @@ gpgpu.computation.setVariableDependencies(gpgpu.particlesVariable, [
 ]);
 
 // Uniforms
-// 传递原始 texture，为了reset
 gpgpu.particlesVariable.material.uniforms.uTime = new THREE.Uniform(0);
 gpgpu.particlesVariable.material.uniforms.uDeltaTime = new THREE.Uniform(0);
+// 传递原始 texture，为了reset
 gpgpu.particlesVariable.material.uniforms.uBase = new THREE.Uniform(
   baseParticlesTexture,
 );
@@ -182,6 +186,7 @@ const particles = {};
 // 这里不能在 vertex shader 中使用 gl_FragCoord 来获取 uv 值，因为 gl_FragCoord 是屏幕像素坐标
 const particlesUvArray = new Float32Array(baseGeometry.count * 2);
 const sizesArray = new Float32Array(baseGeometry.count);
+
 for (let y = 0; y < gpgpu.size; y++) {
   for (let x = 0; x < gpgpu.size; x++) {
     const i = y * gpgpu.size + x;
@@ -195,9 +200,11 @@ for (let y = 0; y < gpgpu.size; y++) {
     particlesUvArray[i2 + 0] = uvX;
     particlesUvArray[i2 + 1] = uvY;
 
+    // Size
     sizesArray[i] = Math.random();
   }
 }
+
 particles.geometry = new THREE.BufferGeometry();
 // setDrawRange 用于设置渲染的顶点数量
 // 这里我们设置为 baseGeometry.count，因为实际的点数量为 gpgpu.size * gpgpu.size，而实际有用的点数量为 baseGeometry.count
@@ -285,7 +292,7 @@ const tick = () => {
 
   // GPGPU Update
   // 更新 gpgpu 的 uniform
-  gpgpu.particlesVariable.material.uniforms.uTime = elapsedTime;
+  gpgpu.particlesVariable.material.uniforms.uTime.value = elapsedTime;
   gpgpu.particlesVariable.material.uniforms.uDeltaTime.value = deltaTime;
   gpgpu.computation.compute();
   // 更新 particles.material.uniforms.uParticlesTexture 的值为 gpgpu 的 texture

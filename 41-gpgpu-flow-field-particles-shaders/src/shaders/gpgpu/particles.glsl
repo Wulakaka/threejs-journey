@@ -1,6 +1,7 @@
 uniform float uTime;
 uniform float uDeltaTime;
 uniform sampler2D uBase;
+uniform float uFlowFieldInfluence;
 
 #include ../includes/simplexNoise4d.glsl
 
@@ -22,9 +23,12 @@ void main() {
     }
     // Alive
     else {
+        // Strength
         // 乘以 0.2 为了让受影响的区域变小
         float strength = simplexNoise4d(vec4(base.xyz * 0.2, uTime + 1.0));
-        strength = smoothstep(0.0, 1.0, strength);
+        // Influence
+        float influence = (uFlowFieldInfluence - 0.5) * -2.0;
+        strength = smoothstep(influence, 1.0, strength);
 
         vec3 flowField = vec3(
             simplexNoise4d(vec4(particle.xyz + 1.0, uTime)),

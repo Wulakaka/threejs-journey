@@ -88,11 +88,13 @@ renderer.setPixelRatio(sizes.pixelRatio);
 debugObject.clearColor = "#29191f";
 renderer.setClearColor(debugObject.clearColor);
 
+const gltf = await gltfLoader.loadAsync("./model.glb");
+
 /**
  * Base geometry
  */
 const baseGeometry = {};
-baseGeometry.instance = new THREE.SphereGeometry(3);
+baseGeometry.instance = gltf.scene.children[0].geometry;
 // 记录顶点数量
 baseGeometry.count = baseGeometry.instance.attributes.position.count;
 

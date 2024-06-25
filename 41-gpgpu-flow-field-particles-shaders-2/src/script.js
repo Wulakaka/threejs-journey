@@ -153,7 +153,23 @@ scene.add(gpgpu.debug);
 const particles = {};
 
 // Geometry
-// particles.geometry = new THREE.SphereGeometry(3)
+particles.geometry = new THREE.BufferGeometry();
+particles.geometry.setDrawRange(0, baseGeometry.count);
+
+const particlesUvArray = new Float32Array(baseGeometry.count * 2);
+for (let y = 0; y < gpgpu.size; y++) {
+  for (let x = 0; x < gpgpu.size; x++) {
+    const i = gpgpu.size * y + x;
+    const i2 = i * 2;
+    particlesUvArray[i2 + 0] = (x + 0.5) / gpgpu.size;
+    particlesUvArray[i2 + 1] = (y + 0.5) / gpgpu.size;
+  }
+}
+
+particles.geometry.setAttribute(
+  "aParticlesUv",
+  new THREE.BufferAttribute(particlesUvArray, 2),
+);
 
 // Material
 particles.material = new THREE.ShaderMaterial({
@@ -167,11 +183,15 @@ particles.material = new THREE.ShaderMaterial({
         sizes.height * sizes.pixelRatio,
       ),
     ),
+    // 这里不同于教程中在 tick 中更新
+    uParticlesTexture: new THREE.Uniform(
+      gpgpu.computation.getCurrentRenderTarget(gpgpu.particlesVariable).texture,
+    ),
   },
 });
 
 // Points
-particles.points = new THREE.Points(baseGeometry.instance, particles.material);
+particles.points = new THREE.Points(particles.geometry, particles.material);
 scene.add(particles.points);
 
 /**

@@ -109,6 +109,19 @@ gpgpu.computation = new GPUComputationRenderer(
 // 创建纹理
 const baseParticlesTexture = gpgpu.computation.createTexture();
 
+// 将 base geometry 的位置信息写入 baseParticlesTexture 中
+for (let i = 0; i < baseGeometry.count; i++) {
+  const i3 = i * 3;
+  const i4 = i * 4;
+  baseParticlesTexture.image.data[i4 + 0] =
+    baseGeometry.instance.attributes.position.array[i3 + 0];
+  baseParticlesTexture.image.data[i4 + 1] =
+    baseGeometry.instance.attributes.position.array[i3 + 1];
+  baseParticlesTexture.image.data[i4 + 2] =
+    baseGeometry.instance.attributes.position.array[i3 + 2];
+  baseParticlesTexture.image.data[i4 + 3] = 0;
+}
+
 // 创建 variable
 gpgpu.particlesVariable = gpgpu.computation.addVariable(
   "uParticles",

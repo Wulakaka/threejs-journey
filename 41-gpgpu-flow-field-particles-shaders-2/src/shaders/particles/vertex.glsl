@@ -5,6 +5,7 @@ uniform sampler2D uParticlesTexture;
 varying vec3 vColor;
 
 attribute vec2 aParticlesUv;
+attribute float aSize;
 
 void main()
 {
@@ -19,7 +20,7 @@ void main()
     float sizeIn = smoothstep(0.0, 0.1, particle.a);
     float sizeOut = smoothstep(1.0, 0.7, particle.a);
     float size = min(sizeIn, sizeOut);
-    gl_PointSize = size * uSize * uResolution.y;
+    gl_PointSize = size * aSize * uSize * uResolution.y;
     gl_PointSize *= (1.0 / - viewPosition.z);
 
     // Varyings

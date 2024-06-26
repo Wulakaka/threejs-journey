@@ -94,7 +94,7 @@ renderer.setClearColor(debugObject.clearColor);
  */
 
 const baseGeometry = {};
-baseGeometry.instance = new THREE.SphereGeometry(3);
+baseGeometry.instance = new THREE.SphereGeometry(3, 64, 64);
 baseGeometry.count = baseGeometry.instance.attributes.position.count;
 
 // gpgpu
@@ -119,13 +119,18 @@ for (let i = 0; i < baseGeometry.count; i++) {
     baseGeometry.instance.attributes.position.array[i3 + 1];
   baseParticlesTexture.image.data[i4 + 2] =
     baseGeometry.instance.attributes.position.array[i3 + 2];
-  baseParticlesTexture.image.data[i4 + 3] = 0;
+  // a 通道控制生命周期，随机数避免同时死亡
+  baseParticlesTexture.image.data[i4 + 3] = Math.random();
 }
 
 // 创建 variable
 gpgpu.particlesVariable = gpgpu.computation.addVariable(
   "uParticles",
   gpgpuParticlesShader,
+  baseParticlesTexture,
+);
+gpgpu.particlesVariable.material.uniforms.uTime = new THREE.Uniform(0);
+gpgpu.particlesVariable.material.uniforms.uBase = new THREE.Uniform(
   baseParticlesTexture,
 );
 
@@ -176,7 +181,7 @@ particles.material = new THREE.ShaderMaterial({
   vertexShader: particlesVertexShader,
   fragmentShader: particlesFragmentShader,
   uniforms: {
-    uSize: new THREE.Uniform(0.4),
+    uSize: new THREE.Uniform(0.2),
     uResolution: new THREE.Uniform(
       new THREE.Vector2(
         sizes.width * sizes.pixelRatio,
@@ -222,6 +227,7 @@ const tick = () => {
   controls.update();
 
   // GPGPU Update
+  gpgpu.particlesVariable.material.uniforms.uTime.value = elapsedTime;
   gpgpu.computation.compute();
 
   // Render normal scene

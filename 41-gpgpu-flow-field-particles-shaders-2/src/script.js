@@ -130,6 +130,7 @@ gpgpu.particlesVariable = gpgpu.computation.addVariable(
   baseParticlesTexture,
 );
 gpgpu.particlesVariable.material.uniforms.uTime = new THREE.Uniform(0);
+gpgpu.particlesVariable.material.uniforms.uDeltaTime = new THREE.Uniform(0);
 gpgpu.particlesVariable.material.uniforms.uBase = new THREE.Uniform(
   baseParticlesTexture,
 );
@@ -228,6 +229,7 @@ const tick = () => {
 
   // GPGPU Update
   gpgpu.particlesVariable.material.uniforms.uTime.value = elapsedTime;
+  gpgpu.particlesVariable.material.uniforms.uDeltaTime.value = deltaTime;
   gpgpu.computation.compute();
 
   // Render normal scene

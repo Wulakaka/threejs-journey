@@ -1,4 +1,5 @@
 uniform float uTime;
+uniform float uDeltaTime;
 uniform sampler2D uBase;
 
 #include ../includes/simplexNoise4d.glsl
@@ -20,8 +21,8 @@ void main() {
         );
 
         flowField = normalize(flowField);
-        particles.xyz += flowField * 0.01;
-        particles.a += 0.01;
+        particles.xyz += flowField * uDeltaTime * 0.5;
+        particles.a += uDeltaTime * 0.3;
     }
 
 

@@ -4,6 +4,7 @@ uniform sampler2D uBase;
 uniform float uFlowFieldStrength;
 uniform float uFlowFieldFrequency;
 uniform float uFlowFieldInfluence;
+uniform vec3 uInteractivePoint;
 
 #include ../includes/simplexNoise4d.glsl
 void main() {
@@ -25,6 +26,10 @@ void main() {
         float influence = (uFlowFieldInfluence - 0.5) * -2.0;
         strength = smoothstep(influence, 1.0, strength);
 
+        // 距离交互中心
+        float distanceToInteractive = distance(uInteractivePoint, particles.xyz);
+        float d = 1.0 - step(1.0, distanceToInteractive);
+
         vec3 flowField = vec3(
             simplexNoise4d(vec4(particles.xyz * uFlowFieldFrequency + 1.0, time)),
             simplexNoise4d(vec4(particles.xyz * uFlowFieldFrequency + 2.0, time)),
@@ -32,7 +37,7 @@ void main() {
         );
 
         flowField = normalize(flowField);
-        particles.xyz += flowField * strength * uDeltaTime * uFlowFieldStrength;
+        particles.xyz += flowField * strength * uDeltaTime * uFlowFieldStrength * d;
 
         // Decay 生命周期消亡
         particles.a += uDeltaTime * 0.3;

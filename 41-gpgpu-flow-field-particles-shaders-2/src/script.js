@@ -142,6 +142,9 @@ gpgpu.particlesVariable.material.uniforms.uFlowFieldFrequency =
   new THREE.Uniform(0.5);
 gpgpu.particlesVariable.material.uniforms.uFlowFieldInfluence =
   new THREE.Uniform(0.5);
+gpgpu.particlesVariable.material.uniforms.uInteractivePoint = new THREE.Uniform(
+  new THREE.Vector3(9999, 9999, 9999),
+);
 
 // 设置依赖
 gpgpu.computation.setVariableDependencies(gpgpu.particlesVariable, [
@@ -216,6 +219,26 @@ particles.points = new THREE.Points(particles.geometry, particles.material);
 scene.add(particles.points);
 
 /**
+ * Displacement
+ */
+const displacement = {};
+displacement.interactiveGeometry = new THREE.Mesh(
+  new THREE.SphereGeometry(3),
+  new THREE.MeshBasicMaterial({
+    color: "red",
+  }),
+);
+displacement.interactiveGeometry.visible = false;
+scene.add(displacement.interactiveGeometry);
+
+displacement.raycaster = new THREE.Raycaster();
+displacement.screenCursor = new THREE.Vector2(9999, 9999);
+window.addEventListener("pointermove", (event) => {
+  displacement.screenCursor.x = (event.clientX / sizes.width) * 2 - 1;
+  displacement.screenCursor.y = -(event.clientY / sizes.height) * 2 + 1;
+});
+
+/**
  * Tweaks
  */
 gui.addColor(debugObject, "clearColor").onChange(() => {
@@ -263,6 +286,25 @@ const tick = () => {
   gpgpu.particlesVariable.material.uniforms.uTime.value = elapsedTime;
   gpgpu.particlesVariable.material.uniforms.uDeltaTime.value = deltaTime;
   gpgpu.computation.compute();
+
+  // Raycaster
+  displacement.raycaster.setFromCamera(displacement.screenCursor, camera);
+  const intersections = displacement.raycaster.intersectObject(
+    displacement.interactiveGeometry,
+  );
+  if (intersections.length) {
+    console.log(intersections[0]);
+    const point = intersections[0].point;
+    gpgpu.particlesVariable.material.uniforms.uInteractivePoint.value.copy(
+      point,
+    );
+  } else {
+    gpgpu.particlesVariable.material.uniforms.uInteractivePoint.value.set(
+      9999,
+      9999,
+      9999,
+    );
+  }
 
   // Render normal scene
   renderer.render(scene, camera);

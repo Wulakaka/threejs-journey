@@ -7,6 +7,7 @@ import GUI from "lil-gui";
 import particlesVertexShader from "./shaders/particles/vertex.glsl";
 import particlesFragmentShader from "./shaders/particles/fragment.glsl";
 import gpgpuParticlesShader from "./shaders/gpgpu/particles.glsl";
+import gpgpuParticles2Shader from "./shaders/gpgpu/particles2.glsl";
 import { GPUComputationRenderer } from "three/addons";
 
 /**
@@ -90,11 +91,16 @@ debugObject.clearColor = "#29191f";
 renderer.setClearColor(debugObject.clearColor);
 
 /**
+ * Load model
+ */
+const gltf = await gltfLoader.loadAsync("./model.glb");
+
+/**
  * Base Geometry
  */
 
 const baseGeometry = {};
-baseGeometry.instance = new THREE.SphereGeometry(3, 64, 64);
+baseGeometry.instance = gltf.scene.children[0].geometry;
 baseGeometry.count = baseGeometry.instance.attributes.position.count;
 
 // gpgpu
@@ -142,9 +148,8 @@ gpgpu.particlesVariable.material.uniforms.uFlowFieldFrequency =
   new THREE.Uniform(0.5);
 gpgpu.particlesVariable.material.uniforms.uFlowFieldInfluence =
   new THREE.Uniform(0.5);
-gpgpu.particlesVariable.material.uniforms.uInteractivePoint = new THREE.Uniform(
-  new THREE.Vector3(9999, 9999, 9999),
-);
+gpgpu.particlesVariable.material.uniforms.uInteractiveTexture =
+  new THREE.Uniform();
 
 // 设置依赖
 gpgpu.computation.setVariableDependencies(gpgpu.particlesVariable, [
@@ -163,6 +168,69 @@ gpgpu.debug = new THREE.Mesh(
 gpgpu.debug.position.x = 3;
 
 scene.add(gpgpu.debug);
+
+// gpgpu2
+const gpgpu2 = {};
+gpgpu2.size = gpgpu.size;
+gpgpu2.computation = new GPUComputationRenderer(
+  gpgpu2.size,
+  gpgpu2.size,
+  renderer,
+);
+
+// 创建纹理
+const baseParticlesTexture2 = gpgpu2.computation.createTexture();
+
+// 将 base geometry 的位置信息写入 baseParticlesTexture 中
+for (let i = 0; i < baseGeometry.count; i++) {
+  const i3 = i * 3;
+  const i4 = i * 4;
+  baseParticlesTexture2.image.data[i4 + 0] =
+    baseGeometry.instance.attributes.position.array[i3 + 0];
+  baseParticlesTexture2.image.data[i4 + 1] =
+    baseGeometry.instance.attributes.position.array[i3 + 1];
+  baseParticlesTexture2.image.data[i4 + 2] =
+    baseGeometry.instance.attributes.position.array[i3 + 2];
+  // a 通道控制生命周期，随机数避免同时死亡
+  baseParticlesTexture2.image.data[i4 + 3] = 0;
+}
+
+// 创建 variable
+gpgpu2.particlesVariable = gpgpu2.computation.addVariable(
+  "uParticles",
+  gpgpuParticles2Shader,
+  baseParticlesTexture2,
+);
+
+// Uniforms
+gpgpu2.particlesVariable.material.uniforms.uDeltaTime = new THREE.Uniform(0);
+gpgpu2.particlesVariable.material.uniforms.uBase = new THREE.Uniform(
+  baseParticlesTexture2,
+);
+gpgpu2.particlesVariable.material.uniforms.uInteractivePoint =
+  new THREE.Uniform(new THREE.Vector3(9999, 9999, 9999));
+gpgpu2.particlesVariable.material.uniforms.uInteractiveRadius =
+  new THREE.Uniform(1);
+gpgpu2.particlesVariable.material.uniforms.uInteractiveDecay =
+  new THREE.Uniform(0.1);
+// 设置依赖
+gpgpu2.computation.setVariableDependencies(gpgpu2.particlesVariable, [
+  gpgpu2.particlesVariable,
+]);
+
+gpgpu2.computation.init();
+
+gpgpu2.debug = new THREE.Mesh(
+  new THREE.PlaneGeometry(3, 3),
+  new THREE.MeshBasicMaterial({
+    map: gpgpu2.computation.getCurrentRenderTarget(gpgpu2.particlesVariable)
+      .texture,
+    transparent: true,
+  }),
+);
+gpgpu2.debug.position.x = -3;
+
+scene.add(gpgpu2.debug);
 
 /**
  * Particles
@@ -194,6 +262,10 @@ particles.geometry.setAttribute(
   "aSize",
   new THREE.BufferAttribute(sizesArray, 1),
 );
+particles.geometry.setAttribute(
+  "aColor",
+  baseGeometry.instance.attributes.color,
+);
 
 // Material
 particles.material = new THREE.ShaderMaterial({
@@ -207,15 +279,13 @@ particles.material = new THREE.ShaderMaterial({
         sizes.height * sizes.pixelRatio,
       ),
     ),
-    // 这里不同于教程中在 tick 中更新
-    uParticlesTexture: new THREE.Uniform(
-      gpgpu.computation.getCurrentRenderTarget(gpgpu.particlesVariable).texture,
-    ),
+    uParticlesTexture: new THREE.Uniform(),
   },
 });
 
 // Points
 particles.points = new THREE.Points(particles.geometry, particles.material);
+// particles.points.frustumCulled = false;
 scene.add(particles.points);
 
 /**
@@ -223,7 +293,7 @@ scene.add(particles.points);
  */
 const displacement = {};
 displacement.interactiveGeometry = new THREE.Mesh(
-  new THREE.SphereGeometry(3),
+  baseGeometry.instance,
   new THREE.MeshBasicMaterial({
     color: "red",
   }),
@@ -268,6 +338,18 @@ gui
   .max(1)
   .step(0.001)
   .name("uFlowFieldInfluence");
+gui
+  .add(gpgpu2.particlesVariable.material.uniforms.uInteractiveRadius, "value")
+  .min(0)
+  .max(10)
+  .step(0.01)
+  .name("uInteractiveRadius");
+gui
+  .add(gpgpu2.particlesVariable.material.uniforms.uInteractiveDecay, "value")
+  .min(0)
+  .max(1)
+  .step(0.001)
+  .name("uInteractiveDecay");
 /**
  * Animate
  */
@@ -285,7 +367,16 @@ const tick = () => {
   // GPGPU Update
   gpgpu.particlesVariable.material.uniforms.uTime.value = elapsedTime;
   gpgpu.particlesVariable.material.uniforms.uDeltaTime.value = deltaTime;
+  gpgpu.particlesVariable.material.uniforms.uInteractiveTexture.value =
+    gpgpu2.computation.getCurrentRenderTarget(gpgpu2.particlesVariable).texture;
   gpgpu.computation.compute();
+
+  particles.material.uniforms.uParticlesTexture.value =
+    gpgpu.computation.getCurrentRenderTarget(gpgpu.particlesVariable).texture;
+
+  // GPGPU2 Update
+  gpgpu2.particlesVariable.material.uniforms.uDeltaTime.value = deltaTime;
+  gpgpu2.computation.compute();
 
   // Raycaster
   displacement.raycaster.setFromCamera(displacement.screenCursor, camera);
@@ -295,11 +386,11 @@ const tick = () => {
   if (intersections.length) {
     console.log(intersections[0]);
     const point = intersections[0].point;
-    gpgpu.particlesVariable.material.uniforms.uInteractivePoint.value.copy(
+    gpgpu2.particlesVariable.material.uniforms.uInteractivePoint.value.copy(
       point,
     );
   } else {
-    gpgpu.particlesVariable.material.uniforms.uInteractivePoint.value.set(
+    gpgpu2.particlesVariable.material.uniforms.uInteractivePoint.value.set(
       9999,
       9999,
       9999,

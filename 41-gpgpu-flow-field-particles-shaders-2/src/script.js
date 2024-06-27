@@ -94,6 +94,9 @@ renderer.setClearColor(debugObject.clearColor);
  * Load model
  */
 const gltf = await gltfLoader.loadAsync("./model.glb");
+const gltf2 = await gltfLoader.loadAsync("./model2.glb");
+console.log(gltf2.scene.children[0].geometry);
+// scene.add(gltf2.scene.children[0]);
 
 /**
  * Base Geometry
@@ -102,7 +105,7 @@ const gltf = await gltfLoader.loadAsync("./model.glb");
 const baseGeometry = {};
 baseGeometry.instance = gltf.scene.children[0].geometry;
 baseGeometry.count = baseGeometry.instance.attributes.position.count;
-
+baseGeometry.instance2 = gltf2.scene.children[0].geometry;
 // gpgpu
 const gpgpu = {};
 gpgpu.size = Math.ceil(Math.sqrt(baseGeometry.count));
@@ -143,11 +146,11 @@ gpgpu.particlesVariable.material.uniforms.uBase = new THREE.Uniform(
   baseParticlesTexture,
 );
 gpgpu.particlesVariable.material.uniforms.uFlowFieldStrength =
-  new THREE.Uniform(2);
+  new THREE.Uniform(6.5);
 gpgpu.particlesVariable.material.uniforms.uFlowFieldFrequency =
   new THREE.Uniform(0.5);
 gpgpu.particlesVariable.material.uniforms.uFlowFieldInfluence =
-  new THREE.Uniform(0.5);
+  new THREE.Uniform(1);
 gpgpu.particlesVariable.material.uniforms.uInteractiveTexture =
   new THREE.Uniform();
 
@@ -166,7 +169,7 @@ gpgpu.debug = new THREE.Mesh(
   }),
 );
 gpgpu.debug.position.x = 3;
-
+gpgpu.debug.visible = false;
 scene.add(gpgpu.debug);
 
 // gpgpu2
@@ -212,7 +215,7 @@ gpgpu2.particlesVariable.material.uniforms.uInteractivePoint =
 gpgpu2.particlesVariable.material.uniforms.uInteractiveRadius =
   new THREE.Uniform(1);
 gpgpu2.particlesVariable.material.uniforms.uInteractiveDecay =
-  new THREE.Uniform(0.1);
+  new THREE.Uniform(0.2);
 // 设置依赖
 gpgpu2.computation.setVariableDependencies(gpgpu2.particlesVariable, [
   gpgpu2.particlesVariable,
@@ -229,7 +232,7 @@ gpgpu2.debug = new THREE.Mesh(
   }),
 );
 gpgpu2.debug.position.x = -3;
-
+gpgpu2.debug.visible = false;
 scene.add(gpgpu2.debug);
 
 /**
@@ -272,7 +275,7 @@ particles.material = new THREE.ShaderMaterial({
   vertexShader: particlesVertexShader,
   fragmentShader: particlesFragmentShader,
   uniforms: {
-    uSize: new THREE.Uniform(0.2),
+    uSize: new THREE.Uniform(0.1),
     uResolution: new THREE.Uniform(
       new THREE.Vector2(
         sizes.width * sizes.pixelRatio,
@@ -293,7 +296,7 @@ scene.add(particles.points);
  */
 const displacement = {};
 displacement.interactiveGeometry = new THREE.Mesh(
-  baseGeometry.instance,
+  baseGeometry.instance2,
   new THREE.MeshBasicMaterial({
     color: "red",
   }),
@@ -384,7 +387,6 @@ const tick = () => {
     displacement.interactiveGeometry,
   );
   if (intersections.length) {
-    console.log(intersections[0]);
     const point = intersections[0].point;
     gpgpu2.particlesVariable.material.uniforms.uInteractivePoint.value.copy(
       point,

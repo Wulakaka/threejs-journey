@@ -95,8 +95,6 @@ renderer.setClearColor(debugObject.clearColor);
  */
 const gltf = await gltfLoader.loadAsync("./model.glb");
 const gltf2 = await gltfLoader.loadAsync("./model2.glb");
-console.log(gltf2.scene.children[0].geometry);
-// scene.add(gltf2.scene.children[0]);
 
 /**
  * Base Geometry
@@ -216,6 +214,9 @@ gpgpu2.particlesVariable.material.uniforms.uInteractiveRadius =
   new THREE.Uniform(1);
 gpgpu2.particlesVariable.material.uniforms.uInteractiveDecay =
   new THREE.Uniform(0.2);
+gpgpu2.particlesVariable.material.uniforms.uCameraPosition = new THREE.Uniform(
+  camera.position,
+);
 // 设置依赖
 gpgpu2.computation.setVariableDependencies(gpgpu2.particlesVariable, [
   gpgpu2.particlesVariable,
@@ -379,6 +380,9 @@ const tick = () => {
 
   // GPGPU2 Update
   gpgpu2.particlesVariable.material.uniforms.uDeltaTime.value = deltaTime;
+  gpgpu2.particlesVariable.material.uniforms.uCameraPosition.value.copy(
+    camera.position,
+  );
   gpgpu2.computation.compute();
 
   // Raycaster

@@ -209,13 +209,13 @@ gpgpu2.particlesVariable.material.uniforms.uBase = new THREE.Uniform(
   baseParticlesTexture2,
 );
 gpgpu2.particlesVariable.material.uniforms.uInteractivePoint =
-  new THREE.Uniform(new THREE.Vector3(9999, 9999, 9999));
+  new THREE.Uniform(new THREE.Vector3().copy(camera.position));
 gpgpu2.particlesVariable.material.uniforms.uInteractiveRadius =
   new THREE.Uniform(1);
 gpgpu2.particlesVariable.material.uniforms.uInteractiveDecay =
   new THREE.Uniform(0.2);
 gpgpu2.particlesVariable.material.uniforms.uCameraPosition = new THREE.Uniform(
-  camera.position,
+  new THREE.Vector3().copy(camera.position),
 );
 // 设置依赖
 gpgpu2.computation.setVariableDependencies(gpgpu2.particlesVariable, [
@@ -383,7 +383,6 @@ const tick = () => {
   gpgpu2.particlesVariable.material.uniforms.uCameraPosition.value.copy(
     camera.position,
   );
-  gpgpu2.computation.compute();
 
   // Raycaster
   displacement.raycaster.setFromCamera(displacement.screenCursor, camera);
@@ -396,12 +395,12 @@ const tick = () => {
       point,
     );
   } else {
-    gpgpu2.particlesVariable.material.uniforms.uInteractivePoint.value.set(
-      9999,
-      9999,
-      9999,
+    gpgpu2.particlesVariable.material.uniforms.uInteractivePoint.value.copy(
+      camera.position,
     );
   }
+
+  gpgpu2.computation.compute();
 
   // Render normal scene
   renderer.render(scene, camera);

@@ -44,6 +44,7 @@ rgbeLoader.load("./urban_alley_01_1k.hdr", (environmentMap) => {
  */
 // Material
 const material = new CustomShaderMaterial({
+  // CSM
   baseMaterial: THREE.MeshPhysicalMaterial,
   vertexShader: wobbleVertexShader,
   fragmentShader: wobbleFragmentShader,
@@ -58,6 +59,17 @@ const material = new CustomShaderMaterial({
   thickness: 1.5,
   transparent: true,
   wireframe: false,
+});
+
+// 位于自身的阴影有 bug，是因为 MeshDepthMaterial 对应的 vertex shader 是原始的
+const depthMaterial = new CustomShaderMaterial({
+  // CSM
+  baseMaterial: THREE.MeshDepthMaterial,
+  vertexShader: wobbleVertexShader,
+  silent: true,
+
+  // MeshDepthMaterial
+  depthPacking: THREE.RGBADepthPacking,
 });
 
 // Tweaks
@@ -75,6 +87,7 @@ geometry.computeTangents();
 
 // Mesh
 const wobble = new THREE.Mesh(geometry, material);
+wobble.customDepthMaterial = depthMaterial;
 wobble.receiveShadow = true;
 wobble.castShadow = true;
 scene.add(wobble);

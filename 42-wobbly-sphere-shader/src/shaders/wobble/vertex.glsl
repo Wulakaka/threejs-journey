@@ -8,6 +8,8 @@ uniform float uWarpPositionFrequency;
 uniform float uWarpTimeFrequency;
 uniform float uWarpStrength;
 
+varying float vWobble;
+
 #include ../includes/simplexNoise4d.glsl
 
 float getWobble(vec3 position) {
@@ -32,6 +34,7 @@ void main() {
     vec3 positionB = csm_Position + shift * biTangent;
 
     // Wobble
+    // wobble 的取值范围是 -uStrength 到 uStrength
     float wobble = getWobble(csm_Position);
     // 算出三个点经过变换后的位置
     csm_Position += wobble * normal;
@@ -42,4 +45,7 @@ void main() {
     vec3 toB = positionB - csm_Position;
     // 最终计算出的法线需要赋值给 csm_Normal
     csm_Normal = cross(toA, toB);
+
+    // Varying
+    vWobble = wobble / uStrength;
 }

@@ -39,8 +39,6 @@ rgbeLoader.load("./aerodynamics_workshop.hdr", (environmentMap) => {
 /**
  * Sliced model
  */
-// Geometry
-const geometry = new THREE.IcosahedronGeometry(2.5, 5);
 
 // Material
 const material = new THREE.MeshStandardMaterial({
@@ -50,9 +48,10 @@ const material = new THREE.MeshStandardMaterial({
   color: "#858080",
 });
 
-// Mesh
-const mesh = new THREE.Mesh(geometry, material);
-scene.add(mesh);
+// Model
+gltfLoader.load("./gears.glb", (gltf) => {
+  scene.add(gltf.scene);
+});
 
 /**
  * Plane

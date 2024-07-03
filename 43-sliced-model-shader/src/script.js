@@ -3,6 +3,9 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
+import CustomShaderMaterial from "three-custom-shader-material/vanilla";
+import slicedVertexShader from "./shaders/sliced/vertex.glsl";
+import slicedFragmentShader from "./shaders/sliced/fragment.glsl";
 import GUI from "lil-gui";
 
 /**
@@ -39,6 +42,16 @@ rgbeLoader.load("./aerodynamics_workshop.hdr", (environmentMap) => {
 /**
  * Sliced model
  */
+// Uniforms
+const uniforms = {
+  uSliceStart: new THREE.Uniform(1.5),
+  uSliceArc: new THREE.Uniform(0.5),
+};
+
+gui
+  .add(uniforms.uSliceStart, "value", -Math.PI, Math.PI, 0.01)
+  .name("uSliceStart");
+gui.add(uniforms.uSliceArc, "value", 0, Math.PI * 2, 0.01).name("uSliceArc");
 
 // Material
 const material = new THREE.MeshStandardMaterial({
@@ -48,9 +61,37 @@ const material = new THREE.MeshStandardMaterial({
   color: "#858080",
 });
 
+const slicedMaterial = new CustomShaderMaterial({
+  // CSM
+  baseMaterial: THREE.MeshStandardMaterial,
+  silent: true,
+  vertexShader: slicedVertexShader,
+  fragmentShader: slicedFragmentShader,
+  uniforms,
+
+  // MeshStandardMaterial
+  metalness: 0.5,
+  roughness: 0.25,
+  envMapIntensity: 0.5,
+  color: "#858080",
+});
+
 // Model
+let model = null;
 gltfLoader.load("./gears.glb", (gltf) => {
-  scene.add(gltf.scene);
+  model = gltf.scene;
+  model.traverse((child) => {
+    if (child.isMesh) {
+      child.castShadow = true;
+      child.receiveShadow = true;
+      if (child.name === "outerHull") {
+        child.material = slicedMaterial;
+      } else {
+        child.material = material;
+      }
+    }
+  });
+  scene.add(model);
 });
 
 /**
@@ -145,6 +186,11 @@ const clock = new THREE.Clock();
 
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
+
+  // Update model
+  if (model) {
+    model.rotation.y = elapsedTime * 0.1;
+  }
 
   // Update controls
   controls.update();

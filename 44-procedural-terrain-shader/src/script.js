@@ -4,6 +4,8 @@ import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
 import GUI from "lil-gui";
 import { Brush, Evaluator, SUBTRACTION } from "three-bvh-csg";
 import CustomShaderMaterial from "three-custom-shader-material/vanilla";
+import terrainVertexShader from "./shaders/terrain/vertex.glsl";
+import terrainFragmentShader from "./shaders/terrain/fragment.glsl";
 
 /**
  * Base
@@ -45,7 +47,7 @@ const evaluator = new Evaluator();
 const board = evaluator.evaluate(boardFill, boardHole, SUBTRACTION);
 // 清除原有的groups
 board.geometry.clearGroups();
-board.material = new THREE.MeshPhysicalMaterial({
+board.material = new THREE.MeshStandardMaterial({
   color: "#ffffff",
   roughness: 0.3,
   metalness: 0,
@@ -55,13 +57,27 @@ board.receiveShadow = true;
 scene.add(board);
 
 /**
- * Placeholder
+ * Terrain
  */
-const placeholder = new THREE.Mesh(
-  new THREE.IcosahedronGeometry(2, 5),
-  new THREE.MeshPhysicalMaterial(),
-);
-scene.add(placeholder);
+const terrainGeometry = new THREE.PlaneGeometry(10, 10, 500, 500);
+terrainGeometry.rotateX(-Math.PI * 0.5);
+const terrainMaterial = new CustomShaderMaterial({
+  // CSM
+  baseMaterial: THREE.MeshStandardMaterial,
+  silent: true,
+  vertexShader: terrainVertexShader,
+  fragmentShader: terrainFragmentShader,
+
+  // MeshStandardMaterial
+  metalness: 0,
+  roughness: 0.5,
+  color: "#85d534",
+});
+
+const terrain = new THREE.Mesh(terrainGeometry, terrainMaterial);
+terrain.castShadow = true;
+terrain.receiveShadow = true;
+scene.add(terrain);
 
 /**
  * Lights

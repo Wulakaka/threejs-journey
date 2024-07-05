@@ -2,6 +2,8 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
 import GUI from "lil-gui";
+import { Brush, Evaluator, SUBTRACTION } from "three-bvh-csg";
+import CustomShaderMaterial from "three-custom-shader-material/vanilla";
 
 /**
  * Base
@@ -29,6 +31,28 @@ rgbeLoader.load("/spruit_sunrise.hdr", (environmentMap) => {
   scene.backgroundBlurriness = 0.5;
   scene.environment = environmentMap;
 });
+
+/**
+ * Board
+ */
+
+// Brushes
+const boardFill = new Brush(new THREE.BoxGeometry(11, 2, 11));
+const boardHole = new Brush(new THREE.BoxGeometry(10, 2.1, 10));
+
+// Evaluate
+const evaluator = new Evaluator();
+const board = evaluator.evaluate(boardFill, boardHole, SUBTRACTION);
+// 清除原有的groups
+board.geometry.clearGroups();
+board.material = new THREE.MeshPhysicalMaterial({
+  color: "#ffffff",
+  roughness: 0.3,
+  metalness: 0,
+});
+board.castShadow = true;
+board.receiveShadow = true;
+scene.add(board);
 
 /**
  * Placeholder

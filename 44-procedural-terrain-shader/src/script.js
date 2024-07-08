@@ -61,6 +61,8 @@ scene.add(board);
  */
 const terrainGeometry = new THREE.PlaneGeometry(10, 10, 500, 500);
 terrainGeometry.rotateX(-Math.PI * 0.5);
+terrainGeometry.deleteAttribute("normal");
+terrainGeometry.deleteAttribute("uv");
 const terrainMaterial = new CustomShaderMaterial({
   // CSM
   baseMaterial: THREE.MeshStandardMaterial,

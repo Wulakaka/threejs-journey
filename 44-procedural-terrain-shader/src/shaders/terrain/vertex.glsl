@@ -2,12 +2,13 @@ uniform float uPositionFrequency;
 uniform float uStrength;
 uniform float uWarpFrequency;
 uniform float uWarpStrength;
-
+uniform float uTime;
 
 #include ../includes/simplexNoise2d.glsl
 
 float getElevation(vec2 position) {
     vec2 warpedPosition = position;
+    warpedPosition += uTime * 0.2;
     // 在 xz 平面上添加扭曲
     warpedPosition += simplexNoise2d(warpedPosition * uPositionFrequency * uWarpFrequency) * uWarpStrength;
 

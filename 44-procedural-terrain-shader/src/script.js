@@ -63,12 +63,29 @@ const terrainGeometry = new THREE.PlaneGeometry(10, 10, 500, 500);
 terrainGeometry.rotateX(-Math.PI * 0.5);
 terrainGeometry.deleteAttribute("normal");
 terrainGeometry.deleteAttribute("uv");
+
+// Material
+const uniforms = {
+  uPositionFrequency: new THREE.Uniform(0.2),
+  uStrength: new THREE.Uniform(2),
+  uWarpFrequency: new THREE.Uniform(5),
+  uWarpStrength: new THREE.Uniform(0.5),
+};
+
+gui
+  .add(uniforms.uPositionFrequency, "value", 0, 1, 0.001)
+  .name("uPositionFrequency");
+gui.add(uniforms.uStrength, "value", 0, 10, 0.01).name("uStrength");
+gui.add(uniforms.uWarpFrequency, "value", 0, 10, 0.01).name("uWarpFrequency");
+gui.add(uniforms.uWarpStrength, "value", 0, 1, 0.01).name("uWarpStrength");
+
 const terrainMaterial = new CustomShaderMaterial({
   // CSM
   baseMaterial: THREE.MeshStandardMaterial,
-  silent: true,
   vertexShader: terrainVertexShader,
   fragmentShader: terrainFragmentShader,
+  uniforms,
+  silent: true,
 
   // MeshStandardMaterial
   metalness: 0,

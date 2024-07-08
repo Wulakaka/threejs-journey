@@ -1,14 +1,24 @@
+uniform float uPositionFrequency;
+uniform float uStrength;
+uniform float uWarpFrequency;
+uniform float uWarpStrength;
+
+
 #include ../includes/simplexNoise2d.glsl
 
 float getElevation(vec2 position) {
-    float uPositionFrequency = 0.2;
+    vec2 warpedPosition = position;
+    // 在 xz 平面上添加扭曲
+    warpedPosition += simplexNoise2d(warpedPosition * uPositionFrequency * uWarpFrequency) * uWarpStrength;
+
     float elevation = 0.0;
-    elevation += simplexNoise2d(position * uPositionFrequency) / 2.0;
-    elevation += simplexNoise2d(position * uPositionFrequency * 2.0) / 4.0;
-    elevation += simplexNoise2d(position * uPositionFrequency * 4.0) / 8.0;
+    elevation += simplexNoise2d(warpedPosition * uPositionFrequency) / 2.0;
+    elevation += simplexNoise2d(warpedPosition * uPositionFrequency * 2.0) / 4.0;
+    elevation += simplexNoise2d(warpedPosition * uPositionFrequency * 4.0) / 8.0;
     float elecvationSign = sign(elevation);
     // 让接近 0 的区域更平坦
     elevation = pow(abs(elevation), 2.0) * elecvationSign;
+    elevation *= uStrength;
     return elevation;
 }
 void main() {

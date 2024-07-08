@@ -6,6 +6,7 @@ uniform vec3 uColorSnow;
 uniform vec3 uColorRock;
 
 varying vec3 vPosition;
+varying float vUpDot;
 
 #include ../includes/simplexNoise2d.glsl
 
@@ -23,6 +24,12 @@ void main() {
     // grass
     float grassMix = step(0.0, vPosition.y);
     color = mix(color, uColorGrass, grassMix);
+
+    // rock
+    float rockMix = 1.0 - step(0.8, vUpDot);
+    // 只有在地面以上的区域才会有岩石
+    rockMix *= step(-0.06, vPosition.y);
+    color = mix(color, uColorRock, rockMix);
 
     // snow
     float threshold = 0.45;

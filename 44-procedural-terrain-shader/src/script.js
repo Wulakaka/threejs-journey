@@ -59,10 +59,10 @@ scene.add(board);
 /**
  * Terrain
  */
-const terrainGeometry = new THREE.PlaneGeometry(10, 10, 500, 500);
-terrainGeometry.rotateX(-Math.PI * 0.5);
-terrainGeometry.deleteAttribute("normal");
-terrainGeometry.deleteAttribute("uv");
+const geometry = new THREE.PlaneGeometry(10, 10, 500, 500);
+geometry.rotateX(-Math.PI * 0.5);
+geometry.deleteAttribute("normal");
+geometry.deleteAttribute("uv");
 
 // Material
 const uniforms = {
@@ -80,7 +80,7 @@ gui.add(uniforms.uStrength, "value", 0, 10, 0.01).name("uStrength");
 gui.add(uniforms.uWarpFrequency, "value", 0, 10, 0.01).name("uWarpFrequency");
 gui.add(uniforms.uWarpStrength, "value", 0, 1, 0.01).name("uWarpStrength");
 
-const terrainMaterial = new CustomShaderMaterial({
+const material = new CustomShaderMaterial({
   // CSM
   baseMaterial: THREE.MeshStandardMaterial,
   vertexShader: terrainVertexShader,
@@ -94,7 +94,19 @@ const terrainMaterial = new CustomShaderMaterial({
   color: "#85d534",
 });
 
-const terrain = new THREE.Mesh(terrainGeometry, terrainMaterial);
+const depthMaterial = new CustomShaderMaterial({
+  // CSM
+  baseMaterial: THREE.MeshDepthMaterial,
+  vertexShader: terrainVertexShader,
+  uniforms,
+  silent: true,
+
+  // MeshDepthMaterial
+  depthPacking: THREE.RGBADepthPacking,
+});
+
+const terrain = new THREE.Mesh(geometry, material);
+terrain.customDepthMaterial = depthMaterial;
 terrain.castShadow = true;
 terrain.receiveShadow = true;
 scene.add(terrain);

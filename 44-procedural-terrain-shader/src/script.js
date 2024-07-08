@@ -65,12 +65,29 @@ geometry.deleteAttribute("normal");
 geometry.deleteAttribute("uv");
 
 // Material
+debugObject.colorWaterDeep = "#002b3d";
+debugObject.colorWaterSurface = "#66a8ff";
+debugObject.colorSand = "#ffe894";
+debugObject.colorGrass = "#85d534";
+debugObject.colorSnow = "#ffffff";
+debugObject.colorRock = "#bfbd8d";
+
 const uniforms = {
   uPositionFrequency: new THREE.Uniform(0.2),
   uStrength: new THREE.Uniform(2),
   uWarpFrequency: new THREE.Uniform(5),
   uWarpStrength: new THREE.Uniform(0.5),
   uTime: new THREE.Uniform(0),
+  uColorWaterDeep: new THREE.Uniform(
+    new THREE.Color(debugObject.colorWaterDeep),
+  ),
+  uColorWaterSurface: new THREE.Uniform(
+    new THREE.Color(debugObject.colorWaterSurface),
+  ),
+  uColorSand: new THREE.Uniform(new THREE.Color(debugObject.colorSand)),
+  uColorGrass: new THREE.Uniform(new THREE.Color(debugObject.colorGrass)),
+  uColorSnow: new THREE.Uniform(new THREE.Color(debugObject.colorSnow)),
+  uColorRock: new THREE.Uniform(new THREE.Color(debugObject.colorRock)),
 };
 
 gui
@@ -79,6 +96,24 @@ gui
 gui.add(uniforms.uStrength, "value", 0, 10, 0.01).name("uStrength");
 gui.add(uniforms.uWarpFrequency, "value", 0, 10, 0.01).name("uWarpFrequency");
 gui.add(uniforms.uWarpStrength, "value", 0, 1, 0.01).name("uWarpStrength");
+gui.addColor(debugObject, "colorWaterDeep").onChange(() => {
+  uniforms.uColorWaterDeep.value.set(debugObject.colorWaterDeep);
+});
+gui.addColor(debugObject, "colorWaterSurface").onChange(() => {
+  uniforms.uColorWaterSurface.value.set(debugObject.colorWaterSurface);
+});
+gui.addColor(debugObject, "colorSand").onChange(() => {
+  uniforms.uColorSand.value.set(debugObject.colorSand);
+});
+gui.addColor(debugObject, "colorGrass").onChange(() => {
+  uniforms.uColorGrass.value.set(debugObject.colorGrass);
+});
+gui.addColor(debugObject, "colorSnow").onChange(() => {
+  uniforms.uColorSnow.value.set(debugObject.colorSnow);
+});
+gui.addColor(debugObject, "colorRock").onChange(() => {
+  uniforms.uColorRock.value.set(debugObject.colorRock);
+});
 
 const material = new CustomShaderMaterial({
   // CSM

@@ -5,6 +5,7 @@ import GUI from "lil-gui";
 import {
   DotScreenPass,
   EffectComposer,
+  GammaCorrectionShader,
   GlitchPass,
   RenderPass,
   RGBShiftShader,
@@ -159,6 +160,9 @@ effectComposer.addPass(glitchPass);
 const rgbShiftPass = new ShaderPass(RGBShiftShader);
 rgbShiftPass.enabled = false;
 effectComposer.addPass(rgbShiftPass);
+
+const gammaCorrectionPass = new ShaderPass(GammaCorrectionShader);
+effectComposer.addPass(gammaCorrectionPass);
 
 /**
  * Animate

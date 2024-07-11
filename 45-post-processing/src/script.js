@@ -2,7 +2,14 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import GUI from "lil-gui";
-import { EffectComposer, RenderPass } from "three/addons";
+import {
+  DotScreenPass,
+  EffectComposer,
+  GlitchPass,
+  RenderPass,
+  RGBShiftShader,
+  ShaderPass,
+} from "three/addons";
 
 /**
  * Base
@@ -139,6 +146,19 @@ effectComposer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
 const renderPass = new RenderPass(scene, camera);
 effectComposer.addPass(renderPass);
+
+const dotScreenPass = new DotScreenPass();
+dotScreenPass.enabled = false;
+effectComposer.addPass(dotScreenPass);
+
+const glitchPass = new GlitchPass();
+// glitchPass.enabled = false;
+// glitchPass.goWild = true;
+effectComposer.addPass(glitchPass);
+
+const rgbShiftPass = new ShaderPass(RGBShiftShader);
+rgbShiftPass.enabled = false;
+effectComposer.addPass(rgbShiftPass);
 
 /**
  * Animate

@@ -11,6 +11,7 @@ import {
   RGBShiftShader,
   ShaderPass,
   SMAAPass,
+  UnrealBloomPass,
 } from "three/addons";
 
 /**
@@ -171,6 +172,18 @@ effectComposer.addPass(glitchPass);
 const rgbShiftPass = new ShaderPass(RGBShiftShader);
 rgbShiftPass.enabled = false;
 effectComposer.addPass(rgbShiftPass);
+
+const unrealBloomPass = new UnrealBloomPass();
+unrealBloomPass.strength = 0.3;
+unrealBloomPass.radius = 1;
+unrealBloomPass.threshold = 0.6;
+
+gui.add(unrealBloomPass, "enabled").name("Unreal Bloom");
+gui.add(unrealBloomPass, "strength").min(0).max(1).step(0.001);
+gui.add(unrealBloomPass, "radius").min(0).max(2).step(0.001);
+gui.add(unrealBloomPass, "threshold").min(0).max(1).step(0.001);
+
+effectComposer.addPass(unrealBloomPass);
 
 const gammaCorrectionPass = new ShaderPass(GammaCorrectionShader);
 effectComposer.addPass(gammaCorrectionPass);

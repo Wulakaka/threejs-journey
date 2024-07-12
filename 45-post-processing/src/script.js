@@ -191,9 +191,13 @@ const tintShader = {
     tDiffuse: {
       value: null,
     },
+    uTint: {
+      value: null,
+    },
   },
   vertexShader: `
     varying vec2 vUv;
+    
     void main() {
       gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
       
@@ -202,14 +206,38 @@ const tintShader = {
   `,
   fragmentShader: `
     uniform sampler2D tDiffuse;
+    uniform vec3 uTint;
+    
     varying vec2 vUv;
+    
     void main() {
       vec4 color = texture(tDiffuse, vUv);
+      color.rgb += uTint;
       gl_FragColor = color;
     }
   `,
 };
 const tintPass = new ShaderPass(tintShader);
+tintPass.material.uniforms.uTint.value = new THREE.Vector3();
+gui
+  .add(tintPass.material.uniforms.uTint.value, "x")
+  .min(-1)
+  .max(1)
+  .step(0.001)
+  .name("Red");
+gui
+  .add(tintPass.material.uniforms.uTint.value, "y")
+  .min(-1)
+  .max(1)
+  .step(0.001)
+  .name("Green");
+gui
+  .add(tintPass.material.uniforms.uTint.value, "z")
+  .min(-1)
+  .max(1)
+  .step(0.001)
+  .name("Blue");
+
 effectComposer.addPass(tintPass);
 
 const gammaCorrectionPass = new ShaderPass(GammaCorrectionShader);

@@ -249,6 +249,9 @@ const displacementShader = {
     uTime: {
       value: null,
     },
+    uNormalMap: {
+      value: null,
+    },
   },
   vertexShader: `
     varying vec2 vUv;
@@ -262,21 +265,30 @@ const displacementShader = {
   fragmentShader: `
     uniform sampler2D tDiffuse;
     uniform float uTime;
+    uniform sampler2D uNormalMap;
     
     varying vec2 vUv;
     
     void main() {
-      vec2 newUv = vec2(
-        vUv.x,
-        vUv.y + sin(vUv.x * 10.0 + uTime) * 0.1
-      );
+      vec3 normalColor = texture2D(uNormalMap, vUv).xyz * 2.0 - 1.0;
+      vec2 newUv = vUv + normalColor.xy * 0.1;
       vec4 color = texture(tDiffuse, newUv);
+      
+      // 光来自于左上方
+      vec3 lightDirection = normalize(vec3(- 1.0, 1.0, 0.0));
+      // 只做增强，不减弱
+      float lightness = clamp(dot(normalColor, lightDirection), 0.0, 1.0);
+      color.rgb += lightness * 2.0;
+      
       gl_FragColor = color;
     }
   `,
 };
 const displacementPass = new ShaderPass(displacementShader);
 displacementPass.material.uniforms.uTime.value = 0;
+displacementPass.material.uniforms.uNormalMap.value = textureLoader.load(
+  "/textures/interfaceNormalMap.png",
+);
 effectComposer.addPass(displacementPass);
 
 // 伽马校正

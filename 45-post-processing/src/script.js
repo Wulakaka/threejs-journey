@@ -149,7 +149,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
 const renderTarget = new THREE.WebGLRenderTarget(800, 600, {
   // 像素比高于1时，不启用抗锯齿
-  // samples: renderer.getPixelRatio() === 1 ? 2 : 0,
+  samples: renderer.getPixelRatio() === 1 ? 2 : 0,
 });
 
 const effectComposer = new EffectComposer(renderer, renderTarget);
@@ -175,8 +175,13 @@ effectComposer.addPass(rgbShiftPass);
 const gammaCorrectionPass = new ShaderPass(GammaCorrectionShader);
 effectComposer.addPass(gammaCorrectionPass);
 
-const smaaPass = new SMAAPass();
-effectComposer.addPass(smaaPass);
+// 如果像素比为1且不支持WebGL2，则使用SMAA
+// 判断是否支持WebGL2的原因是 WebGL1 不支持 render target 中的 samples 属性
+if (renderer.getPixelRatio() === 1 && !renderer.capabilities.isWebGL2) {
+  const smaaPass = new SMAAPass();
+  effectComposer.addPass(smaaPass);
+  console.log("Using SMAA");
+}
 
 /**
  * Animate

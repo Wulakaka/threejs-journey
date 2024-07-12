@@ -10,6 +10,7 @@ import {
   RenderPass,
   RGBShiftShader,
   ShaderPass,
+  SMAAPass,
 } from "three/addons";
 
 /**
@@ -148,7 +149,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
 const renderTarget = new THREE.WebGLRenderTarget(800, 600, {
   // 像素比高于1时，不启用抗锯齿
-  samples: renderer.getPixelRatio() === 1 ? 2 : 0,
+  // samples: renderer.getPixelRatio() === 1 ? 2 : 0,
 });
 
 const effectComposer = new EffectComposer(renderer, renderTarget);
@@ -173,6 +174,9 @@ effectComposer.addPass(rgbShiftPass);
 
 const gammaCorrectionPass = new ShaderPass(GammaCorrectionShader);
 effectComposer.addPass(gammaCorrectionPass);
+
+const smaaPass = new SMAAPass();
+effectComposer.addPass(smaaPass);
 
 /**
  * Animate

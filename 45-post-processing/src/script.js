@@ -145,7 +145,13 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 /**
  * Post-processing
  */
-const effectComposer = new EffectComposer(renderer);
+
+const renderTarget = new THREE.WebGLRenderTarget(800, 600, {
+  // 像素比高于1时，不启用抗锯齿
+  samples: renderer.getPixelRatio() === 1 ? 2 : 0,
+});
+
+const effectComposer = new EffectComposer(renderer, renderTarget);
 effectComposer.setSize(sizes.width, sizes.height);
 effectComposer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
@@ -157,7 +163,7 @@ dotScreenPass.enabled = false;
 effectComposer.addPass(dotScreenPass);
 
 const glitchPass = new GlitchPass();
-// glitchPass.enabled = false;
+glitchPass.enabled = false;
 // glitchPass.goWild = true;
 effectComposer.addPass(glitchPass);
 

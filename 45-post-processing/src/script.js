@@ -185,6 +185,33 @@ gui.add(unrealBloomPass, "threshold").min(0).max(1).step(0.001);
 
 effectComposer.addPass(unrealBloomPass);
 
+// tintPass
+const tintShader = {
+  uniforms: {
+    tDiffuse: {
+      value: null,
+    },
+  },
+  vertexShader: `
+    varying vec2 vUv;
+    void main() {
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      
+      vUv = uv;
+    }
+  `,
+  fragmentShader: `
+    uniform sampler2D tDiffuse;
+    varying vec2 vUv;
+    void main() {
+      vec4 color = texture(tDiffuse, vUv);
+      gl_FragColor = color;
+    }
+  `,
+};
+const tintPass = new ShaderPass(tintShader);
+effectComposer.addPass(tintPass);
+
 const gammaCorrectionPass = new ShaderPass(GammaCorrectionShader);
 effectComposer.addPass(gammaCorrectionPass);
 

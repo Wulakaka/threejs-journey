@@ -270,6 +270,7 @@ const displacementShader = {
     varying vec2 vUv;
     
     void main() {
+      // 让范围变成 -1 ~ 1
       vec3 normalColor = texture2D(uNormalMap, vUv).xyz * 2.0 - 1.0;
       vec2 newUv = vUv + normalColor.xy * 0.1;
       vec4 color = texture(tDiffuse, newUv);

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-export default function Clicker({ keyName, color }) {
+export default function Clicker({ keyName, color, increment }) {
   // 需要在 useState 中直接获取，否则通过在 useEffect 中获取之后再设置会导致多次渲染
   const [count, setCount] = useState(
     parseInt(localStorage.getItem(keyName) ?? 0),
@@ -19,6 +19,7 @@ export default function Clicker({ keyName, color }) {
   const buttonClick = () => {
     // setCount((value) => value + 1);
     setCount(count + 1);
+    increment();
   };
   return (
     <div>

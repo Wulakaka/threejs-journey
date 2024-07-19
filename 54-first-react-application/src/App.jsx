@@ -1,5 +1,5 @@
 import Clicker from "./Clicker.jsx";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
 export default function App({ children, clickersCount }) {
   const [hasClicker, setHasClicker] = useState(true);
@@ -11,6 +11,15 @@ export default function App({ children, clickersCount }) {
   const toggleClicker = () => {
     setHasClicker(!hasClicker);
   };
+
+  const colors = useMemo(
+    () =>
+      Array(clickersCount)
+        .fill(null)
+        .map(() => `hsl(${Math.random() * 360}deg, 100%, 70%)`),
+    [clickersCount],
+  );
+
   return (
     <>
       {children}
@@ -27,7 +36,7 @@ export default function App({ children, clickersCount }) {
                 key={index}
                 increment={increment}
                 keyName={`count${index}`}
-                color={`hsl(${Math.random() * 360}deg, 100%, 70%)`}
+                color={colors[index]}
               />
             ))}
         </>

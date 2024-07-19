@@ -14,9 +14,18 @@ export default function App() {
       </button>
       {hasClicker && (
         <>
-          <Clicker keyName="countA" />
-          <Clicker keyName="countB" />
-          <Clicker keyName="countC" />
+          <Clicker
+            keyName="countA"
+            color={`hsl(${Math.random() * 360}deg, 100%, 70%)`}
+          />
+          <Clicker
+            keyName="countB"
+            color={`hsl(${Math.random() * 360}deg, 100%, 70%)`}
+          />
+          <Clicker
+            keyName="countC"
+            color={`hsl(${Math.random() * 360}deg, 100%, 70%)`}
+          />
         </>
       )}
     </>

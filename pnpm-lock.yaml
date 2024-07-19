@@ -595,6 +595,25 @@ importers:
         specifier: ^0.4.1
         version: 0.4.1(vite@5.3.3)
 
+  55-first-r3f-application:
+    dependencies:
+      react:
+        specifier: '18.3'
+        version: 18.3.1
+      react-dom:
+        specifier: '18.3'
+        version: 18.3.1(react@18.3.1)
+    devDependencies:
+      '@vitejs/plugin-react':
+        specifier: '4.3'
+        version: 4.3.1(vite@5.3.3)
+      vite:
+        specifier: ^5.3.3
+        version: 5.3.3
+      vite-plugin-restart:
+        specifier: ^0.4.1
+        version: 0.4.1(vite@5.3.3)
+
 packages:
 
   /@ampproject/remapping@2.3.0:
@@ -2295,12 +2314,8 @@ packages:
     engines: {node: '>= 6'}
     dev: false
 
-  /picocolors@1.0.0:
-    resolution: {integrity: sha512-1fygroTLlHu66zi26VoTDv8yRgm0Fccecssto+MhsZ0D/DGW2sm8E8AjW7NU5VVTRt5GxbeZ5qBuJr+HyLYkjQ==}
-
   /picocolors@1.0.1:
     resolution: {integrity: sha512-anP1Z8qwhkbmu7MFP5iTt+wQKXgwzf7zTyGlcdzabySa9vd0Xt392U0rVmz9poOaBj0uHJKyyo9/upk0HrEQew==}
-    dev: true
 
   /picomatch@2.3.1:
     resolution: {integrity: sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==}
@@ -2311,7 +2326,7 @@ packages:
     engines: {node: ^10 || ^12 || >=14}
     dependencies:
       nanoid: 3.3.7
-      picocolors: 1.0.0
+      picocolors: 1.0.1
       source-map-js: 1.2.0
 
   /postcss@8.4.38:
@@ -2319,7 +2334,7 @@ packages:
     engines: {node: ^10 || ^12 || >=14}
     dependencies:
       nanoid: 3.3.7
-      picocolors: 1.0.0
+      picocolors: 1.0.1
       source-map-js: 1.2.0
     dev: true
 

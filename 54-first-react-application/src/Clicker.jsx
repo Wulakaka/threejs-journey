@@ -1,18 +1,18 @@
 import { useState, useEffect } from "react";
 
-export default function Clicker() {
+export default function Clicker({ keyName }) {
   // 需要在 useState 中直接获取，否则通过在 useEffect 中获取之后再设置会导致多次渲染
   const [count, setCount] = useState(
-    parseInt(localStorage.getItem("count") ?? 0),
+    parseInt(localStorage.getItem(keyName) ?? 0),
   );
 
   useEffect(() => {
-    localStorage.setItem("count", count);
+    localStorage.setItem(keyName, count);
   }, [count]);
 
   useEffect(() => {
     return () => {
-      localStorage.removeItem("count");
+      localStorage.removeItem(keyName);
     };
   }, []);
 

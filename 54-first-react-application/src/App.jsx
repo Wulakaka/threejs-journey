@@ -12,7 +12,13 @@ export default function App() {
       <button onClick={toggleClicker}>
         {hasClicker ? "Hide" : "Show"} Clicker
       </button>
-      {hasClicker && <Clicker />}
+      {hasClicker && (
+        <>
+          <Clicker keyName="countA" />
+          <Clicker keyName="countB" />
+          <Clicker keyName="countC" />
+        </>
+      )}
     </>
   );
 }

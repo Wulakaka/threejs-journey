@@ -1,7 +1,7 @@
 import Clicker from "./Clicker.jsx";
 import { useState } from "react";
 
-export default function App() {
+export default function App({ children }) {
   const [hasClicker, setHasClicker] = useState(true);
 
   const toggleClicker = () => {
@@ -9,6 +9,7 @@ export default function App() {
   };
   return (
     <>
+      {children}
       <button onClick={toggleClicker}>
         {hasClicker ? "Hide" : "Show"} Clicker
       </button>

@@ -8,6 +8,9 @@ const todo = "react";
 
 root.render(
   <div>
-    <App />
+    <App>
+      <h1>My First React App</h1>
+      <h2>And a fancy subtitle</h2>
+    </App>
   </div>,
 );

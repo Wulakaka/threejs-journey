@@ -3,20 +3,24 @@ import { useRef } from "react";
 
 export default function Experience() {
   const cube = useRef();
+  const group = useRef();
   useFrame((state, delta) => {
     cube.current.rotation.y += delta;
+    // group.current.rotation.y += delta;
   });
 
   return (
     <>
-      <mesh ref={cube} rotation-y={Math.PI * 0.25} position-x={2} scale={1.5}>
-        <boxGeometry />
-        <meshBasicMaterial color="mediumpurple" />
-      </mesh>
-      <mesh position-x={-2}>
-        <sphereGeometry />
-        <meshBasicMaterial color="orange" />
-      </mesh>
+      <group ref={group}>
+        <mesh ref={cube} rotation-y={Math.PI * 0.25} position-x={2} scale={1.5}>
+          <boxGeometry />
+          <meshBasicMaterial color="mediumpurple" />
+        </mesh>
+        <mesh position-x={-2}>
+          <sphereGeometry />
+          <meshBasicMaterial color="orange" />
+        </mesh>
+      </group>
       <mesh rotation-x={-Math.PI * 0.5} position-y={-1} scale={10}>
         <planeGeometry />
         <meshBasicMaterial color="greenyellow" />

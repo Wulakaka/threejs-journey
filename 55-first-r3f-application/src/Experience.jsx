@@ -1,7 +1,15 @@
+import { useFrame } from "@react-three/fiber";
+import { useRef } from "react";
+
 export default function Experience() {
+  const cube = useRef();
+  useFrame((state, delta) => {
+    cube.current.rotation.y += delta;
+  });
+
   return (
     <>
-      <mesh rotation-y={Math.PI * 0.25} position-x={2} scale={1.5}>
+      <mesh ref={cube} rotation-y={Math.PI * 0.25} position-x={2} scale={1.5}>
         <boxGeometry />
         <meshBasicMaterial color="mediumpurple" />
       </mesh>

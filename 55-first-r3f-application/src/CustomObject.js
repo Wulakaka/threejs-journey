@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { DoubleSide } from "three";
 
 export default function CustomObject() {
@@ -11,6 +11,10 @@ export default function CustomObject() {
   }, []);
   const geometry = useRef();
 
+  useEffect(() => {
+    geometry.current.computeVertexNormals();
+  }, [positions]);
+
   return (
     <mesh>
       <bufferGeometry ref={geometry}>
@@ -21,7 +25,10 @@ export default function CustomObject() {
           array={positions}
         ></bufferAttribute>
       </bufferGeometry>
-      <meshBasicMaterial color="red" side={DoubleSide}></meshBasicMaterial>
+      <meshStandardMaterial
+        color="red"
+        side={DoubleSide}
+      ></meshStandardMaterial>
     </mesh>
   );
 }

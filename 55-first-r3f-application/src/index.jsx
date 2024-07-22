@@ -13,6 +13,7 @@ const root = ReactDOM.createRoot(document.querySelector("#root"));
 root.render(
   <>
     <Canvas
+      dpr={[1, 2]}
       gl={{
         antialias: true,
         toneMapping: ACESFilmicToneMapping,

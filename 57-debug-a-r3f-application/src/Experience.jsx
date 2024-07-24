@@ -24,6 +24,15 @@ export default function Experience() {
     choice: { options: ["a", "b", "c"] },
   });
 
+  const { scale } = useControls("cube", {
+    scale: {
+      value: 1.5,
+      step: 0.01,
+      min: 0,
+      max: 5,
+    },
+  });
+
   return (
     <>
       <OrbitControls makeDefault />
@@ -36,7 +45,7 @@ export default function Experience() {
         <meshStandardMaterial color={color} />
       </mesh>
 
-      <mesh position-x={2} scale={1.5}>
+      <mesh position-x={2} scale={scale}>
         <boxGeometry />
         <meshStandardMaterial color="mediumpurple" />
       </mesh>

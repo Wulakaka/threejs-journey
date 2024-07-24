@@ -15,6 +15,11 @@ export default function Experience() {
     },
     color: "#ff0000",
     visible: true,
+    myInterval: {
+      min: 0,
+      max: 10,
+      value: [4, 5],
+    },
   });
 
   return (

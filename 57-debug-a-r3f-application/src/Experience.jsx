@@ -34,7 +34,7 @@ export default function Experience() {
     },
   });
 
-  const { perfVisible } = useControls("Perf", {
+  const { perfVisible } = useControls("debug", {
     perfVisible: true,
   });
 

@@ -1,8 +1,8 @@
 import { OrbitControls } from "@react-three/drei";
-import { useControls } from "leva";
+import { button, useControls } from "leva";
 
 export default function Experience() {
-  const { position, color, visible } = useControls({
+  const { position, color, visible } = useControls("sphere", {
     position: {
       value: {
         x: -2,
@@ -13,13 +13,15 @@ export default function Experience() {
       step: 0.01,
       joystick: "invertY",
     },
-    color: "#ff0000",
+    color: "orange",
     visible: true,
     myInterval: {
       min: 0,
       max: 10,
       value: [4, 5],
     },
+    clickMe: button(() => console.log("ok")),
+    choice: { options: ["a", "b", "c"] },
   });
 
   return (

@@ -15,9 +15,11 @@ export default function Experience() {
   const cube = useRef();
   const directionalLight = useRef();
 
-  useHelper(directionalLight, THREE.DirectionalLightHelper, 1);
+  // useHelper(directionalLight, THREE.DirectionalLightHelper, 1);
   useFrame((state, delta) => {
     cube.current.rotation.y += delta * 0.2;
+    const time = state.clock.getElapsedTime();
+    cube.current.position.x = 2 + Math.sin(time);
   });
 
   return (
@@ -48,8 +50,9 @@ export default function Experience() {
         scale={10}
         color="#316d39"
         opacity={0.8}
-        frames={1000}
+        frames={Infinity}
         temporal
+        blend={100}
       >
         <RandomizedLight
           position={[1, 2, 3]}

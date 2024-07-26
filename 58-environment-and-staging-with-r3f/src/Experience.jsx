@@ -1,5 +1,5 @@
 import { useFrame } from "@react-three/fiber";
-import { OrbitControls, useHelper } from "@react-three/drei";
+import { BakeShadows, OrbitControls, useHelper } from "@react-three/drei";
 import { useRef } from "react";
 import { Perf } from "r3f-perf";
 import * as THREE from "three";
@@ -15,6 +15,8 @@ export default function Experience() {
 
   return (
     <>
+      <BakeShadows />
+
       <Perf position="top-left" />
 
       <OrbitControls makeDefault />

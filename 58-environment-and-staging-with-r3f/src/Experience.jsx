@@ -1,5 +1,6 @@
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import {
+  Environment,
   Sky,
   ContactShadows,
   AccumulativeShadows,
@@ -52,8 +53,33 @@ export default function Experience() {
     setPosition(position);
   }, [phi, theta]);
 
+  const { envMapIntensity } = useControls("environment map", {
+    envMapIntensity: {
+      value: 3.5,
+      min: 0,
+      max: 15,
+    },
+  });
+
+  const scene = useThree((state) => state.scene);
+  useEffect(() => {
+    // todo 这里有 bug,第一帧不对
+    scene.environmentIntensity = envMapIntensity;
+  }, [envMapIntensity]);
+
   return (
     <>
+      <Environment
+        files={[
+          "./environmentMaps/2/nx.jpg",
+          "./environmentMaps/2/px.jpg",
+          "./environmentMaps/2/py.jpg",
+          "./environmentMaps/2/ny.jpg",
+          "./environmentMaps/2/pz.jpg",
+          "./environmentMaps/2/nz.jpg",
+        ]}
+      />
+
       {/*<BakeShadows />*/}
       {/*<SoftShadows size={25} samples={10} focus={0} />*/}
 
@@ -61,7 +87,7 @@ export default function Experience() {
 
       <OrbitControls makeDefault />
 
-      <directionalLight
+      {/*<directionalLight
         ref={directionalLight}
         position={sunPosition}
         intensity={4.5}
@@ -73,7 +99,7 @@ export default function Experience() {
         shadow-camera-left={-5}
         shadow-camera-near={1}
         shadow-camera-far={10}
-      />
+      />*/}
 
       {/*<AccumulativeShadows
         position-y={-0.99}
@@ -103,9 +129,9 @@ export default function Experience() {
         frames={1}
       ></ContactShadows>
 
-      <ambientLight intensity={1.5} />
+      {/*<ambientLight intensity={1.5} />*/}
 
-      <Sky sunPosition={sunPosition} />
+      {/*<Sky sunPosition={sunPosition} />*/}
 
       <mesh castShadow={true} position-x={-2}>
         <sphereGeometry />

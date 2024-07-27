@@ -9,7 +9,7 @@ import {
   SoftShadows,
   useHelper,
 } from "@react-three/drei";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Perf } from "r3f-perf";
 import * as THREE from "three";
 import { useControls } from "leva";
@@ -31,9 +31,26 @@ export default function Experience() {
     blur: { value: 2.8, min: 0, max: 10 },
   });
 
-  const { sunPosition } = useControls("sky", {
-    sunPosition: [1, 2, 3],
+  const [sunPosition, setPosition] = useState(new THREE.Vector3());
+
+  const { phi, theta } = useControls("sky", {
+    phi: {
+      value: 0,
+      min: 0,
+      max: Math.PI,
+    },
+    theta: {
+      value: 0,
+      min: 0,
+      max: Math.PI * 2,
+    },
   });
+
+  useEffect(() => {
+    const spherical = new THREE.Spherical(3, phi, theta);
+    const position = new THREE.Vector3().setFromSpherical(spherical);
+    setPosition(position);
+  }, [phi, theta]);
 
   return (
     <>

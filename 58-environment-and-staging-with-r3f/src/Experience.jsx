@@ -71,7 +71,7 @@ export default function Experience() {
 
   return (
     <>
-      <Environment background>
+      <Environment background={false} preset="sunset" resolution={32}>
         <color args={["#000000"]} attach="background" />
         {/*<mesh position-z={-5} scale={10}>
           <planeGeometry />

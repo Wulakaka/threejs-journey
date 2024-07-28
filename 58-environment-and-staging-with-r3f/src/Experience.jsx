@@ -71,6 +71,7 @@ export default function Experience() {
   return (
     <>
       <Environment
+        background
         files={[
           "./environmentMaps/2/nx.jpg",
           "./environmentMaps/2/px.jpg",

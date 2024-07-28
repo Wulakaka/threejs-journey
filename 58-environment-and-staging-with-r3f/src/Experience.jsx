@@ -70,10 +70,7 @@ export default function Experience() {
 
   return (
     <>
-      <Environment
-        background
-        files="./environmentMaps/the_sky_is_on_fire_2k.hdr"
-      />
+      <Environment background preset="sunset" />
 
       {/*<BakeShadows />*/}
       {/*<SoftShadows size={25} samples={10} focus={0} />*/}

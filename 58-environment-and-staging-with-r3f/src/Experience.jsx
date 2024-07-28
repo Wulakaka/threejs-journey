@@ -74,7 +74,7 @@ export default function Experience() {
         <color args={["#000000"]} attach="background" />
         <mesh position-z={-5} scale={10}>
           <planeGeometry />
-          <meshBasicMaterial color="red"></meshBasicMaterial>
+          <meshBasicMaterial color={[100, 0, 0]}></meshBasicMaterial>
         </mesh>
       </Environment>
 

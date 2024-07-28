@@ -70,7 +70,12 @@ export default function Experience() {
 
   return (
     <>
-      <Environment background preset="sunset" />
+      <Environment background preset="sunset">
+        <mesh position-z={-5} scale={10}>
+          <planeGeometry />
+          <meshBasicMaterial color="red"></meshBasicMaterial>
+        </mesh>
+      </Environment>
 
       {/*<BakeShadows />*/}
       {/*<SoftShadows size={25} samples={10} focus={0} />*/}

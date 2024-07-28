@@ -28,7 +28,7 @@ export default function Experience() {
   });
 
   const { color, opacity, blur } = useControls("contact shadows", {
-    color: "#1d8f75",
+    color: "#4b2709",
     opacity: { value: 0.4, min: 0, max: 1 },
     blur: { value: 2.8, min: 0, max: 10 },
   });
@@ -54,13 +54,29 @@ export default function Experience() {
     setPosition(position);
   }, [phi, theta]);
 
-  const { envMapIntensity } = useControls("environment map", {
-    envMapIntensity: {
-      value: 3.5,
-      min: 0,
-      max: 15,
-    },
-  });
+  const { envMapIntensity, envMapHeight, envMapRadius, envMapScale } =
+    useControls("environment map", {
+      envMapIntensity: {
+        value: 3.5,
+        min: 0,
+        max: 15,
+      },
+      envMapHeight: {
+        value: 7,
+        min: 0,
+        max: 100,
+      },
+      envMapRadius: {
+        value: 28,
+        min: 10,
+        max: 1000,
+      },
+      envMapScale: {
+        value: 100,
+        min: 0,
+        max: 1000,
+      },
+    });
 
   const scene = useThree((state) => state.scene);
   // 不加这行，第一帧不会生效
@@ -71,19 +87,26 @@ export default function Experience() {
 
   return (
     <>
-      <Environment background={false} preset="sunset" resolution={32}>
-        <color args={["#000000"]} attach="background" />
+      <Environment
+        preset="sunset"
+        ground={{
+          radius: envMapRadius,
+          height: envMapHeight,
+          scale: envMapScale,
+        }}
+      >
+        {/*<color args={["#000000"]} attach="background" />*/}
         {/*<mesh position-z={-5} scale={10}>
           <planeGeometry />
           <meshBasicMaterial color={[100, 0, 0]}></meshBasicMaterial>
         </mesh>*/}
-        <Lightformer
+        {/*<Lightformer
           position-z={-5}
           color="red"
           scale={10}
           form="ring"
           intensity={10}
-        />
+        />*/}
       </Environment>
 
       {/*<BakeShadows />*/}
@@ -125,7 +148,7 @@ export default function Experience() {
       </AccumulativeShadows>*/}
 
       <ContactShadows
-        position={[0, -0.99, 0]}
+        position={[0, 0, 0]}
         scale={10}
         resolution={512}
         far={5}
@@ -139,20 +162,26 @@ export default function Experience() {
 
       {/*<Sky sunPosition={sunPosition} />*/}
 
-      <mesh castShadow={true} position-x={-2}>
+      <mesh castShadow={true} position-y={1} position-x={-2}>
         <sphereGeometry />
         <meshStandardMaterial color="orange" roughness={0} />
       </mesh>
 
-      <mesh castShadow={true} ref={cube} position-x={2} scale={1.5}>
+      <mesh
+        castShadow={true}
+        ref={cube}
+        position-y={1}
+        position-x={2}
+        scale={1.5}
+      >
         <boxGeometry />
         <meshStandardMaterial color="mediumpurple" />
       </mesh>
 
-      <mesh position-y={-1} rotation-x={-Math.PI * 0.5} scale={10}>
+      {/*  <mesh position-y={0} rotation-x={-Math.PI * 0.5} scale={10}>
         <planeGeometry />
         <meshStandardMaterial color="greenyellow" />
-      </mesh>
+      </mesh>*/}
     </>
   );
 }

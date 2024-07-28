@@ -1,5 +1,6 @@
 import { useFrame, useThree } from "@react-three/fiber";
 import {
+  Stage,
   Environment,
   Sky,
   ContactShadows,
@@ -78,44 +79,39 @@ export default function Experience() {
       },
     });
 
-  const scene = useThree((state) => state.scene);
-  // 不加这行，第一帧不会生效
-  scene.environmentIntensity = envMapIntensity;
-  useEffect(() => {
-    scene.environmentIntensity = envMapIntensity;
-  }, [envMapIntensity]);
+  // const scene = useThree((state) => state.scene);
+  // // 不加这行，第一帧不会生效
+  // scene.environmentIntensity = envMapIntensity;
+  // useEffect(() => {
+  //   scene.environmentIntensity = envMapIntensity;
+  // }, [envMapIntensity]);
 
   return (
     <>
-      <Environment
+      {/*<Environment
         preset="sunset"
         ground={{
           radius: envMapRadius,
           height: envMapHeight,
           scale: envMapScale,
-        }}
-      >
-        {/*<color args={["#000000"]} attach="background" />*/}
-        {/*<mesh position-z={-5} scale={10}>
+        }}>*/}
+      {/*<color args={["#000000"]} attach="background" />*/}
+      {/*<mesh position-z={-5} scale={10}>
           <planeGeometry />
           <meshBasicMaterial color={[100, 0, 0]}></meshBasicMaterial>
         </mesh>*/}
-        {/*<Lightformer
+      {/*<Lightformer
           position-z={-5}
           color="red"
           scale={10}
           form="ring"
           intensity={10}
         />*/}
-      </Environment>
-
+      {/*</Environment>*/}
       {/*<BakeShadows />*/}
       {/*<SoftShadows size={25} samples={10} focus={0} />*/}
-
       <Perf position="top-left" />
-
       <OrbitControls makeDefault />
-
       {/*<directionalLight
         ref={directionalLight}
         position={sunPosition}
@@ -129,7 +125,6 @@ export default function Experience() {
         shadow-camera-near={1}
         shadow-camera-far={10}
       />*/}
-
       {/*<AccumulativeShadows
         position-y={-0.99}
         scale={10}
@@ -146,8 +141,7 @@ export default function Experience() {
           bias={0.001}
         />
       </AccumulativeShadows>*/}
-
-      <ContactShadows
+      {/*  <ContactShadows
         position={[0, 0, 0]}
         scale={10}
         resolution={512}
@@ -156,18 +150,14 @@ export default function Experience() {
         opacity={opacity}
         blur={blur}
         frames={1}
-      ></ContactShadows>
-
+      ></ContactShadows>*/}
       {/*<ambientLight intensity={1.5} />*/}
-
       {/*<Sky sunPosition={sunPosition} />*/}
-
-      <mesh castShadow={true} position-y={1} position-x={-2}>
+      {/*<mesh castShadow={true} position-y={1} position-x={-2}>
         <sphereGeometry />
         <meshStandardMaterial color="orange" roughness={0} />
-      </mesh>
-
-      <mesh
+      </mesh>*/}
+      {/*<mesh
         castShadow={true}
         ref={cube}
         position-y={1}
@@ -176,12 +166,30 @@ export default function Experience() {
       >
         <boxGeometry />
         <meshStandardMaterial color="mediumpurple" />
-      </mesh>
-
+      </mesh>*/}
       {/*  <mesh position-y={0} rotation-x={-Math.PI * 0.5} scale={10}>
         <planeGeometry />
         <meshStandardMaterial color="greenyellow" />
       </mesh>*/}
+      <Stage
+        shadows={{
+          type: "contact",
+          opacity: 0.2,
+          blur: 3,
+        }}
+        environment="sunset"
+        preset="portrait"
+        intensity={envMapIntensity}
+      >
+        <mesh castShadow position-y={1} position-x={-2}>
+          <sphereGeometry />
+          <meshStandardMaterial color="orange" />
+        </mesh>
+        <mesh castShadow ref={cube} position-y={1} position-x={2} scale={1.5}>
+          <boxGeometry />
+          <meshStandardMaterial color="mediumpurple" />
+        </mesh>
+      </Stage>
     </>
   );
 }

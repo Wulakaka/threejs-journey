@@ -62,8 +62,9 @@ export default function Experience() {
   });
 
   const scene = useThree((state) => state.scene);
+  // 不加这行，第一帧不会生效
+  scene.environmentIntensity = envMapIntensity;
   useEffect(() => {
-    // todo 这里有 bug,第一帧不对
     scene.environmentIntensity = envMapIntensity;
   }, [envMapIntensity]);
 

@@ -9,6 +9,7 @@ import {
   RandomizedLight,
   SoftShadows,
   useHelper,
+  Lightformer,
 } from "@react-three/drei";
 import { useEffect, useRef, useState } from "react";
 import { Perf } from "r3f-perf";
@@ -72,10 +73,17 @@ export default function Experience() {
     <>
       <Environment background>
         <color args={["#000000"]} attach="background" />
-        <mesh position-z={-5} scale={10}>
+        {/*<mesh position-z={-5} scale={10}>
           <planeGeometry />
           <meshBasicMaterial color={[100, 0, 0]}></meshBasicMaterial>
-        </mesh>
+        </mesh>*/}
+        <Lightformer
+          position-z={-5}
+          color="red"
+          scale={10}
+          form="ring"
+          intensity={10}
+        />
       </Environment>
 
       {/*<BakeShadows />*/}
@@ -133,7 +141,7 @@ export default function Experience() {
 
       <mesh castShadow={true} position-x={-2}>
         <sphereGeometry />
-        <meshStandardMaterial color="orange" />
+        <meshStandardMaterial color="orange" roughness={0} />
       </mesh>
 
       <mesh castShadow={true} ref={cube} position-x={2} scale={1.5}>

@@ -70,7 +70,8 @@ export default function Experience() {
 
   return (
     <>
-      <Environment background preset="sunset">
+      <Environment background>
+        <color args={["#000000"]} attach="background" />
         <mesh position-z={-5} scale={10}>
           <planeGeometry />
           <meshBasicMaterial color="red"></meshBasicMaterial>

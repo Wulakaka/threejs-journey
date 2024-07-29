@@ -1,19 +1,9 @@
 import { OrbitControls } from "@react-three/drei";
 import { Perf } from "r3f-perf";
-import { useLoader } from "@react-three/fiber";
-import { DRACOLoader, GLTFLoader } from "three/addons";
+import { Suspense } from "react";
+import Model from "./Model.js";
 
 export default function Experience() {
-  const model = useLoader(
-    GLTFLoader,
-    "./FlightHelmet/glTF/FlightHelmet.gltf",
-    (loader) => {
-      const dracoLoader = new DRACOLoader();
-      dracoLoader.setDecoderPath("./draco/");
-      loader.setDRACOLoader(dracoLoader);
-    },
-  );
-
   return (
     <>
       <Perf position="top-left" />
@@ -33,7 +23,16 @@ export default function Experience() {
         <meshStandardMaterial color="greenyellow" />
       </mesh>
 
-      <primitive object={model.scene} scale={5} position-y={-1} />
+      <Suspense
+        fallback={
+          <mesh position-y={0.5} scale={[2, 3, 2]}>
+            <boxGeometry args={[1, 1, 1, 2, 2, 2]} />
+            <meshBasicMaterial color="red" wireframe />
+          </mesh>
+        }
+      >
+        <Model />
+      </Suspense>
     </>
   );
 }

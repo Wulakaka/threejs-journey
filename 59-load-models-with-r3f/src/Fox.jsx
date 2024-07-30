@@ -1,7 +1,18 @@
-import { useGLTF } from "@react-three/drei";
+import { useAnimations, useGLTF } from "@react-three/drei";
+import { useEffect } from "react";
 
 export default function Fox() {
   const fox = useGLTF("./Fox/glTF/Fox.gltf");
+  const animations = useAnimations(fox.animations, fox.scene);
+  useEffect(() => {
+    const action = animations.actions.Run;
+    action.play();
+    setTimeout(() => {
+      const action = animations.actions.Walk;
+      action.crossFadeFrom(animations.actions.Run, 1);
+      action.play();
+    }, 2000);
+  }, []);
 
   return (
     <primitive

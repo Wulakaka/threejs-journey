@@ -3,11 +3,13 @@ import {
   OrbitControls,
   Text3D,
   useMatcapTexture,
+  useTexture,
 } from "@react-three/drei";
 import { Perf } from "r3f-perf";
 
 export default function Experience() {
-  const [matcapTexture] = useMatcapTexture("7B5254_E9DCC7_B19986_C8AC91", 256);
+  // const [matcapTexture] = useMatcapTexture("./textures/matcaps/1.png", 256);
+  const matcapTexture = useTexture("./textures/matcaps/3.png");
 
   return (
     <>

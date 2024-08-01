@@ -31,10 +31,10 @@ export default function Experience() {
 
   const donutArray = [...Array(100)];
 
-  const donutsGroup = useRef();
+  const donuts = useRef([]);
 
   useFrame((state, delta, frame) => {
-    donutsGroup.current?.children.forEach((mesh) => {
+    donuts.current.forEach((mesh) => {
       mesh.rotation.y += delta * 0.2;
     });
   });
@@ -66,22 +66,21 @@ export default function Experience() {
         </Text3D>
       </Center>
 
-      <group ref={donutsGroup}>
-        {donutArray.map((value, index) => (
-          <mesh
-            key={index}
-            geometry={torusGeometry}
-            material={material}
-            position={[
-              (Math.random() - 0.5) * 10,
-              (Math.random() - 0.5) * 10,
-              (Math.random() - 0.5) * 10,
-            ]}
-            scale={Math.random() * 0.2 + 0.2}
-            rotation={[Math.random() * Math.PI, Math.random() * Math.PI, 0]}
-          ></mesh>
-        ))}
-      </group>
+      {donutArray.map((value, index) => (
+        <mesh
+          ref={(mesh) => (donuts.current[index] = mesh)}
+          key={index}
+          geometry={torusGeometry}
+          material={material}
+          position={[
+            (Math.random() - 0.5) * 10,
+            (Math.random() - 0.5) * 10,
+            (Math.random() - 0.5) * 10,
+          ]}
+          scale={Math.random() * 0.2 + 0.2}
+          rotation={[Math.random() * Math.PI, Math.random() * Math.PI, 0]}
+        ></mesh>
+      ))}
     </>
   );
 }

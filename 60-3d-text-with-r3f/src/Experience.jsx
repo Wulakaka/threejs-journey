@@ -11,6 +11,8 @@ export default function Experience() {
   // const [matcapTexture] = useMatcapTexture("./textures/matcaps/1.png", 256);
   const matcapTexture = useTexture("./textures/matcaps/3.png");
 
+  const donutArray = [...Array(100)];
+
   return (
     <>
       <Perf position="top-left" />
@@ -33,6 +35,21 @@ export default function Experience() {
           <meshMatcapMaterial matcap={matcapTexture} />
         </Text3D>
       </Center>
+
+      {donutArray.map((value, index) => (
+        <mesh
+          position={[
+            (Math.random() - 0.5) * 10,
+            (Math.random() - 0.5) * 10,
+            (Math.random() - 0.5) * 10,
+          ]}
+          scale={Math.random() * 0.2 + 0.2}
+          rotation={[Math.random() * Math.PI, Math.random() * Math.PI, 0]}
+        >
+          <torusGeometry />
+          <meshMatcapMaterial matcap={matcapTexture} />
+        </mesh>
+      ))}
     </>
   );
 }

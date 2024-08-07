@@ -33,14 +33,46 @@ const gltfLoader = new GLTFLoader();
 gltfLoader.setDRACOLoader(dracoLoader);
 
 /**
- * Object
+ * Models
  */
-const cube = new THREE.Mesh(
-  new THREE.BoxGeometry(1, 1, 1),
-  new THREE.MeshBasicMaterial(),
-);
 
-scene.add(cube);
+// Texture
+const portalTexture = textureLoader.load("./baked.jpg");
+portalTexture.flipY = false;
+portalTexture.colorSpace = THREE.SRGBColorSpace;
+// Material
+const portalMaterial = new THREE.MeshBasicMaterial({
+  map: portalTexture,
+});
+const poleLightMaterial = new THREE.MeshBasicMaterial({
+  color: "#fffffb",
+});
+const portalLightMaterial = new THREE.MeshBasicMaterial({
+  color: "rgb(254, 231, 254)",
+});
+
+gltfLoader.load("./portal.glb", (gltf) => {
+  gltf.scene.traverse((child) => {
+    if (child instanceof THREE.Mesh) {
+      child.material = portalMaterial;
+    }
+  });
+  const portalLightMesh = gltf.scene.children.find(
+    (child) => child.name === "portalLight",
+  );
+  portalLightMesh.material = portalLightMaterial;
+
+  const poleLightAMesh = gltf.scene.children.find(
+    (child) => child.name === "poleLightA",
+  );
+  poleLightAMesh.material = poleLightMaterial;
+  const poleLightBMesh = gltf.scene.children.find(
+    (child) => child.name === "poleLightB",
+  );
+  poleLightBMesh.material = poleLightMaterial;
+
+  scene.add(gltf.scene);
+});
 
 /**
  * Sizes

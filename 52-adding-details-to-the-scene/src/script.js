@@ -129,9 +129,9 @@ const renderer = new THREE.WebGLRenderer({
 });
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-debugObject.clearColor = "#000000";
+debugObject.clearColor = "#1d161b";
 renderer.setClearColor(debugObject.clearColor);
-gui.add(debugObject, "clearColor").onChange(() => {
+gui.addColor(debugObject, "clearColor").onChange(() => {
   renderer.setClearColor(debugObject.clearColor);
 });
 

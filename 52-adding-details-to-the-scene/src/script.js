@@ -85,27 +85,31 @@ gltfLoader.load("portal.glb", (gltf) => {
  * Fireflies
  */
 const firefliesGeometry = new THREE.BufferGeometry();
-const count = 30;
-const positions = new Float32Array(count * 3);
-const offset = new Float32Array(count);
-const frequency = new Float32Array(count);
-for (let i = 0; i < count; i++) {
+const firefliesCount = 30;
+const positions = new Float32Array(firefliesCount * 3);
+const scaleArray = new Float32Array(firefliesCount);
+const frequency = new Float32Array(firefliesCount);
+for (let i = 0; i < firefliesCount; i++) {
   positions[i * 3 + 0] = (Math.random() - 0.5) * 4;
   positions[i * 3 + 1] = Math.random() * 2;
   positions[i * 3 + 2] = (Math.random() - 0.5) * 4;
-  offset[i] = Math.random();
+  scaleArray[i] = Math.random();
   frequency[i] = Math.random();
 }
 firefliesGeometry.setAttribute(
   "position",
   new THREE.BufferAttribute(positions, 3),
 );
-firefliesGeometry.setAttribute("aOffset", new THREE.BufferAttribute(offset, 1));
+firefliesGeometry.setAttribute(
+  "aScale",
+  new THREE.BufferAttribute(scaleArray, 1),
+);
 firefliesGeometry.setAttribute(
   "aFrequency",
   new THREE.BufferAttribute(frequency, 1),
 );
 const firefliesMaterial = new THREE.ShaderMaterial({
+  blending: THREE.AdditiveBlending,
   uniforms: {
     uSize: new THREE.Uniform(200),
     uPixelRatio: new THREE.Uniform(Math.min(window.devicePixelRatio, 2)),

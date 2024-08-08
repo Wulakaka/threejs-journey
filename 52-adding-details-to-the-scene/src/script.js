@@ -87,23 +87,34 @@ gltfLoader.load("portal.glb", (gltf) => {
 const firefliesGeometry = new THREE.BufferGeometry();
 const count = 30;
 const positions = new Float32Array(count * 3);
+const offset = new Float32Array(count);
+const frequency = new Float32Array(count);
 for (let i = 0; i < count; i++) {
   positions[i * 3 + 0] = (Math.random() - 0.5) * 4;
   positions[i * 3 + 1] = Math.random() * 2;
   positions[i * 3 + 2] = (Math.random() - 0.5) * 4;
+  offset[i] = Math.random();
+  frequency[i] = Math.random();
 }
 firefliesGeometry.setAttribute(
   "position",
   new THREE.BufferAttribute(positions, 3),
 );
+firefliesGeometry.setAttribute("aOffset", new THREE.BufferAttribute(offset, 1));
+firefliesGeometry.setAttribute(
+  "aFrequency",
+  new THREE.BufferAttribute(frequency, 1),
+);
 const firefliesMaterial = new THREE.ShaderMaterial({
   uniforms: {
     uSize: new THREE.Uniform(200),
     uPixelRatio: new THREE.Uniform(Math.min(window.devicePixelRatio, 2)),
+    uTime: new THREE.Uniform(0),
   },
   vertexShader: firefliesVertexShader,
   fragmentShader: firefliesFragmentShader,
   transparent: true,
+  depthWrite: false,
 });
 const fireflies = new THREE.Points(firefliesGeometry, firefliesMaterial);
 scene.add(fireflies);
@@ -180,6 +191,9 @@ const tick = () => {
 
   // Update controls
   controls.update();
+
+  // Update fireflies
+  firefliesMaterial.uniforms.uTime.value = elapsedTime;
 
   // Render
   renderer.render(scene, camera);

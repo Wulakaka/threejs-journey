@@ -3,6 +3,8 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
+import firefliesVertexShader from "./shaders/fireflies/vertex.glsl";
+import firefliesFragmentShader from "./shaders/fireflies/fragment.glsl";
 
 /**
  * Base
@@ -80,6 +82,33 @@ gltfLoader.load("portal.glb", (gltf) => {
 });
 
 /**
+ * Fireflies
+ */
+const firefliesGeometry = new THREE.BufferGeometry();
+const count = 30;
+const positions = new Float32Array(count * 3);
+for (let i = 0; i < count; i++) {
+  positions[i * 3 + 0] = (Math.random() - 0.5) * 4;
+  positions[i * 3 + 1] = Math.random() * 2;
+  positions[i * 3 + 2] = (Math.random() - 0.5) * 4;
+}
+firefliesGeometry.setAttribute(
+  "position",
+  new THREE.BufferAttribute(positions, 3),
+);
+const firefliesMaterial = new THREE.ShaderMaterial({
+  uniforms: {
+    uSize: new THREE.Uniform(200),
+    uPixelRatio: new THREE.Uniform(Math.min(window.devicePixelRatio, 2)),
+  },
+  vertexShader: firefliesVertexShader,
+  fragmentShader: firefliesFragmentShader,
+  transparent: true,
+});
+const fireflies = new THREE.Points(firefliesGeometry, firefliesMaterial);
+scene.add(fireflies);
+
+/**
  * Sizes
  */
 const sizes = {
@@ -95,6 +124,12 @@ window.addEventListener("resize", () => {
   // Update camera
   camera.aspect = sizes.width / sizes.height;
   camera.updateProjectionMatrix();
+
+  // Update fireflies
+  firefliesMaterial.uniforms.uPixelRatio.value = Math.min(
+    window.devicePixelRatio,
+    2,
+  );
 
   // Update renderer
   renderer.setSize(sizes.width, sizes.height);

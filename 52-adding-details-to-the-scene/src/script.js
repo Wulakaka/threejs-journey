@@ -5,6 +5,8 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import firefliesVertexShader from "./shaders/fireflies/vertex.glsl";
 import firefliesFragmentShader from "./shaders/fireflies/fragment.glsl";
+import portalVertexShader from "./shaders/portal/vertex.glsl";
+import portalFragmentShader from "./shaders/portal/fragment.glsl";
 
 /**
  * Base
@@ -51,9 +53,14 @@ const bakedMaterial = new THREE.MeshBasicMaterial({ map: bakedTexture });
 // Pole light material
 const poleLightMaterial = new THREE.MeshBasicMaterial({ color: "#fffffb" });
 
+// FEE7FE
 // Portal light material
-const portalLightMaterial = new THREE.MeshBasicMaterial({
-  color: "rgb(254, 231, 254)",
+const portalLightMaterial = new THREE.ShaderMaterial({
+  vertexShader: portalVertexShader,
+  fragmentShader: portalFragmentShader,
+  uniforms: {
+    uTime: new THREE.Uniform(0),
+  },
 });
 
 /**
@@ -140,7 +147,7 @@ window.addEventListener("resize", () => {
   camera.aspect = sizes.width / sizes.height;
   camera.updateProjectionMatrix();
 
-  // Update fireflies
+  // Update uniforms
   firefliesMaterial.uniforms.uPixelRatio.value = Math.min(
     window.devicePixelRatio,
     2,
@@ -196,8 +203,9 @@ const tick = () => {
   // Update controls
   controls.update();
 
-  // Update fireflies
+  // Update materials
   firefliesMaterial.uniforms.uTime.value = elapsedTime;
+  portalLightMaterial.uniforms.uTime.value = elapsedTime;
 
   // Render
   renderer.render(scene, camera);

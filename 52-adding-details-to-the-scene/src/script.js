@@ -111,8 +111,6 @@ gltfLoader.load("portal.glb", (gltf) => {
 
 let balloonMaterial;
 gltfLoader.load("balloon.glb", (gltf) => {
-  console.log(gltf.scene.children[0].geometry.attributes.position);
-
   const geometry = new THREE.BufferGeometry();
   const count = gltf.scene.children[0].geometry.attributes.position.count;
 

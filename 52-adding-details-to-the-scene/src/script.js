@@ -3,6 +3,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
+import gsap from "gsap";
 import firefliesVertexShader from "./shaders/fireflies/vertex.glsl";
 import firefliesFragmentShader from "./shaders/fireflies/fragment.glsl";
 import portalVertexShader from "./shaders/portal/vertex.glsl";
@@ -118,9 +119,9 @@ gltfLoader.load("balloon.glb", (gltf) => {
   const originArray = gltf.scene.children[0].geometry.attributes.position.array;
   const positionArray = new Float32Array(count * 3);
   for (let i = 0; i < count; i++) {
-    positionArray[i * 3 + 0] = originArray[i * 3 + 0] * 2;
-    positionArray[i * 3 + 1] = originArray[i * 3 + 1] * 2 + 0.5;
-    positionArray[i * 3 + 2] = originArray[i * 3 + 2] * 2;
+    positionArray[i * 3 + 0] = originArray[i * 3 + 0];
+    positionArray[i * 3 + 1] = originArray[i * 3 + 1];
+    positionArray[i * 3 + 2] = originArray[i * 3 + 2];
   }
 
   geometry.setAttribute(
@@ -130,9 +131,11 @@ gltfLoader.load("balloon.glb", (gltf) => {
 
   const positionAArray = new Float32Array(count * 3);
   for (let i = 0; i < count; i++) {
-    positionAArray[i * 3 + 0] = (Math.random() - 0.5) * 4;
-    positionAArray[i * 3 + 1] = Math.random() * 1.5;
-    positionAArray[i * 3 + 2] = (Math.random() - 0.5) * 4;
+    const r = Math.random() * 0.5;
+    const angle = Math.random() * Math.PI * 2;
+    positionAArray[i * 3 + 0] = 0;
+    positionAArray[i * 3 + 1] = 0.78 + Math.sin(angle) * r;
+    positionAArray[i * 3 + 2] = -1.7 + Math.cos(angle) * r;
   }
   geometry.setAttribute(
     "aPositionA",
@@ -145,11 +148,44 @@ gltfLoader.load("balloon.glb", (gltf) => {
     .add(debugObject, "progress")
     .min(0)
     .max(1)
-    .step(0.001)
+    .step(0.0001)
     .name("Balloon progress")
     .onChange(() => {
       balloonMaterial.uniforms.uProgress.value = debugObject.progress;
+    })
+    .listen();
+
+  debugObject.start = function () {
+    const tl = gsap.timeline();
+
+    tl.fromTo(
+      debugObject,
+      {
+        progress: 0,
+      },
+      {
+        progress: 1,
+        duration: 10,
+        // ease: "power3.inOut",
+        onUpdate: () => {
+          balloonMaterial.uniforms.uProgress.value = debugObject.progress;
+        },
+      },
+    );
+
+    tl.to(debugObject, {
+      progress: 0,
+      delay: 2,
+      duration: 10,
+      // ease: "power3.inOut",
+      onUpdate: () => {
+        balloonMaterial.uniforms.uProgress.value = debugObject.progress;
+      },
     });
+
+    // tl.play();
+  };
+  gui.add(debugObject, "start");
 
   balloonMaterial = new THREE.ShaderMaterial({
     vertexShader: balloonVertexShader,

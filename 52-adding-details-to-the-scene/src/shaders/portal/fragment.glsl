@@ -8,7 +8,7 @@ varying vec2 vUv;
 
 void main() {
     // Displace the UV
-    vec2 displacedUv = vUv + cnoise(vec3(vUv * 4.0, uTime * 0.1));
+    vec2 displacedUv = vUv + cnoise(vec3(vUv * 3.0, uTime * 0.1));
     // Perlin noise
     float strength = cnoise(vec3(displacedUv * 5.0, uTime * 0.2));
 
@@ -19,7 +19,7 @@ void main() {
     strength += outerGlow;
 
     // Apply cool step
-    strength += step(-0.5, strength) * 0.2 + step(0.5, strength) * 0.8;
+    strength += step(0.5, strength) * 0.8;
 
     strength = clamp(strength, 0.0, 1.0);
 

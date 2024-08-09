@@ -7,6 +7,8 @@ import firefliesVertexShader from "./shaders/fireflies/vertex.glsl";
 import firefliesFragmentShader from "./shaders/fireflies/fragment.glsl";
 import portalVertexShader from "./shaders/portal/vertex.glsl";
 import portalFragmentShader from "./shaders/portal/fragment.glsl";
+import balloonVertexShader from "./shaders/balloon/vertex.glsl";
+import balloonFragmentShader from "./shaders/balloon/fragment.glsl";
 
 /**
  * Base
@@ -100,6 +102,70 @@ gltfLoader.load("portal.glb", (gltf) => {
   portalLightMesh.material = portalLightMaterial;
   poleLightAMesh.material = poleLightMaterial;
   poleLightBMesh.material = poleLightMaterial;
+});
+
+/**
+ * Balloon
+ */
+
+let balloonMaterial;
+gltfLoader.load("balloon.glb", (gltf) => {
+  console.log(gltf.scene.children[0].geometry.attributes.position);
+
+  const geometry = new THREE.BufferGeometry();
+  const count = gltf.scene.children[0].geometry.attributes.position.count;
+
+  const originArray = gltf.scene.children[0].geometry.attributes.position.array;
+  const positionArray = new Float32Array(count * 3);
+  for (let i = 0; i < count; i++) {
+    positionArray[i * 3 + 0] = originArray[i * 3 + 0] * 2;
+    positionArray[i * 3 + 1] = originArray[i * 3 + 1] * 2 + 0.5;
+    positionArray[i * 3 + 2] = originArray[i * 3 + 2] * 2;
+  }
+
+  geometry.setAttribute(
+    "position",
+    new THREE.BufferAttribute(positionArray, 3),
+  );
+
+  const positionAArray = new Float32Array(count * 3);
+  for (let i = 0; i < count; i++) {
+    positionAArray[i * 3 + 0] = (Math.random() - 0.5) * 4;
+    positionAArray[i * 3 + 1] = Math.random() * 1.5;
+    positionAArray[i * 3 + 2] = (Math.random() - 0.5) * 4;
+  }
+  geometry.setAttribute(
+    "aPositionA",
+    new THREE.BufferAttribute(positionAArray, 3),
+  );
+
+  // material
+  debugObject.progress = 0;
+  gui
+    .add(debugObject, "progress")
+    .min(0)
+    .max(1)
+    .step(0.001)
+    .name("Balloon progress")
+    .onChange(() => {
+      balloonMaterial.uniforms.uProgress.value = debugObject.progress;
+    });
+
+  balloonMaterial = new THREE.ShaderMaterial({
+    vertexShader: balloonVertexShader,
+    fragmentShader: balloonFragmentShader,
+    uniforms: {
+      uTime: { value: 0 },
+      uPixelRatio: { value: Math.min(window.devicePixelRatio, 2) },
+      uProgress: new THREE.Uniform(debugObject.progress),
+    },
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+  });
+
+  const balloon = new THREE.Points(geometry, balloonMaterial);
+  scene.add(balloon);
 });
 
 /**
@@ -220,6 +286,7 @@ const tick = () => {
   // Update materials
   firefliesMaterial.uniforms.uTime.value = elapsedTime;
   portalLightMaterial.uniforms.uTime.value = elapsedTime;
+  balloonMaterial && (balloonMaterial.uniforms.uTime.value = elapsedTime);
 
   // Render
   renderer.render(scene, camera);

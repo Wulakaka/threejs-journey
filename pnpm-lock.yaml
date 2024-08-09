@@ -597,6 +597,9 @@ importers:
 
   52-adding-details-to-the-scene:
     dependencies:
+      gsap:
+        specifier: ^3.12.5
+        version: 3.12.5
       lil-gui:
         specifier: ^0.19.2
         version: 0.19.2

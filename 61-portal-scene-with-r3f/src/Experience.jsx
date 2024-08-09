@@ -42,7 +42,13 @@ export default function Experience() {
         >
           <meshBasicMaterial color="#ffffff" />
         </mesh>
-        <Sparkles size={6} scale={[4, 2, 4]} position-y={1} count={40} />
+        <Sparkles
+          size={6}
+          scale={[4, 2, 4]}
+          position-y={1}
+          count={40}
+          speed={0.2}
+        />
       </Center>
     </>
   );

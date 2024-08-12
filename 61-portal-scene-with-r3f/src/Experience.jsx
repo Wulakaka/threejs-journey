@@ -6,10 +6,11 @@ import {
   useTexture,
   shaderMaterial,
 } from "@react-three/drei";
-import { extend } from "@react-three/fiber";
+import { extend, useFrame } from "@react-three/fiber";
 import portalVertexShader from "./shaders/portal/vertex.glsl";
 import portalFragmentShader from "./shaders/portal/fragment.glsl";
 import * as THREE from "three";
+import { useRef } from "react";
 
 useGLTF.setDecoderPath("./draco/");
 
@@ -29,6 +30,11 @@ export default function Experience() {
   );
 
   extend({ PortalMaterial });
+
+  const portalMaterial = useRef();
+  useFrame((state, delta, frame) => {
+    portalMaterial.current.uTime += delta;
+  });
 
   return (
     <>
@@ -58,7 +64,7 @@ export default function Experience() {
           position={nodes.portalLight.position}
           rotation={nodes.portalLight.rotation}
         >
-          <portalMaterial />
+          <portalMaterial ref={portalMaterial} />
         </mesh>
         <Sparkles
           size={6}

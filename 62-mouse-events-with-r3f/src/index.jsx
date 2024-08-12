@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import { Canvas } from "@react-three/fiber";
 import Experience from "./Experience.jsx";
 import { Perf } from "r3f-perf";
+import { Bvh } from "@react-three/drei";
 
 const root = ReactDOM.createRoot(document.querySelector("#root"));
 
@@ -14,8 +15,13 @@ root.render(
       far: 200,
       position: [-4, 3, 6],
     }}
+    onPointerMissed={() => {
+      console.log("You missed");
+    }}
   >
     <Perf position="top-left" />
-    <Experience />
+    <Bvh>
+      <Experience />
+    </Bvh>
   </Canvas>,
 );

@@ -5,6 +5,10 @@ import {
   useGLTF,
   useTexture,
 } from "@react-three/drei";
+import portalVertexShader from "./shaders/portal/vertex.glsl";
+import portalFragmentShader from "./shaders/portal/fragment.glsl";
+import * as THREE from "three";
+
 useGLTF.setDecoderPath("./draco/");
 
 export default function Experience() {
@@ -40,7 +44,15 @@ export default function Experience() {
           position={nodes.portalLight.position}
           rotation={nodes.portalLight.rotation}
         >
-          <meshBasicMaterial color="#ffffff" />
+          <shaderMaterial
+            vertexShader={portalVertexShader}
+            fragmentShader={portalFragmentShader}
+            uniforms={{
+              uTime: { value: 0 },
+              uColorStart: { value: new THREE.Color("#000000") },
+              uColorEnd: { value: new THREE.Color("#ffffff") },
+            }}
+          />
         </mesh>
         <Sparkles
           size={6}

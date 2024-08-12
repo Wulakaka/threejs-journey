@@ -2,6 +2,7 @@ import "./style.css";
 import ReactDOM from "react-dom/client";
 import { Canvas } from "@react-three/fiber";
 import Experience from "./Experience.jsx";
+import { Perf } from "r3f-perf";
 
 const root = ReactDOM.createRoot(document.querySelector("#root"));
 
@@ -14,6 +15,7 @@ root.render(
       position: [-4, 3, 6],
     }}
   >
+    <Perf position="top-left" />
     <Experience />
   </Canvas>,
 );

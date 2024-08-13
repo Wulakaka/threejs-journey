@@ -2,6 +2,7 @@ import { OrbitControls } from "@react-three/drei";
 import { Perf } from "r3f-perf";
 import {
   Bloom,
+  DepthOfField,
   EffectComposer,
   Glitch,
   Noise,
@@ -13,12 +14,27 @@ import { useControls } from "leva";
 import { useEffect, useState } from "react";
 
 export default function Experience() {
-  const { blendFunctionKey } = useControls("postprocessing", {
-    blendFunctionKey: {
-      options: Object.keys(BlendFunction),
-      value: "OVERLAY",
+  const { blendFunctionKey, focusDistance, focalLength } = useControls(
+    "postprocessing",
+    {
+      blendFunctionKey: {
+        options: Object.keys(BlendFunction),
+        value: "OVERLAY",
+      },
+      focusDistance: {
+        value: 0.025,
+        min: 0,
+        max: 1,
+        step: 0.001,
+      },
+      focalLength: {
+        value: 0.025,
+        min: 0,
+        max: 1,
+        step: 0.001,
+      },
     },
-  });
+  );
 
   const [blendFunction, setBlendFunction] = useState(BlendFunction.OVERLAY);
   useEffect(() => {
@@ -27,7 +43,7 @@ export default function Experience() {
 
   return (
     <>
-      <color args={["#000000"]} attach="background" />
+      <color args={["#ffffff"]} attach="background" />
 
       <EffectComposer multisampling={4}>
         {/*        <Vignette
@@ -42,7 +58,12 @@ export default function Experience() {
           mode={GlitchMode.CONSTANT_MILD}
         />*/}
         {/*<Noise premultiply blendFunction={blendFunction} />*/}
-        <Bloom luminanceThreshold={0} mipmapBlur intensity={0.5} />
+        {/*<Bloom luminanceThreshold={0} mipmapBlur intensity={0.5} />*/}
+        <DepthOfField
+          focusDistance={focusDistance}
+          focalLength={focalLength}
+          bokehScale={6}
+        />
         <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
       </EffectComposer>
 
@@ -60,7 +81,7 @@ export default function Experience() {
 
       <mesh castShadow position-x={2} scale={1.5}>
         <boxGeometry />
-        <meshBasicMaterial color={[1.5, 1, 4]} />
+        <meshStandardMaterial color="mediumpurple" />
       </mesh>
 
       <mesh

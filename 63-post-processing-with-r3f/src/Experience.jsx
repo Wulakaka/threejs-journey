@@ -3,6 +3,7 @@ import { Perf } from "r3f-perf";
 import {
   EffectComposer,
   Glitch,
+  Noise,
   ToneMapping,
   Vignette,
 } from "@react-three/postprocessing";
@@ -13,16 +14,17 @@ import { useEffect, useState } from "react";
 console.log(GlitchMode);
 
 export default function Experience() {
-  // const { blendFunctionKey } = useControls("postprocessing", {
-  //   blendFunctionKey: {
-  //     options: Object.keys(BlendFunction),
-  //   },
-  // });
-  //
-  // const [blendFunction, setBlendFunction] = useState(BlendFunction.NORMAL);
-  // useEffect(() => {
-  //   setBlendFunction(BlendFunction[blendFunctionKey]);
-  // }, [blendFunctionKey]);
+  const { blendFunctionKey } = useControls("postprocessing", {
+    blendFunctionKey: {
+      options: Object.keys(BlendFunction),
+      value: "OVERLAY",
+    },
+  });
+
+  const [blendFunction, setBlendFunction] = useState(BlendFunction.OVERLAY);
+  useEffect(() => {
+    setBlendFunction(BlendFunction[blendFunctionKey]);
+  }, [blendFunctionKey]);
 
   return (
     <>
@@ -35,12 +37,13 @@ export default function Experience() {
           darkness={0.9}
           blendFunction={BlendFunction.NORMAL}
         />*/}
-        <Glitch
+        {/*<Glitch
           delay={[0.5, 1]}
           duration={[0.1, 0.3]}
           strength={[0.2, 0.4]}
           mode={GlitchMode.CONSTANT_MILD}
-        />
+        />*/}
+        <Noise premultiply blendFunction={blendFunction} />
       </EffectComposer>
 
       <Perf position="top-left" />

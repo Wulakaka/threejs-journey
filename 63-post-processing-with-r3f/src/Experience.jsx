@@ -44,6 +44,11 @@ export default function Experience() {
 
   const drunkRef = useRef();
 
+  const drunkProps = useControls("Drunk Effect", {
+    frequency: { value: 2, min: 1, max: 20 },
+    amplitude: { value: 0.1, min: 0, max: 1 },
+  });
+
   return (
     <>
       <color args={["#ffffff"]} attach="background" />
@@ -67,7 +72,11 @@ export default function Experience() {
           focalLength={0.025}
           bokehScale={6}
         />*/}
-        <Drunk ref={drunkRef} frequency={2} amplitude={0.1} />
+        <Drunk
+          ref={drunkRef}
+          {...drunkProps}
+          blendFunction={BlendFunction.DARKEN}
+        />
         <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
       </EffectComposer>
 

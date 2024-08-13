@@ -42,7 +42,7 @@ export default function Experience() {
           mode={GlitchMode.CONSTANT_MILD}
         />*/}
         {/*<Noise premultiply blendFunction={blendFunction} />*/}
-        <Bloom luminanceThreshold={1.1} mipmapBlur />
+        <Bloom luminanceThreshold={0} mipmapBlur intensity={0.5} />
         <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
       </EffectComposer>
 
@@ -60,11 +60,7 @@ export default function Experience() {
 
       <mesh castShadow position-x={2} scale={1.5}>
         <boxGeometry />
-        <meshStandardMaterial
-          color="#ffffff"
-          emissive="orange"
-          emissiveIntensity={2}
-        />
+        <meshBasicMaterial color={[1.5, 1, 4]} />
       </mesh>
 
       <mesh

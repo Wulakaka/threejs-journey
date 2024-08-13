@@ -6,20 +6,28 @@ import {
   Vignette,
 } from "@react-three/postprocessing";
 import { ToneMappingMode, BlendFunction } from "postprocessing";
-console.log(BlendFunction);
+import { useControls } from "leva";
+import { useEffect, useState } from "react";
 
 export default function Experience() {
+  const { blendFunctionKey } = useControls("postprocessing", {
+    blendFunctionKey: {
+      options: Object.keys(BlendFunction),
+    },
+  });
+
+  const [blendFunction, setBlendFunction] = useState(BlendFunction.NORMAL);
+  useEffect(() => {
+    setBlendFunction(BlendFunction[blendFunctionKey]);
+  }, [blendFunctionKey]);
+
   return (
     <>
       <color args={["#FFFFFF"]} attach="background" />
 
       <EffectComposer multisampling={4}>
         <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
-        <Vignette
-          offset={0.3}
-          darkness={0.9}
-          blendFunction={BlendFunction.NORMAL}
-        />
+        <Vignette offset={0.3} darkness={0.9} blendFunction={blendFunction} />
       </EffectComposer>
 
       <Perf position="top-left" />

@@ -12,6 +12,7 @@ import {
 import { ToneMappingMode, BlendFunction, GlitchMode } from "postprocessing";
 import { useControls } from "leva";
 import { useEffect, useState } from "react";
+import Drunk from "./Drunk.jsx";
 
 export default function Experience() {
   const { blendFunctionKey, focusDistance, focalLength } = useControls(
@@ -46,24 +47,25 @@ export default function Experience() {
       <color args={["#ffffff"]} attach="background" />
 
       <EffectComposer multisampling={4}>
-        {/*        <Vignette
+        {/* <Vignette
           offset={0.3}
           darkness={0.9}
           blendFunction={BlendFunction.NORMAL}
-        />*/}
-        {/*<Glitch
+        />
+        <Glitch
           delay={[0.5, 1]}
           duration={[0.1, 0.3]}
           strength={[0.2, 0.4]}
           mode={GlitchMode.CONSTANT_MILD}
-        />*/}
-        {/*<Noise premultiply blendFunction={blendFunction} />*/}
-        {/*<Bloom luminanceThreshold={0} mipmapBlur intensity={0.5} />*/}
-        <DepthOfField
-          focusDistance={focusDistance}
-          focalLength={focalLength}
-          bokehScale={6}
         />
+        <Noise premultiply blendFunction={BlendFunction.SOFT_LIGHT} />
+        <Bloom mipmapBlur intensity={0.5} luminanceThreshold={0} />
+        <DepthOfField
+          focusDistance={0.025}
+          focalLength={0.025}
+          bokehScale={6}
+        />*/}
+        <Drunk />
         <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
       </EffectComposer>
 

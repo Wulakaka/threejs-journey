@@ -6,7 +6,7 @@ import { ToneMappingMode } from "postprocessing";
 export default function Experience() {
   return (
     <>
-      <EffectComposer>
+      <EffectComposer multisampling={4}>
         <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
       </EffectComposer>
 

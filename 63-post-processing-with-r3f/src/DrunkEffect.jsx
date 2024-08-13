@@ -1,4 +1,4 @@
-import { Effect } from "postprocessing";
+import { Effect, BlendFunction } from "postprocessing";
 import { Uniform } from "three";
 
 const fragmentShader = /* glsl */ `
@@ -14,7 +14,7 @@ const fragmentShader = /* glsl */ `
 `;
 
 export default class DrunkEffect extends Effect {
-  constructor({ frequency, amplitude, blendFunction }) {
+  constructor({ frequency, amplitude, blendFunction = BlendFunction.DARKEN }) {
     super("DrunkEffect", fragmentShader, {
       uniforms: new Map([
         ["frequency", new Uniform(frequency)],

@@ -47,6 +47,9 @@ export default function Experience() {
   const drunkProps = useControls("Drunk Effect", {
     frequency: { value: 2, min: 1, max: 20 },
     amplitude: { value: 0.1, min: 0, max: 1 },
+    speed: { value: 1, min: 0.1, max: 10 },
+    // 0.8, 1.0, 0.5
+    color: "orange",
   });
 
   return (

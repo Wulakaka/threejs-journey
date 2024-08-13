@@ -5,14 +5,21 @@ import {
   ToneMapping,
   Vignette,
 } from "@react-three/postprocessing";
-import { ToneMappingMode } from "postprocessing";
+import { ToneMappingMode, BlendFunction } from "postprocessing";
+console.log(BlendFunction);
 
 export default function Experience() {
   return (
     <>
+      <color args={["#FFFFFF"]} attach="background" />
+
       <EffectComposer multisampling={4}>
         <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
-        <Vignette offset={0.3} darkness={0.9} />
+        <Vignette
+          offset={0.3}
+          darkness={0.9}
+          blendFunction={BlendFunction.NORMAL}
+        />
       </EffectComposer>
 
       <Perf position="top-left" />

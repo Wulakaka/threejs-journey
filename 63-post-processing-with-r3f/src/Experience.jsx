@@ -2,24 +2,27 @@ import { OrbitControls } from "@react-three/drei";
 import { Perf } from "r3f-perf";
 import {
   EffectComposer,
+  Glitch,
   ToneMapping,
   Vignette,
 } from "@react-three/postprocessing";
-import { ToneMappingMode, BlendFunction } from "postprocessing";
+import { ToneMappingMode, BlendFunction, GlitchMode } from "postprocessing";
 import { useControls } from "leva";
 import { useEffect, useState } from "react";
 
-export default function Experience() {
-  const { blendFunctionKey } = useControls("postprocessing", {
-    blendFunctionKey: {
-      options: Object.keys(BlendFunction),
-    },
-  });
+console.log(GlitchMode);
 
-  const [blendFunction, setBlendFunction] = useState(BlendFunction.NORMAL);
-  useEffect(() => {
-    setBlendFunction(BlendFunction[blendFunctionKey]);
-  }, [blendFunctionKey]);
+export default function Experience() {
+  // const { blendFunctionKey } = useControls("postprocessing", {
+  //   blendFunctionKey: {
+  //     options: Object.keys(BlendFunction),
+  //   },
+  // });
+  //
+  // const [blendFunction, setBlendFunction] = useState(BlendFunction.NORMAL);
+  // useEffect(() => {
+  //   setBlendFunction(BlendFunction[blendFunctionKey]);
+  // }, [blendFunctionKey]);
 
   return (
     <>
@@ -27,7 +30,17 @@ export default function Experience() {
 
       <EffectComposer multisampling={4}>
         <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
-        <Vignette offset={0.3} darkness={0.9} blendFunction={blendFunction} />
+        {/*        <Vignette
+          offset={0.3}
+          darkness={0.9}
+          blendFunction={BlendFunction.NORMAL}
+        />*/}
+        <Glitch
+          delay={[0.5, 1]}
+          duration={[0.1, 0.3]}
+          strength={[0.2, 0.4]}
+          mode={GlitchMode.CONSTANT_MILD}
+        />
       </EffectComposer>
 
       <Perf position="top-left" />

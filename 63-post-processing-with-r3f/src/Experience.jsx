@@ -11,36 +11,38 @@ import {
 } from "@react-three/postprocessing";
 import { ToneMappingMode, BlendFunction, GlitchMode } from "postprocessing";
 import { useControls } from "leva";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Drunk from "./Drunk.jsx";
 
 export default function Experience() {
-  const { blendFunctionKey, focusDistance, focalLength } = useControls(
-    "postprocessing",
-    {
-      blendFunctionKey: {
-        options: Object.keys(BlendFunction),
-        value: "OVERLAY",
-      },
-      focusDistance: {
-        value: 0.025,
-        min: 0,
-        max: 1,
-        step: 0.001,
-      },
-      focalLength: {
-        value: 0.025,
-        min: 0,
-        max: 1,
-        step: 0.001,
-      },
-    },
-  );
+  // const { blendFunctionKey, focusDistance, focalLength } = useControls(
+  //   "postprocessing",
+  //   {
+  //     blendFunctionKey: {
+  //       options: Object.keys(BlendFunction),
+  //       value: "OVERLAY",
+  //     },
+  //     focusDistance: {
+  //       value: 0.025,
+  //       min: 0,
+  //       max: 1,
+  //       step: 0.001,
+  //     },
+  //     focalLength: {
+  //       value: 0.025,
+  //       min: 0,
+  //       max: 1,
+  //       step: 0.001,
+  //     },
+  //   },
+  // );
+  //
+  // const [blendFunction, setBlendFunction] = useState(BlendFunction.OVERLAY);
+  // useEffect(() => {
+  //   setBlendFunction(BlendFunction[blendFunctionKey]);
+  // }, [blendFunctionKey]);
 
-  const [blendFunction, setBlendFunction] = useState(BlendFunction.OVERLAY);
-  useEffect(() => {
-    setBlendFunction(BlendFunction[blendFunctionKey]);
-  }, [blendFunctionKey]);
+  const drunkRef = useRef();
 
   return (
     <>
@@ -65,7 +67,7 @@ export default function Experience() {
           focalLength={0.025}
           bokehScale={6}
         />*/}
-        <Drunk />
+        <Drunk ref={drunkRef} frequency={2} amplitude={0.1} />
         <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
       </EffectComposer>
 

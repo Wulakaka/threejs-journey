@@ -1,6 +1,7 @@
 import { OrbitControls } from "@react-three/drei";
 import { Perf } from "r3f-perf";
 import {
+  Bloom,
   EffectComposer,
   Glitch,
   Noise,
@@ -10,8 +11,6 @@ import {
 import { ToneMappingMode, BlendFunction, GlitchMode } from "postprocessing";
 import { useControls } from "leva";
 import { useEffect, useState } from "react";
-
-console.log(GlitchMode);
 
 export default function Experience() {
   const { blendFunctionKey } = useControls("postprocessing", {
@@ -28,10 +27,9 @@ export default function Experience() {
 
   return (
     <>
-      <color args={["#FFFFFF"]} attach="background" />
+      <color args={["#000000"]} attach="background" />
 
       <EffectComposer multisampling={4}>
-        <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
         {/*        <Vignette
           offset={0.3}
           darkness={0.9}
@@ -43,7 +41,9 @@ export default function Experience() {
           strength={[0.2, 0.4]}
           mode={GlitchMode.CONSTANT_MILD}
         />*/}
-        <Noise premultiply blendFunction={blendFunction} />
+        {/*<Noise premultiply blendFunction={blendFunction} />*/}
+        <Bloom luminanceThreshold={1.1} mipmapBlur />
+        <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
       </EffectComposer>
 
       <Perf position="top-left" />
@@ -60,7 +60,7 @@ export default function Experience() {
 
       <mesh castShadow position-x={2} scale={1.5}>
         <boxGeometry />
-        <meshStandardMaterial color="mediumpurple" />
+        <meshStandardMaterial color={[5, 2, 1]} />
       </mesh>
 
       <mesh

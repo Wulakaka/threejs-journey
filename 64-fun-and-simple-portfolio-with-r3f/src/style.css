@@ -9,3 +9,7 @@ body,
     height: 100%;
     background: ivory;
 }
+
+.r3f {
+    touch-action: none;
+}

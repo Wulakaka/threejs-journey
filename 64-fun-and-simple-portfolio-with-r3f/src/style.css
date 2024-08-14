@@ -18,4 +18,6 @@ body,
     width: 1024px;
     height: 670px;
     border: none;
+    border-radius: 20px;
+    background: black;
 }

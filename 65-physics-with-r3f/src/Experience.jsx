@@ -7,7 +7,7 @@ import {
   Physics,
   RigidBody,
 } from "@react-three/rapier";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
@@ -63,6 +63,22 @@ export default function Experience() {
   };
 
   const hamburger = useGLTF("./hamburger.glb");
+
+  const cubesCount = 3;
+
+  const cubes = useRef();
+
+  useEffect(() => {
+    for (let i = 0; i < cubesCount; i++) {
+      const matrix = new THREE.Matrix4();
+      matrix.compose(
+        new THREE.Vector3(i * 2, 0, 0),
+        new THREE.Quaternion(),
+        new THREE.Vector3(1, 1, 1),
+      );
+      cubes.current.setMatrixAt(i, matrix);
+    }
+  }, []);
 
   return (
     <>
@@ -130,6 +146,16 @@ export default function Experience() {
           <CuboidCollider args={[0.5, 2, 5]} position={[5.5, 1, 0]} />
           <CuboidCollider args={[0.5, 2, 5]} position={[-5.5, 1, 0]} />
         </RigidBody>
+
+        <instancedMesh
+          ref={cubes}
+          args={[null, null, cubesCount]}
+          castShadow
+          receiveShadow
+        >
+          <boxGeometry />
+          <meshStandardMaterial color="tomato" />
+        </instancedMesh>
       </Physics>
     </>
   );

@@ -40,16 +40,16 @@ export default function Experience() {
       <directionalLight castShadow position={[1, 2, 3]} intensity={4.5} />
       <ambientLight intensity={1.5} />
 
-      <Physics debug>
-        <RigidBody colliders="ball">
-          <mesh castShadow position={[-1.5, 2, 0]}>
+      <Physics debug gravity={[0, -9.81, 0]}>
+        <RigidBody colliders="ball" position={[-1.5, 2, 0]}>
+          <mesh castShadow>
             <sphereGeometry />
             <meshStandardMaterial color="orange" />
           </mesh>
         </RigidBody>
 
-        <RigidBody ref={cube}>
-          <mesh castShadow position={[1.5, 2, 0]} onClick={cubeJump}>
+        <RigidBody ref={cube} position={[1.5, 2, 0]} gravityScale={1}>
+          <mesh castShadow onClick={cubeJump}>
             <boxGeometry />
             <meshStandardMaterial color="mediumpurple" />
           </mesh>

@@ -77,6 +77,7 @@ export default function Experience() {
           (Math.random() - 0.5) * 8,
         ],
         rotation: [Math.random(), Math.random(), Math.random()],
+        scale: [Math.random() + 0.5, Math.random() + 0.5, Math.random() + 0.5],
       });
     }
 

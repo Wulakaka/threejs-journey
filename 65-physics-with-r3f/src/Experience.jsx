@@ -12,15 +12,18 @@ export default function Experience() {
   const cube = useRef();
 
   const cubeJump = (e) => {
+    // 类似于射击效果
     // cube.current.applyImpulseAtPoint(
     //   e.ray.direction.multiplyScalar(5),
     //   e.point,
     //   true,
     // );
 
+    const mass = cube.current.mass();
+
     cube.current.applyImpulse({
       x: 0,
-      y: 5,
+      y: 5 * mass,
       z: 0,
     });
 
@@ -54,7 +57,9 @@ export default function Experience() {
           gravityScale={1}
           restitution={0}
           friction={0.7}
+          colliders={false}
         >
+          <CuboidCollider mass={2} args={[0.5, 0.5, 0.5]} />
           <mesh castShadow onClick={cubeJump}>
             <boxGeometry />
             <meshStandardMaterial color="mediumpurple" />

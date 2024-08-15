@@ -6,11 +6,13 @@ import {
   Physics,
   RigidBody,
 } from "@react-three/rapier";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
 export default function Experience() {
+  const [hitSound] = useState(() => new Audio("./hit.mp3"));
+
   const cube = useRef();
 
   const cubeJump = (e) => {
@@ -44,13 +46,20 @@ export default function Experience() {
     const eulerRotation = new THREE.Euler(0, time * 3, 0);
     const quaternionRotation = new THREE.Quaternion();
     quaternionRotation.setFromEuler(eulerRotation);
-    twister.current.setNextKinematicRotation(quaternionRotation);
+    twister.current?.setNextKinematicRotation(quaternionRotation);
 
     const angle = time * 0.5;
     const x = Math.cos(angle) * 2;
     const z = Math.sin(angle) * 2;
-    twister.current.setNextKinematicTranslation({ x, y: -0.8, z });
+    twister.current?.setNextKinematicTranslation({ x, y: -0.8, z });
   });
+
+  const collisionEnter = (e) => {
+    console.log("collision!");
+    // hitSound.currentTime = 0;
+    // hitSound.volume = Math.random();
+    // hitSound.play();
+  };
 
   return (
     <>
@@ -76,6 +85,10 @@ export default function Experience() {
           restitution={0}
           friction={0.7}
           colliders={false}
+          onCollisionEnter={collisionEnter}
+          onCollisionExit={() => console.log("exit!")}
+          onSleep={() => console.log("sleep")}
+          onWake={() => console.log("wake")}
         >
           <CuboidCollider mass={2} args={[0.5, 0.5, 0.5]} />
           <mesh castShadow onClick={cubeJump}>

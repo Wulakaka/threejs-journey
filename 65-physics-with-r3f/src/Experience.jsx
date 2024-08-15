@@ -13,7 +13,7 @@ export default function Experience() {
       <ambientLight intensity={1.5} />
 
       <Physics debug>
-        <RigidBody>
+        <RigidBody colliders="ball">
           <mesh castShadow position={[-2, 2, 0]}>
             <sphereGeometry />
             <meshStandardMaterial color="orange" />

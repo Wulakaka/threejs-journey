@@ -14,19 +14,15 @@ export default function Experience() {
 
       <Physics debug>
         <RigidBody colliders="ball">
-          <mesh castShadow position={[-2, 2, 0]}>
+          <mesh castShadow position={[0, 4, 0]}>
             <sphereGeometry />
             <meshStandardMaterial color="orange" />
           </mesh>
         </RigidBody>
 
-        <RigidBody>
-          <mesh castShadow position={[2, 2, 0]}>
-            <boxGeometry args={[3, 2, 1]} />
-            <meshStandardMaterial color="mediumpurple" />
-          </mesh>
-          <mesh castShadow position={[2, 2, 4]}>
-            <boxGeometry args={[1, 1, 1]} />
+        <RigidBody colliders="trimesh" type="fixed">
+          <mesh castShadow position={[0, -0.5, 0]} rotation-x={[Math.PI / 2]}>
+            <torusGeometry args={[1, 0.5, 16, 32]} />
             <meshStandardMaterial color="mediumpurple" />
           </mesh>
         </RigidBody>

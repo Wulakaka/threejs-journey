@@ -4,10 +4,11 @@ import {
   BallCollider,
   CuboidCollider,
   CylinderCollider,
+  InstancedRigidBodies,
   Physics,
   RigidBody,
 } from "@react-three/rapier";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
@@ -64,21 +65,37 @@ export default function Experience() {
 
   const hamburger = useGLTF("./hamburger.glb");
 
-  const cubesCount = 3;
-
-  const cubes = useRef();
-
-  useEffect(() => {
+  const cubesCount = 100;
+  const instances = useMemo(() => {
+    const instances = [];
     for (let i = 0; i < cubesCount; i++) {
-      const matrix = new THREE.Matrix4();
-      matrix.compose(
-        new THREE.Vector3(i * 2, 0, 0),
-        new THREE.Quaternion(),
-        new THREE.Vector3(1, 1, 1),
-      );
-      cubes.current.setMatrixAt(i, matrix);
+      instances.push({
+        key: `instance_${i}`,
+        position: [
+          (Math.random() - 0.5) * 8,
+          6 + i * 2,
+          (Math.random() - 0.5) * 8,
+        ],
+        rotation: [Math.random(), Math.random(), Math.random()],
+      });
     }
+
+    return instances;
   }, []);
+
+  // const cubes = useRef();
+  //
+  // useEffect(() => {
+  //   for (let i = 0; i < cubesCount; i++) {
+  //     const matrix = new THREE.Matrix4();
+  //     matrix.compose(
+  //       new THREE.Vector3(i * 2, 0, 0),
+  //       new THREE.Quaternion(),
+  //       new THREE.Vector3(1, 1, 1),
+  //     );
+  //     cubes.current.setMatrixAt(i, matrix);
+  //   }
+  // }, []);
 
   return (
     <>
@@ -89,7 +106,7 @@ export default function Experience() {
       <directionalLight castShadow position={[1, 2, 3]} intensity={4.5} />
       <ambientLight intensity={1.5} />
 
-      <Physics debug gravity={[0, -9.81, 0]}>
+      <Physics debug={false} gravity={[0, -9.81, 0]}>
         <RigidBody colliders="ball" position={[-1.5, 2, 0]}>
           <mesh castShadow>
             <sphereGeometry />
@@ -147,15 +164,16 @@ export default function Experience() {
           <CuboidCollider args={[0.5, 2, 5]} position={[-5.5, 1, 0]} />
         </RigidBody>
 
-        <instancedMesh
-          ref={cubes}
-          args={[null, null, cubesCount]}
-          castShadow
-          receiveShadow
-        >
-          <boxGeometry />
-          <meshStandardMaterial color="tomato" />
-        </instancedMesh>
+        <InstancedRigidBodies instances={instances}>
+          <instancedMesh
+            args={[null, null, cubesCount]}
+            castShadow
+            receiveShadow
+          >
+            <boxGeometry />
+            <meshStandardMaterial color="tomato" />
+          </instancedMesh>
+        </InstancedRigidBodies>
       </Physics>
     </>
   );

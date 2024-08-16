@@ -1,4 +1,4 @@
-import { OrbitControls, useGLTF } from "@react-three/drei";
+import { Center, OrbitControls, useGLTF } from "@react-three/drei";
 import { Perf } from "r3f-perf";
 import {
   BallCollider,
@@ -40,6 +40,17 @@ export default function Experience() {
     });
   };
 
+  const ball = useRef();
+
+  const jumpBall = () => {
+    const mass = ball.current.mass();
+    ball.current.applyImpulse({
+      x: 0,
+      y: 10 * mass,
+      z: 0,
+    });
+  };
+
   const twister = useRef();
 
   useFrame((state) => {
@@ -69,6 +80,7 @@ export default function Experience() {
   const instances = useMemo(() => {
     const instances = [];
     for (let i = 0; i < cubesCount; i++) {
+      const scale = Math.random() * 0.09 + 0.01;
       instances.push({
         key: `instance_${i}`,
         position: [
@@ -77,7 +89,7 @@ export default function Experience() {
           (Math.random() - 0.5) * 8,
         ],
         rotation: [Math.random(), Math.random(), Math.random()],
-        scale: [Math.random() + 0.5, Math.random() + 0.5, Math.random() + 0.5],
+        scale: [scale, scale, scale],
       });
     }
 
@@ -98,6 +110,32 @@ export default function Experience() {
   //   }
   // }, []);
 
+  const heartShape = useMemo(() => {
+    const x = 0,
+      y = 0;
+
+    const heartShape = new THREE.Shape();
+
+    heartShape.moveTo(x + 5, y + 5);
+    heartShape.bezierCurveTo(x + 5, y + 5, x + 4, y, x, y);
+    heartShape.bezierCurveTo(x - 6, y, x - 6, y + 7, x - 6, y + 7);
+    heartShape.bezierCurveTo(x - 6, y + 11, x - 3, y + 15.4, x + 5, y + 19);
+    heartShape.bezierCurveTo(x + 12, y + 15.4, x + 16, y + 11, x + 16, y + 7);
+    heartShape.bezierCurveTo(x + 16, y + 7, x + 16, y, x + 10, y);
+    heartShape.bezierCurveTo(x + 7, y, x + 5, y + 5, x + 5, y + 5);
+
+    return heartShape;
+  }, []);
+
+  const extrudeSettings = {
+    depth: 3,
+    bevelEnabled: true,
+    bevelSegments: 2,
+    steps: 2,
+    bevelSize: 3,
+    bevelThickness: 3,
+  };
+
   return (
     <>
       <Perf position="top-left" />
@@ -108,8 +146,13 @@ export default function Experience() {
       <ambientLight intensity={1.5} />
 
       <Physics debug={false} gravity={[0, -9.81, 0]}>
-        <RigidBody colliders="ball" position={[-1.5, 2, 0]}>
-          <mesh castShadow>
+        <RigidBody
+          ref={ball}
+          colliders="ball"
+          position={[-1.5, 2, 0]}
+          restitution={1}
+        >
+          <mesh castShadow onClick={jumpBall}>
             <sphereGeometry />
             <meshStandardMaterial color="orange" />
           </mesh>
@@ -141,6 +184,15 @@ export default function Experience() {
           </mesh>
         </RigidBody>
 
+        <Center position-y={-4} scale={[1, 0.5, 1]}>
+          <RigidBody type="fixed" rotation-x={-Math.PI / 2} colliders="trimesh">
+            <mesh receiveShadow>
+              <extrudeGeometry args={[heartShape, extrudeSettings]} />
+              <meshStandardMaterial color="purple" />
+            </mesh>
+          </RigidBody>
+        </Center>
+
         <RigidBody
           ref={twister}
           position={[0, -0.8, 0]}
@@ -165,13 +217,17 @@ export default function Experience() {
           <CuboidCollider args={[0.5, 2, 5]} position={[-5.5, 1, 0]} />
         </RigidBody>
 
-        <InstancedRigidBodies instances={instances}>
+        <InstancedRigidBodies
+          instances={instances}
+          restitution={0.5}
+          colliders="cuboid"
+        >
           <instancedMesh
             args={[null, null, cubesCount]}
             castShadow
             receiveShadow
           >
-            <boxGeometry />
+            <extrudeGeometry args={[heartShape, extrudeSettings]} />
             <meshStandardMaterial color="tomato" />
           </instancedMesh>
         </InstancedRigidBodies>

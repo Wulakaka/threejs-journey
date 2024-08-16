@@ -296,7 +296,7 @@ const shaderMaterial = new THREE.ShaderMaterial({
         
         uniform sampler2D uDisplacementTexture;
 
-        varying vec2 vUv;
+        varying vec3 vColor;
 
         void main()
         {
@@ -307,25 +307,19 @@ const shaderMaterial = new THREE.ShaderMaterial({
 
             gl_Position = projectionMatrix * viewMatrix * modelPosition;
 
-            vUv = uv;
+            vec3 depthColor = vec3(1.0, 0.1, 0.1);
+            vec3 surfaceColor = vec3(0.1, 0.0, 0.5);
+            vec3 finalColor = mix(depthColor, surfaceColor, max(0.25, elevation));
+            
+            vColor = finalColor;
         }
     `,
   fragmentShader: `
-        uniform sampler2D uDisplacementTexture;
-
-        varying vec2 vUv;
+        varying vec3 vColor;
 
         void main()
         {
-            float elevation = texture2D(uDisplacementTexture, vUv).r;
-            
-            elevation = max(0.25, elevation);
-
-            vec3 depthColor = vec3(1.0, 0.1, 0.1);
-            vec3 surfaceColor = vec3(0.1, 0.0, 0.5);
-            vec3 finalColor = mix(depthColor, surfaceColor, elevation);
-
-            gl_FragColor = vec4(finalColor, 1.0);
+            gl_FragColor = vec4(vColor, 1.0);
         }
     `,
 });

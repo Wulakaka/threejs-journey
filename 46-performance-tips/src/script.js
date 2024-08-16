@@ -1,7 +1,9 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import Stats from "stats.js";
+import * as BufferGeometryUtils from "three/examples/jsm/utils/BufferGeometryUtils.js";
 
+console.log(BufferGeometryUtils);
 const stats = new Stats();
 stats.showPanel(0);
 document.body.appendChild(stats.dom);
@@ -153,40 +155,40 @@ tick();
  */
 
 // // Tip 4
-// console.log(renderer.info)
+console.log(renderer.info);
 
 // // Tip 6
-// scene.remove(cube)
-// cube.geometry.dispose()
-// cube.material.dispose()
+// scene.remove(cube);
+// cube.geometry.dispose();
+// cube.material.dispose();
 
 // // Tip 10
-// directionalLight.shadow.camera.top = 3
-// directionalLight.shadow.camera.right = 6
-// directionalLight.shadow.camera.left = - 6
-// directionalLight.shadow.camera.bottom = - 3
-// directionalLight.shadow.camera.far = 10
-// directionalLight.shadow.mapSize.set(1024, 1024)
-
-// const cameraHelper = new THREE.CameraHelper(directionalLight.shadow.camera)
-// scene.add(cameraHelper)
+// directionalLight.shadow.camera.top = 3;
+// directionalLight.shadow.camera.right = 6;
+// directionalLight.shadow.camera.left = -6;
+// directionalLight.shadow.camera.bottom = -3;
+// directionalLight.shadow.camera.far = 10;
+// directionalLight.shadow.mapSize.set(1024, 1024);
+//
+// const cameraHelper = new THREE.CameraHelper(directionalLight.shadow.camera);
+// scene.add(cameraHelper);
 
 // // Tip 11
-// cube.castShadow = true
-// cube.receiveShadow = false
-
-// torusKnot.castShadow = true
-// torusKnot.receiveShadow = false
-
-// sphere.castShadow = true
-// sphere.receiveShadow = false
-
-// floor.castShadow = false
-// floor.receiveShadow = true
+// cube.castShadow = true;
+// cube.receiveShadow = false;
+//
+// torusKnot.castShadow = true;
+// torusKnot.receiveShadow = false;
+//
+// sphere.castShadow = true;
+// sphere.receiveShadow = false;
+//
+// floor.castShadow = false;
+// floor.receiveShadow = true;
 
 // // Tip 12
-// renderer.shadowMap.autoUpdate = false
-// renderer.shadowMap.needsUpdate = true
+// renderer.shadowMap.autoUpdate = false;
+// renderer.shadowMap.needsUpdate = true;
 
 // // Tip 18
 // for(let i = 0; i < 50; i++)
@@ -205,22 +207,28 @@ tick();
 //     scene.add(mesh)
 // }
 
-// // Tip 19
-// for(let i = 0; i < 50; i++)
-// {
-//     const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5)
+// Tip 19
+const geometries = [];
+for (let i = 0; i < 50; i++) {
+  const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
 
-//     const material = new THREE.MeshNormalMaterial()
+  geometry.rotateX((Math.random() - 0.5) * Math.PI * 2);
+  geometry.rotateY((Math.random() - 0.5) * Math.PI * 2);
 
-//     const mesh = new THREE.Mesh(geometry, material)
-//     mesh.position.x = (Math.random() - 0.5) * 10
-//     mesh.position.y = (Math.random() - 0.5) * 10
-//     mesh.position.z = (Math.random() - 0.5) * 10
-//     mesh.rotation.x = (Math.random() - 0.5) * Math.PI * 2
-//     mesh.rotation.y = (Math.random() - 0.5) * Math.PI * 2
+  geometry.translate(
+    (Math.random() - 0.5) * 10,
+    (Math.random() - 0.5) * 10,
+    (Math.random() - 0.5) * 10,
+  );
 
-//     scene.add(mesh)
-// }
+  geometries.push(geometry);
+}
+
+const mergedGeometry = BufferGeometryUtils.mergeGeometries(geometries);
+
+const material = new THREE.MeshNormalMaterial();
+const mesh = new THREE.Mesh(mergedGeometry, material);
+scene.add(mesh);
 
 // // Tip 20
 // const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5)

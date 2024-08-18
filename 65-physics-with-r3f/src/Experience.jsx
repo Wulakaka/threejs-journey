@@ -42,13 +42,17 @@ export default function Experience() {
 
   const ball = useRef();
 
-  const jumpBall = () => {
+  const jumpBall = (e) => {
     const mass = ball.current.mass();
-    ball.current.applyImpulse({
-      x: 0,
-      y: 10 * mass,
-      z: 0,
-    });
+    ball.current.applyImpulseAtPoint(
+      {
+        x: 0,
+        y: 10 * mass,
+        z: 0,
+      },
+      e.point,
+      true,
+    );
   };
 
   const twister = useRef();

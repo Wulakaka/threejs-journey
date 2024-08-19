@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { RigidBody } from "@react-three/rapier";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 
 const boxGeometry = new THREE.BoxGeometry(1, 1, 1);
@@ -26,11 +26,15 @@ function BlockStart({ position = [0, 0, 0] }) {
 
 function BlockSpinner({ position = [0, 0, 0] }) {
   const obstacle = useRef();
+  // 用 useState 来缓存 speed 的值，避免每次渲染都重新生成一个随机数
+  const [speed] = useState(
+    () => (Math.random() + 0.2) * (Math.random() > 0.5 ? 1 : -1),
+  );
 
   useFrame((state) => {
     const time = state.clock.getElapsedTime();
     const rotation = new THREE.Quaternion();
-    rotation.setFromEuler(new THREE.Euler(0, time, 0));
+    rotation.setFromEuler(new THREE.Euler(0, time * speed, 0));
     // https://rapier.rs/javascript3d/classes/RigidBody.html#setNextKinematicRotation
     obstacle.current.setNextKinematicRotation(rotation);
   });

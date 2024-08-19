@@ -112,12 +112,57 @@ function BlockLimbo({ position = [0, 0, 0] }) {
   );
 }
 
+function BlockAxe({ position = [0, 0, 0] }) {
+  const obstacle = useRef();
+  const [timeOffset] = useState(() => Math.random() * Math.PI * 2);
+
+  useFrame((state) => {
+    const time = state.clock.getElapsedTime();
+    const x = Math.sin(time + timeOffset) * 1.25;
+    // https://rapier.rs/javascript3d/classes/RigidBody.html#setNextKinematicTranslation
+    obstacle.current.setNextKinematicTranslation({
+      x: position[0] + x,
+      y: position[1] + 0.75,
+      z: position[2],
+    });
+  });
+
+  return (
+    <group position={position}>
+      <mesh
+        geometry={boxGeometry}
+        material={floor2Material}
+        position={[0, -0.1, 0]}
+        scale={[4, 0.2, 4]}
+        receiveShadow={true}
+      ></mesh>
+
+      <RigidBody
+        type="kinematicPosition"
+        ref={obstacle}
+        position={[0, 0.3, 0]}
+        restitution={0.2}
+        friction={0}
+      >
+        <mesh
+          geometry={boxGeometry}
+          scale={[1.5, 1.5, 0.3]}
+          material={obstacleMaterial}
+          castShadow={true}
+          receiveShadow={true}
+        />
+      </RigidBody>
+    </group>
+  );
+}
+
 export default function Level() {
   return (
     <>
       <BlockStart position={[0, 0, 12]} />
       <BlockSpinner position={[0, 0, 8]} />
       <BlockLimbo position={[0, 0, 4]} />
+      <BlockAxe position={[0, 0, 0]} />
     </>
   );
 }

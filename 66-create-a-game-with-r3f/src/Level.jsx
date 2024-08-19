@@ -207,6 +207,7 @@ export function Level({
       {blocks.map((Block, index) => (
         <Block key={index} position={[0, 0, -4 * (index + 1)]} />
       ))}
+      <BlockEnd position={[0, 0, -4 * (count + 1)]} />
     </>
   );
 }

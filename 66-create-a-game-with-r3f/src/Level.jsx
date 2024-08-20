@@ -3,6 +3,7 @@ import { RigidBody } from "@react-three/rapier";
 import { useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
+import Bounds from "./Bounds.jsx";
 
 const boxGeometry = new THREE.BoxGeometry(1, 1, 1);
 
@@ -208,6 +209,11 @@ export function Level({
         <Block key={index} position={[0, 0, -4 * (index + 1)]} />
       ))}
       <BlockEnd position={[0, 0, -4 * (count + 1)]} />
+      <Bounds
+        length={count + 2}
+        boxGeometry={boxGeometry}
+        wallMaterial={wallMaterial}
+      />
     </>
   );
 }

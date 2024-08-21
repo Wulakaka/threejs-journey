@@ -13,6 +13,7 @@ export default create(
           if (state.phase === "ready") {
             return {
               phase: "playing",
+              startTime: Date.now(),
             };
           }
           return {};
@@ -33,11 +34,17 @@ export default create(
           if (state.phase === "playing") {
             return {
               phase: "ended",
+              endTime: Date.now(),
             };
           }
           return {};
         });
       },
+      /**
+       * Time
+       */
+      startTime: 0,
+      endTime: 0,
     };
   }),
 );

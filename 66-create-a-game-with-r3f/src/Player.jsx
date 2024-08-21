@@ -8,7 +8,10 @@ export default function Player() {
   const body = useRef();
   const [subscribeKeys, getKeys] = useKeyboardControls();
   const { rapier, world } = useRapier();
-  const [smoothedCameraPosition] = useState(() => new THREE.Vector3());
+  // 设置初始 camera 位置
+  const [smoothedCameraPosition] = useState(
+    () => new THREE.Vector3(10, 10, 10),
+  );
   const [smoothedCameraTarget] = useState(() => new THREE.Vector3());
 
   const jump = () => {

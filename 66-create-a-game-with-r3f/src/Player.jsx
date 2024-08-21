@@ -3,6 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import { useKeyboardControls } from "@react-three/drei";
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
+import useGame from "./stores/useGame.jsx";
 
 export default function Player() {
   const body = useRef();
@@ -26,6 +27,11 @@ export default function Player() {
     }
   };
 
+  const start = useGame((state) => state.start);
+  const end = useGame((state) => state.end);
+  const restart = useGame((state) => state.restart);
+  const blocksCount = useGame((state) => state.blocksCount);
+
   useEffect(() => {
     const unsubscribeJump = subscribeKeys(
       (state) => state.jump,
@@ -35,7 +41,15 @@ export default function Player() {
         }
       },
     );
-    return () => unsubscribeJump();
+
+    const unsubscribeAny = subscribeKeys(() => {
+      start();
+    });
+
+    return () => {
+      unsubscribeJump();
+      unsubscribeAny();
+    };
   }, []);
 
   useFrame((state, delta) => {
@@ -90,6 +104,12 @@ export default function Player() {
 
     state.camera.position.copy(smoothedCameraPosition);
     state.camera.lookAt(smoothedCameraTarget);
+
+    /**
+     * Phases
+     */
+    if (bodyPosition.z < -(blocksCount * 4 + 2)) end();
+    if (bodyPosition.y < -4) restart();
   });
 
   return (

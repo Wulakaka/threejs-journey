@@ -67,7 +67,7 @@ export function BlockSpinner({ position = [0, 0, 0] }) {
     const rotation = new THREE.Quaternion();
     rotation.setFromEuler(new THREE.Euler(0, time * speed, 0));
     // https://rapier.rs/javascript3d/classes/RigidBody.html#setNextKinematicRotation
-    obstacle.current.setNextKinematicRotation(rotation);
+    obstacle.current?.setNextKinematicRotation(rotation);
   });
 
   return (
@@ -107,7 +107,7 @@ export function BlockLimbo({ position = [0, 0, 0] }) {
     const time = state.clock.getElapsedTime();
     const y = Math.sin(time + timeOffset) + 1.15;
     // https://rapier.rs/javascript3d/classes/RigidBody.html#setNextKinematicTranslation
-    obstacle.current.setNextKinematicTranslation({
+    obstacle.current?.setNextKinematicTranslation({
       x: position[0],
       y: position[1] + y,
       z: position[2],
@@ -151,7 +151,7 @@ export function BlockAxe({ position = [0, 0, 0] }) {
     const time = state.clock.getElapsedTime();
     const x = Math.sin(time + timeOffset) * 1.25;
     // https://rapier.rs/javascript3d/classes/RigidBody.html#setNextKinematicTranslation
-    obstacle.current.setNextKinematicTranslation({
+    obstacle.current?.setNextKinematicTranslation({
       x: position[0] + x,
       y: position[1] + 0.75,
       z: position[2],

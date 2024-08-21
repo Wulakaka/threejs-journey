@@ -27,12 +27,31 @@ export default function Player() {
     }
   };
 
+  const reset = () => {
+    body.current.setTranslation({ x: 0, y: 1, z: 0 });
+    // https://rapier.rs/javascript3d/classes/RigidBody.html#setLinvel
+    // 线速度
+    body.current.setLinvel({ x: 0, y: 0, z: 0 });
+    // https://rapier.rs/javascript3d/classes/RigidBody.html#setAngvel
+    // 角速度
+    body.current.setAngvel({ x: 0, y: 0, z: 0 });
+  };
+
   const start = useGame((state) => state.start);
   const end = useGame((state) => state.end);
   const restart = useGame((state) => state.restart);
   const blocksCount = useGame((state) => state.blocksCount);
 
   useEffect(() => {
+    const unsubscribeReset = useGame.subscribe(
+      (state) => state.phase,
+      (value) => {
+        if (value === "ready") {
+          reset();
+        }
+      },
+    );
+
     const unsubscribeJump = subscribeKeys(
       (state) => state.jump,
       (value) => {
@@ -47,6 +66,7 @@ export default function Player() {
     });
 
     return () => {
+      unsubscribeReset();
       unsubscribeJump();
       unsubscribeAny();
     };

@@ -10,13 +10,22 @@ body
     overflow: hidden;
 }
 
-.webgl
-{
+.canvas-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     position: fixed;
     top: 0;
     left: 0;
     outline: none;
 }
+
+/*.webgl*/
+/*{*/
+/*    position: fixed;*/
+/*    top: 0;*/
+/*    left: 0;*/
+/*    outline: none;*/
+/*}*/
 
 .loading-bar {
     position: absolute;

@@ -36,6 +36,7 @@ const debugObject = {};
 
 // Canvas
 const canvas = document.querySelector("canvas.webgl");
+const canvas2 = document.querySelector("canvas.webgl2");
 
 // Scene
 const scene = new THREE.Scene();
@@ -129,13 +130,13 @@ scene.add(overlay);
  * Sizes
  */
 const sizes = {
-  width: window.innerWidth,
+  width: window.innerWidth / 2,
   height: window.innerHeight,
 };
 
 window.addEventListener("resize", () => {
   // Update sizes
-  sizes.width = window.innerWidth;
+  sizes.width = window.innerWidth / 2;
   sizes.height = window.innerHeight;
 
   // Update camera
@@ -164,19 +165,38 @@ scene.add(camera);
 const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
 
+//  camera 2
+const camera2 = new THREE.PerspectiveCamera(
+  75,
+  sizes.width / sizes.height,
+  0.1,
+  100,
+);
+camera2.position.set(-4, 1, -4);
+scene.add(camera2);
+
+// Controls2
+const controls2 = new OrbitControls(camera2, canvas2);
+controls2.enableDamping = true;
+
 /**
  * Renderer
  */
-const renderer = new THREE.WebGLRenderer({
-  canvas: canvas,
-  antialias: true,
-});
-renderer.toneMapping = THREE.ReinhardToneMapping;
-renderer.toneMappingExposure = 3;
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-renderer.setSize(sizes.width, sizes.height);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+function generateRenderer(canvas) {
+  const renderer = new THREE.WebGLRenderer({
+    canvas: canvas,
+    antialias: true,
+  });
+  renderer.toneMapping = THREE.ReinhardToneMapping;
+  renderer.toneMappingExposure = 3;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.setSize(sizes.width, sizes.height);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  return renderer;
+}
+const renderer = generateRenderer(canvas);
+const renderer2 = generateRenderer(canvas2);
 
 /**
  * Animate
@@ -184,9 +204,11 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 const tick = () => {
   // Update controls
   controls.update();
+  controls2.update();
 
   // Render
   renderer.render(scene, camera);
+  renderer2.render(scene, camera2);
 
   // Call tick again on the next frame
   window.requestAnimationFrame(tick);

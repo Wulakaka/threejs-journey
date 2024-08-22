@@ -595,6 +595,22 @@ importers:
         specifier: ^0.4.1
         version: 0.4.1(vite@5.3.3)
 
+  47-intro-and-loading-progress:
+    dependencies:
+      lil-gui:
+        specifier: ^0.19.2
+        version: 0.19.2
+      three:
+        specifier: ^0.166.1
+        version: 0.166.1
+    devDependencies:
+      vite:
+        specifier: ^5.3.3
+        version: 5.3.3
+      vite-plugin-restart:
+        specifier: ^0.4.1
+        version: 0.4.1(vite@5.3.3)
+
   51-importing-and-optimizing-the-scene:
     dependencies:
       lil-gui:

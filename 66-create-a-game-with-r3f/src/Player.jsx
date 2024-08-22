@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import useGame from "./stores/useGame.jsx";
 
-export default function Player() {
+export default function Player({ position = [0, 1, 0], camera }) {
   const body = useRef();
   const [subscribeKeys, getKeys] = useKeyboardControls();
   const { rapier, world } = useRapier();
@@ -28,7 +28,11 @@ export default function Player() {
   };
 
   const reset = () => {
-    body.current.setTranslation({ x: 0, y: 1, z: 0 });
+    body.current.setTranslation({
+      x: position[0],
+      y: position[1],
+      z: position[2],
+    });
     // https://rapier.rs/javascript3d/classes/RigidBody.html#setLinvel
     // 线速度
     body.current.setLinvel({ x: 0, y: 0, z: 0 });
@@ -124,8 +128,8 @@ export default function Player() {
     smoothedCameraPosition.lerp(cameraPosition, 5 * delta);
     smoothedCameraTarget.lerp(cameraTarget, 5 * delta);
 
-    state.camera.position.copy(smoothedCameraPosition);
-    state.camera.lookAt(smoothedCameraTarget);
+    camera.position.copy(smoothedCameraPosition);
+    camera.lookAt(smoothedCameraTarget);
 
     /**
      * Phases
@@ -143,7 +147,7 @@ export default function Player() {
       friction={1}
       linearDamping={0.5}
       angularDamping={0.5}
-      position={[0, 1, 0]}
+      position={position}
     >
       <mesh castShadow>
         <icosahedronGeometry args={[0.3, 1]} />

@@ -27,7 +27,7 @@ export default function Screens() {
       </div>
       <div>
         <Canvas shadows scene={scene} camera={camera2}></Canvas>
-        <Interface />
+        <Interface player="player2" />
       </div>
     </div>
   );

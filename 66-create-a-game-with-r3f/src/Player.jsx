@@ -5,7 +5,12 @@ import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import useGame from "./stores/useGame.jsx";
 
-export default function Player({ position = [0, 1, 0], camera }) {
+export default function Player({
+  position = [0, 1, 0],
+  camera,
+  player = "player1",
+  color = "mediumpurple",
+}) {
   const body = useRef();
   const [subscribeKeys, getKeys] = useKeyboardControls();
   const { rapier, world } = useRapier();
@@ -23,7 +28,7 @@ export default function Player({ position = [0, 1, 0], camera }) {
     const hit = world.castRay(ray, 10, true);
 
     if (hit && hit.timeOfImpact < 0.15) {
-      body.current.applyImpulse({ x: 0, y: 0.5, z: 0 });
+      body.current.applyImpulse({ x: 0, y: 0.7, z: 0 });
     }
   };
 
@@ -48,16 +53,16 @@ export default function Player({ position = [0, 1, 0], camera }) {
 
   useEffect(() => {
     const unsubscribeReset = useGame.subscribe(
-      (state) => state.phase,
+      (state) => state[player].phase,
       (value) => {
         if (value === "ready") {
-          reset();
+          reset(player);
         }
       },
     );
 
     const unsubscribeJump = subscribeKeys(
-      (state) => state.jump,
+      (state) => state[`${player}jump`],
       (value) => {
         if (value) {
           jump();
@@ -65,9 +70,20 @@ export default function Player({ position = [0, 1, 0], camera }) {
       },
     );
 
-    const unsubscribeAny = subscribeKeys(() => {
-      start();
-    });
+    const unsubscribeAny = subscribeKeys(
+      (state) => {
+        return (
+          state[`${player}forward`] ||
+          state[`${player}backward`] ||
+          state[`${player}leftward`] ||
+          state[`${player}rightward`] ||
+          state[`${player}jump`]
+        );
+      },
+      () => {
+        start(player);
+      },
+    );
 
     return () => {
       unsubscribeReset();
@@ -82,7 +98,12 @@ export default function Player({ position = [0, 1, 0], camera }) {
     /**
      * Controls
      */
-    const { forward, backward, leftward, rightward } = getKeys();
+    const {
+      [`${player}forward`]: forward,
+      [`${player}backward`]: backward,
+      [`${player}leftward`]: leftward,
+      [`${player}rightward`]: rightward,
+    } = getKeys();
     const impulse = { x: 0, y: 0, z: 0 };
     const torque = { x: 0, y: 0, z: 0 };
 
@@ -134,8 +155,8 @@ export default function Player({ position = [0, 1, 0], camera }) {
     /**
      * Phases
      */
-    if (bodyPosition.z < -(blocksCount * 4 + 2)) end();
-    if (bodyPosition.y < -4) restart();
+    if (bodyPosition.z < -(blocksCount * 4 + 2)) end(player);
+    if (bodyPosition.y < -4) restart(player);
   });
 
   return (
@@ -151,7 +172,7 @@ export default function Player({ position = [0, 1, 0], camera }) {
     >
       <mesh castShadow>
         <icosahedronGeometry args={[0.3, 1]} />
-        <meshStandardMaterial flatShading color="mediumpurple" />
+        <meshStandardMaterial flatShading color={color} />
       </mesh>
     </RigidBody>
   );

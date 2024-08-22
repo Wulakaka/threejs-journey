@@ -18,7 +18,12 @@ export default function Experience({ camera2 }) {
         <Lights />
         <Level count={blocksCount} seed={blocksSeed} />
         <Player camera={camera} />
-        <Player camera={camera2} position={[1, 1, 0]} />
+        <Player
+          camera={camera2}
+          position={[1, 1, 0]}
+          player="player2"
+          color="hotpink"
+        />
       </Physics>
     </>
   );

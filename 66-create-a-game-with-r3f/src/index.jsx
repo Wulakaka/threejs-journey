@@ -8,11 +8,16 @@ const root = ReactDOM.createRoot(document.querySelector("#root"));
 root.render(
   <KeyboardControls
     map={[
-      { name: "forward", keys: ["KeyW", "ArrowUp"] },
-      { name: "backward", keys: ["KeyS", "ArrowDown"] },
-      { name: "leftward", keys: ["KeyA", "ArrowLeft"] },
-      { name: "rightward", keys: ["KeyD", "ArrowRight"] },
-      { name: "jump", keys: ["Space"] },
+      { name: "player1forward", keys: ["KeyW"] },
+      { name: "player1backward", keys: ["KeyS"] },
+      { name: "player1leftward", keys: ["KeyA"] },
+      { name: "player1rightward", keys: ["KeyD"] },
+      { name: "player1jump", keys: ["Space"] },
+      { name: "player2forward", keys: ["ArrowUp"] },
+      { name: "player2backward", keys: ["ArrowDown"] },
+      { name: "player2leftward", keys: ["ArrowLeft"] },
+      { name: "player2rightward", keys: ["ArrowRight"] },
+      { name: "player2jump", keys: ["Numpad0"] },
     ]}
   >
     <Screens />

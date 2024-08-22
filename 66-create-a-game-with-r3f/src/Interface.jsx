@@ -3,27 +3,27 @@ import { useEffect, useRef } from "react";
 import { addEffect } from "@react-three/fiber";
 import useGame from "./stores/useGame.jsx";
 
-export default function Interface() {
+export default function Interface({ player = "player1" }) {
   const time = useRef();
 
   const restart = useGame((state) => state.restart);
-  const phase = useGame((state) => state.phase);
+  const phase = useGame((state) => state[player].phase);
 
-  const forward = useKeyboardControls((state) => state.forward);
-  const backward = useKeyboardControls((state) => state.backward);
-  const leftward = useKeyboardControls((state) => state.leftward);
-  const rightward = useKeyboardControls((state) => state.rightward);
-  const jump = useKeyboardControls((state) => state.jump);
+  const forward = useKeyboardControls((state) => state[`${player}forward`]);
+  const backward = useKeyboardControls((state) => state[`${player}backward`]);
+  const leftward = useKeyboardControls((state) => state[`${player}leftward`]);
+  const rightward = useKeyboardControls((state) => state[`${player}rightward`]);
+  const jump = useKeyboardControls((state) => state[`${player}jump`]);
 
   useEffect(() => {
     const unsubscribeEffect = addEffect(() => {
       const state = useGame.getState();
 
       let elapsedTime = 0;
-      if (state.phase === "playing") {
-        elapsedTime = Date.now() - state.startTime;
-      } else if (state.phase === "ended") {
-        elapsedTime = state.endTime - state.startTime;
+      if (state[player].phase === "playing") {
+        elapsedTime = Date.now() - state[player].startTime;
+      } else if (state[player].phase === "ended") {
+        elapsedTime = state[player].endTime - state[player].startTime;
       }
       elapsedTime /= 1000;
       elapsedTime = elapsedTime.toFixed(2);
@@ -45,7 +45,7 @@ export default function Interface() {
       </div>
       {/* Restart */}
       {phase === "ended" && (
-        <div className="restart" onClick={restart}>
+        <div className="restart" onClick={() => restart(player)}>
           Restart
         </div>
       )}

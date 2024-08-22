@@ -13,10 +13,10 @@ root.render(
       { name: "player1leftward", keys: ["KeyA"] },
       { name: "player1rightward", keys: ["KeyD"] },
       { name: "player1jump", keys: ["Space"] },
-      { name: "player2forward", keys: ["ArrowUp"] },
-      { name: "player2backward", keys: ["ArrowDown"] },
-      { name: "player2leftward", keys: ["ArrowLeft"] },
-      { name: "player2rightward", keys: ["ArrowRight"] },
+      { name: "player2forward", keys: ["ArrowUp", "Numpad8"] },
+      { name: "player2backward", keys: ["ArrowDown", "Numpad5"] },
+      { name: "player2leftward", keys: ["ArrowLeft", "Numpad4"] },
+      { name: "player2rightward", keys: ["ArrowRight", "Numpad6"] },
       { name: "player2jump", keys: ["Numpad0"] },
     ]}
   >

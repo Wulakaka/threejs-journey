@@ -73,6 +73,8 @@ export default function Player() {
   }, []);
 
   useFrame((state, delta) => {
+    if (!body.current) return;
+
     /**
      * Controls
      */

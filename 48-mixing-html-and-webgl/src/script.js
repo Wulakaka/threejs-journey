@@ -188,11 +188,30 @@ renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
 /**
+ * Points
+ */
+const points = [
+  {
+    position: new THREE.Vector3(0, 0, 0),
+    element: document.querySelector(".point-0"),
+  },
+];
+
+/**
  * Animate
  */
 const tick = () => {
   // Update controls
   controls.update();
+
+  // Go through each point
+  for (const point of points) {
+    const screenPosition = point.position.clone();
+    screenPosition.project(camera);
+    const translateX = screenPosition.x * sizes.width * 0.5;
+    const translateY = -screenPosition.y * sizes.height * 0.5;
+    point.element.style.transform = `translateX(${translateX}px) translateY(${translateY}px)`;
+  }
 
   // Render
   renderer.render(scene, camera);

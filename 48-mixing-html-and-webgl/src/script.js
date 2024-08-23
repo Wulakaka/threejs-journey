@@ -192,10 +192,11 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
  */
 const points = [
   {
-    position: new THREE.Vector3(0, 0, 0),
+    position: new THREE.Vector3(1.55, 0.3, -0.6),
     element: document.querySelector(".point-0"),
   },
 ];
+const raycaster = new THREE.Raycaster();
 
 /**
  * Animate
@@ -210,7 +211,22 @@ const tick = () => {
     screenPosition.project(camera);
     const translateX = screenPosition.x * sizes.width * 0.5;
     const translateY = -screenPosition.y * sizes.height * 0.5;
-    point.element.style.transform = `translateX(${translateX}px) translateY(${translateY}px)`;
+    point.element.style.transform = `translate(${translateX}px, ${translateY}px)`;
+
+    raycaster.setFromCamera(screenPosition, camera);
+    const intersects = raycaster.intersectObjects(scene.children, true);
+    if (intersects.length === 0) {
+      point.element.classList.remove("visible");
+    } else {
+      // 检查第一个交叉点是否在点之前
+      const intersectionDistance = intersects[0].distance;
+      const pointDistance = point.position.distanceTo(camera.position);
+      if (intersectionDistance < pointDistance) {
+        point.element.classList.remove("visible");
+      } else {
+        point.element.classList.add("visible");
+      }
+    }
   }
 
   // Render

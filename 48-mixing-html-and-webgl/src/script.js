@@ -7,6 +7,7 @@ import { gsap } from "gsap";
  * Loaders
  */
 const loadingBarElement = document.querySelector(".loading-bar");
+let sceneReady = false;
 const loadingManager = new THREE.LoadingManager(
   // Loaded
   () => {
@@ -23,6 +24,10 @@ const loadingManager = new THREE.LoadingManager(
       loadingBarElement.classList.add("ended");
       loadingBarElement.style.transform = "";
     }, 500);
+
+    window.setTimeout(() => {
+      sceneReady = true;
+    }, 2000);
   },
 
   // Progress
@@ -205,26 +210,28 @@ const tick = () => {
   // Update controls
   controls.update();
 
-  // Go through each point
-  for (const point of points) {
-    const screenPosition = point.position.clone();
-    screenPosition.project(camera);
-    const translateX = screenPosition.x * sizes.width * 0.5;
-    const translateY = -screenPosition.y * sizes.height * 0.5;
-    point.element.style.transform = `translate(${translateX}px, ${translateY}px)`;
+  if (sceneReady) {
+    // Go through each point
+    for (const point of points) {
+      const screenPosition = point.position.clone();
+      screenPosition.project(camera);
+      const translateX = screenPosition.x * sizes.width * 0.5;
+      const translateY = -screenPosition.y * sizes.height * 0.5;
+      point.element.style.transform = `translate(${translateX}px, ${translateY}px)`;
 
-    raycaster.setFromCamera(screenPosition, camera);
-    const intersects = raycaster.intersectObjects(scene.children, true);
-    if (intersects.length === 0) {
-      point.element.classList.remove("visible");
-    } else {
-      // 检查第一个交叉点是否在点之前
-      const intersectionDistance = intersects[0].distance;
-      const pointDistance = point.position.distanceTo(camera.position);
-      if (intersectionDistance < pointDistance) {
+      raycaster.setFromCamera(screenPosition, camera);
+      const intersects = raycaster.intersectObjects(scene.children, true);
+      if (intersects.length === 0) {
         point.element.classList.remove("visible");
       } else {
-        point.element.classList.add("visible");
+        // 检查第一个交叉点是否在点之前
+        const intersectionDistance = intersects[0].distance;
+        const pointDistance = point.position.distanceTo(camera.position);
+        if (intersectionDistance < pointDistance) {
+          point.element.classList.remove("visible");
+        } else {
+          point.element.classList.add("visible");
+        }
       }
     }
   }

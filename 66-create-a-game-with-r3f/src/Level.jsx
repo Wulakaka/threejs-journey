@@ -4,6 +4,7 @@ import { useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Float, Text, useGLTF } from "@react-three/drei";
 import Bounds from "./Bounds.jsx";
+import BlockWheel from "./BlockWheel.jsx";
 
 const boxGeometry = new THREE.BoxGeometry(1, 1, 1);
 
@@ -211,7 +212,7 @@ export function BlockAxe({ position = [0, 0, 0] }) {
 
 export function Level({
   count = 5,
-  types = [BlockSpinner, BlockLimbo, BlockAxe],
+  types = [BlockSpinner, BlockLimbo, BlockAxe, BlockWheel],
   seed = 0,
 }) {
   const blocks = useMemo(() => {
@@ -229,7 +230,12 @@ export function Level({
     <>
       <BlockStart position={[0, 0, 0]} />
       {blocks.map((Block, index) => (
-        <Block key={index} position={[0, 0, -4 * (index + 1)]} />
+        <Block
+          key={index}
+          position={[0, 0, -4 * (index + 1)]}
+          material={floor2Material}
+          boxGeometry={boxGeometry}
+        />
       ))}
       <BlockEnd position={[0, 0, -4 * (count + 1)]} />
       <Bounds

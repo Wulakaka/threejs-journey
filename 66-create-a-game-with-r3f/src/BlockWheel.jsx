@@ -6,16 +6,20 @@ export default function BlockWheel({
   material,
   boxGeometry,
 }) {
-  const horizonCount = 8;
-  const fromPositions = useMemo(() => {
+  const horizonCount = 4;
+  const fromTransitions = useMemo(() => {
     return Array(horizonCount)
       .fill(null)
       .map((_, index) => {
         const theta = ((index + 0.5) / horizonCount) * Math.PI - Math.PI / 2;
-        const x = -(Math.sin(theta) + 1);
+        const length = 4 - (Math.sin(theta) + 1);
+        const x = -2 + length / 2;
         const y = -0.1;
         const z = 2 - ((index + 0.5) / horizonCount) * 2;
-        return [x, y, z];
+        return {
+          position: [x, y, z],
+          scale: [length, 0.2, 0.4],
+        };
       });
   }, [horizonCount]);
 
@@ -23,23 +27,26 @@ export default function BlockWheel({
     return Array(horizonCount)
       .fill(null)
       .map((_, index) => {
-        const theta =
-          (((index + 0.5) / horizonCount) * Math.PI) / 2 - Math.PI / 2;
-        const x = -(Math.sin(theta) + 1) * 2 + 2;
+        const theta = ((index + 0.5) / horizonCount) * Math.PI - Math.PI / 2;
+        const length = 2 + (Math.sin(theta) + 1);
+        const x = 2 - length / 2;
         const y = -0.1;
         const z = -((index + 0.5) / horizonCount) * 2;
-        return [x, y, z];
+        return {
+          position: [x, y, z],
+          scale: [length, 0.2, 0.4],
+        };
       });
   }, [horizonCount]);
 
   const count = 24;
   const translations = useMemo(() => {
-    const radius = 2;
+    const radius = 1.2;
     return Array(count)
       .fill(null)
       .map((_, index) => {
         const theta = ((index + 0.5) / count) * Math.PI * 2;
-        const x = (theta / (Math.PI * 2)) * 4 - 2;
+        const x = (theta / (Math.PI * 2)) * 2 - 1;
         const y = Math.cos(theta + Math.PI) * (radius + 0.1) + radius;
         const z = Math.sin(theta + Math.PI) * (radius + 0.1);
         return {
@@ -52,20 +59,20 @@ export default function BlockWheel({
   return (
     <group position={position}>
       <RigidBody type={"fixed"}>
-        {fromPositions.map((position, key) => (
+        {fromTransitions.map(({ position, scale }, key) => (
           <mesh
             material={material}
             geometry={boxGeometry}
-            scale={[4, 0.2, 0.2]}
+            scale={scale}
             position={position}
             key={key + "from"}
           ></mesh>
         ))}
-        {toPositions.map((position, key) => (
+        {toPositions.map(({ position, scale }, key) => (
           <mesh
             material={material}
             geometry={boxGeometry}
-            scale={[4, 0.2, 0.2]}
+            scale={scale}
             position={position}
             key={key + "to"}
           ></mesh>
@@ -74,7 +81,7 @@ export default function BlockWheel({
           <mesh
             material={material}
             geometry={boxGeometry}
-            scale={[4, 0.2, 0.5]}
+            scale={[2, 0.2, 0.3]}
             position={position}
             rotation={rotation}
             key={key}

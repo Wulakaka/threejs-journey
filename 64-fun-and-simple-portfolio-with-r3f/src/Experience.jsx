@@ -7,11 +7,36 @@ import {
   Text,
   useGLTF,
 } from "@react-three/drei";
+import { useFrame, useThree } from "@react-three/fiber";
+import * as THREE from "three";
+import { useState } from "react";
 
-export default function Experience() {
+export default function Experience({ portal, isFocusing, onFocus }) {
+  const [cameraPosition] = useState(new THREE.Vector3());
+  const [smoothCameraPosition] = useState(new THREE.Vector3());
+  const [cameraTarget] = useState(new THREE.Vector3());
+  const [smoothCameraTarget] = useState(new THREE.Vector3());
+
   const computer = useGLTF(
     "https://vazxmixjsiawhamofees.supabase.co/storage/v1/object/public/models/macbook/model.gltf",
   );
+  const { camera } = useThree();
+
+  if (isFocusing) {
+    cameraPosition.set(0, 1, 3);
+    cameraTarget.set(0, 1, -2);
+  } else {
+    cameraPosition.set(-3, 1.5, 4);
+    cameraTarget.set(0, 0, 0);
+  }
+
+  useFrame((state, delta, frame) => {
+    smoothCameraPosition.lerp(cameraPosition, delta);
+    camera.position.copy(smoothCameraPosition);
+
+    smoothCameraTarget.lerp(cameraTarget, delta);
+    camera.lookAt(smoothCameraTarget);
+  });
 
   return (
     <>
@@ -43,8 +68,21 @@ export default function Experience() {
               distanceFactor={1.17}
               position={[0, 1.56, -1.4]}
               rotation-x={-0.256}
+              portal={portal}
             >
-              <iframe src="https://bruno-simon.com/html/"></iframe>
+              <div
+                className="iframe"
+                style={{
+                  pointerEvents: isFocusing ? "none" : "auto",
+                }}
+                onClick={onFocus}
+              ></div>
+              <iframe
+                src="https://bruno-simon.com/html/"
+                style={{
+                  pointerEvents: isFocusing ? "auto" : "none",
+                }}
+              ></iframe>
             </Html>
           </primitive>
 

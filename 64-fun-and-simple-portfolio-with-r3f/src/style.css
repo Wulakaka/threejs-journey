@@ -9,9 +9,22 @@ body,
     height: 100%;
     background: ivory;
 }
+.container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: ivory;
+    touch-action: none;
+}
 
 .r3f {
     touch-action: none;
+}
+
+.htmlScreen {
+    pointer-events: none;
 }
 
 .htmlScreen iframe {
@@ -20,4 +33,12 @@ body,
     border: none;
     border-radius: 20px;
     background: black;
+}
+
+.htmlScreen .iframe {
+    width: 1024px;
+    height: 670px;
+    position: absolute;
+    left: 0;
+    top: 0;
 }

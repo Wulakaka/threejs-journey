@@ -1,8 +1,9 @@
 packages:
-  - '*'
+  - "*"
+  - tsl/*
   - packages/*
   - components/**
-  - '!**/test/**'
+  - "!**/test/**"
 
 onlyBuiltDependencies:
   - esbuild

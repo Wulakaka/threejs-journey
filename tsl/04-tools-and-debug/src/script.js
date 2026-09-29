@@ -1,6 +1,8 @@
-import * as THREE from 'three/webgpu'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+import { Inspector } from 'three/addons/inspector/Inspector.js'
 import { uv } from 'three/tsl'
+import * as THREE from 'three/webgpu'
+// import TSLGraphEditor from 'three/addons/inspector/extensions/tsl-graph/TSLGraphEditor.js'
 
 /**
  * Base
@@ -61,13 +63,16 @@ controls.enableDamping = true
  */
 const renderer = new THREE.WebGPURenderer({
   canvas: canvas,
-  antialias: true
+  antialias: true,
+  forceWebGL: false
 })
 renderer.shadowMap.enabled = true
 renderer.shadowMap.type = THREE.PCFShadowMap
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 renderer.setClearColor(0x111111)
+renderer.inspector = new Inspector()
+// renderer.inspector.addTab(new TSLGraphEditor())
 
 /**
  * Floor
@@ -83,13 +88,29 @@ renderer.setClearColor(0x111111)
     transparent: true
   })
 
-  const fade = uv().sub(0.5).length().smoothstep(0.5, 0.2)
+  const fade = uv()
+    .sub(0.5)
+    .length()
+    .smoothstep(0.5, 0.2)
+    .toVar('fade')
+    .debug()
+    .toInspector('FloorFade')
+
   material.opacityNode = fade
 
   const mesh = new THREE.Mesh(geometry, material)
   mesh.rotation.x = -Math.PI * 0.5
   mesh.receiveShadow = true
   scene.add(mesh)
+
+  //   const { vertexShader, fragmentShader } = await renderer.debug.getShaderAsync(
+  //     scene,
+  //     camera,
+  //     mesh
+  //   )
+
+  //   console.log(vertexShader)
+  //   console.log(fragmentShader)
 }
 
 /**
@@ -99,12 +120,20 @@ renderer.setClearColor(0x111111)
   const geometry = new THREE.TorusKnotGeometry(0.5, 0.24, 128, 32)
 
   const material = new THREE.MeshStandardNodeMaterial()
+  //   material.userData.graphId = 'torus-physical'
 
   const mesh = new THREE.Mesh(geometry, material)
   mesh.castShadow = true
   mesh.receiveShadow = true
   mesh.position.y = 1
   scene.add(mesh)
+
+  // Tweaks
+  const gui = renderer.inspector.createParameters('Torus')
+  gui.add(material, 'roughness', 0, 1)
+  gui.add(material, 'metalness', 0, 1)
+  gui.addColor(material, 'color')
+  gui.add(material, 'wireframe')
 }
 
 /**

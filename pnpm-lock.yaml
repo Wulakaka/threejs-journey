@@ -1125,6 +1125,16 @@ importers:
         specifier: ^8.1.3
         version: 8.3.1
 
+  tsl/04-tools-and-debug:
+    dependencies:
+      three:
+        specifier: ^0.186.0
+        version: 0.186.1
+    devDependencies:
+      vite:
+        specifier: ^8.1.3
+        version: 8.3.1
+
 packages:
 
   '@babel/code-frame@7.27.1':
@@ -2641,6 +2651,9 @@ packages:
 
   three@0.185.1:
     resolution: {integrity: sha512-5aojFCXKwnjBRZvUnt3WFfEcvUJgkN5LlijRFN95hMy8WVkG4I0QNcJE+OuWvuJ0bOdStrbfXn0pkd6/QyiAlg==}
+
+  three@0.186.1:
+    resolution: {integrity: sha512-blFeqb49wRCSGUGj7gtpfnSGHy2lwDk94RhUmS1c/hTby70kvChbWpkJ4Pm1390LqzzvTmzgXKHPEafJwCb8jA==}
 
   through2@0.6.5:
     resolution: {integrity: sha512-RkK/CCESdTKQZHdmKICijdKKsCRVHs5KsLZ6pACAmF/1GPUQhonHSXWNERctxEp7RmvjdNbZTL5z9V7nSCXKcg==}
@@ -4300,6 +4313,8 @@ snapshots:
   three@0.166.1: {}
 
   three@0.185.1: {}
+
+  three@0.186.1: {}
 
   through2@0.6.5:
     dependencies:

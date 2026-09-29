@@ -1,7 +1,19 @@
 import * as THREE from 'three/webgpu'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
-import { uv } from 'three/tsl'
-
+import {
+  checker,
+  color,
+  materialColor,
+  modelNormalMatrix,
+  modelPosition,
+  normalLocal,
+  positionLocal,
+  screenUV,
+  uv,
+  vec3,
+  vec4
+} from 'three/tsl'
+import { TransformControls } from 'three/addons/controls/TransformControls.js'
 /**
  * Base
  */
@@ -80,6 +92,10 @@ renderer.setClearColor(0x111111)
 
   const material = new THREE.MeshStandardNodeMaterial({ map: textureColor })
 
+  const pattern = vec3(checker(uv().mul(4)))
+
+  material.colorNode = pattern.mul(materialColor)
+
   const mesh = new THREE.Mesh(geometry, material)
   mesh.rotation.x = -Math.PI * 0.5
   mesh.receiveShadow = true
@@ -94,11 +110,28 @@ renderer.setClearColor(0x111111)
 
   const material = new THREE.MeshStandardNodeMaterial()
 
+  material.outputNode = vec4(modelPosition, 1, 1)
+
   const mesh = new THREE.Mesh(geometry, material)
   mesh.castShadow = true
   mesh.receiveShadow = true
   mesh.position.y = 1
   scene.add(mesh)
+
+  // TransformControl
+  const transformControls = new TransformControls(camera, canvas)
+  transformControls.attach(mesh)
+  scene.add(transformControls.getHelper())
+
+  transformControls.addEventListener('dragging-changed', (event) => {
+    controls.enabled = !event.value
+  })
+
+  window.addEventListener('keydown', (event) => {
+    if (event.key === 'g') transformControls.setMode('translate')
+    else if (event.key === 'r') transformControls.setMode('rotate')
+    else if (event.key === 's') transformControls.setMode('scale')
+  })
 }
 
 /**

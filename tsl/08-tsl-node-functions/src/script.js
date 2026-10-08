@@ -2,7 +2,19 @@ import * as THREE from 'three/webgpu'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { TransformControls } from 'three/addons/controls/TransformControls.js'
 import { Inspector } from 'three/addons/inspector/Inspector.js'
-import { bool, Discard, float, Fn, If, not, uv, vec2, vec3 } from 'three/tsl'
+import {
+  bool,
+  Discard,
+  float,
+  Fn,
+  If,
+  int,
+  Loop,
+  not,
+  uv,
+  vec2,
+  vec3
+} from 'three/tsl'
 
 /**
  * Base
@@ -90,6 +102,45 @@ renderer.inspector = new Inspector()
     side: THREE.DoubleSide
   })
 
+  const circles = Fn(
+    ({
+      coordinates = uv(),
+      center = vec2(0.5),
+      radius = float(0.25),
+      thickness = float(0.02),
+      inverted = bool(false),
+      discarded = bool(false),
+      count = int(5),
+      span = float(0.1)
+    }) => {
+      const lines = float(0)
+
+      Loop(
+        { start: 0, end: count, type: 'float', condition: '<', name: 'i' },
+        ({ i }) => {
+          lines.addAssign(
+            circle({
+              coordinates,
+              center,
+              radius: radius.add(i.mul(span)),
+              thickness,
+              inverted: bool(false),
+              discarded: bool(false)
+            })
+          )
+        }
+      )
+
+      If(inverted, () => {
+        lines.assign(lines.oneMinus())
+      })
+
+      lines.lessThanEqual(0).and(discarded).discard()
+
+      return lines
+    }
+  )
+
   const circle = Fn(
     ({
       coordinates = uv(),
@@ -109,11 +160,6 @@ renderer.inspector = new Inspector()
         line.assign(line.oneMinus())
       })
 
-      //   If(line.lessThanEqual(0).and(discarded), () => {
-      //     Discard()
-      //   })
-      //   Discard(line.lessThanEqual(0).and(discarded))
-
       line.lessThanEqual(0).and(discarded).discard()
 
       return line
@@ -121,7 +167,10 @@ renderer.inspector = new Inspector()
   )
 
   material.colorNode = vec3(
-    circle({ radius: float(0.1), inverted: bool(true), discarded: bool(true) })
+    circles({
+      radius: float(0.075),
+      discarded: bool(true)
+    })
   )
 
   const fade = uv().sub(0.5).length().smoothstep(0.5, 0.2)

@@ -2,7 +2,7 @@ import * as THREE from 'three/webgpu'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { TransformControls } from 'three/addons/controls/TransformControls.js'
 import { Inspector } from 'three/addons/inspector/Inspector.js'
-import { uv } from 'three/tsl'
+import { bool, Discard, float, Fn, If, not, uv, vec2, vec3 } from 'three/tsl'
 
 /**
  * Base
@@ -89,6 +89,40 @@ renderer.inspector = new Inspector()
     transparent: true,
     side: THREE.DoubleSide
   })
+
+  const circle = Fn(
+    ({
+      coordinates = uv(),
+      center = vec2(0.5),
+      radius = float(0.25),
+      thickness = float(0.02),
+      inverted = bool(false),
+      discarded = bool(false)
+    }) => {
+      const distanceToCenter = coordinates.distance(center)
+
+      const lineSDF = distanceToCenter.sub(radius)
+
+      const line = lineSDF.abs().step(thickness.div(2))
+
+      If(inverted.not(), () => {
+        line.assign(line.oneMinus())
+      })
+
+      //   If(line.lessThanEqual(0).and(discarded), () => {
+      //     Discard()
+      //   })
+      //   Discard(line.lessThanEqual(0).and(discarded))
+
+      line.lessThanEqual(0).and(discarded).discard()
+
+      return line
+    }
+  )
+
+  material.colorNode = vec3(
+    circle({ radius: float(0.1), inverted: bool(true), discarded: bool(true) })
+  )
 
   const fade = uv().sub(0.5).length().smoothstep(0.5, 0.2)
   material.opacityNode = fade

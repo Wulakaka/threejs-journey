@@ -2,7 +2,18 @@ import * as THREE from 'three/webgpu'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { TransformControls } from 'three/addons/controls/TransformControls.js'
 import { Inspector } from 'three/addons/inspector/Inspector.js'
-import { uv } from 'three/tsl'
+import {
+  attribute,
+  bufferAttribute,
+  color,
+  positionWorld,
+  time,
+  uniform,
+  uniformArray,
+  uv,
+  vec2,
+  vec3
+} from 'three/tsl'
 
 /**
  * Base
@@ -84,10 +95,23 @@ renderer.inspector = new Inspector()
 {
   const geometry = new THREE.PlaneGeometry(10, 10, 10, 10)
 
+  const count = geometry.attributes.position.count
+
+  const randomArray = new Float32Array(count)
+
+  for (let i = 0; i < count; i++) randomArray[i] = Math.random()
+
+  const randomBuffer = new THREE.BufferAttribute(randomArray, 1)
+  // geometry.setAttribute('random', randomBuffer)
+
   const material = new THREE.MeshStandardNodeMaterial({
     map: uvChecker,
     transparent: true
   })
+
+  const random = bufferAttribute(randomBuffer, 'float')
+
+  material.colorNode = random
 
   const fade = uv().sub(0.5).length().smoothstep(0.5, 0.2)
   material.opacityNode = fade
@@ -106,11 +130,39 @@ renderer.inspector = new Inspector()
 
   const material = new THREE.MeshStandardNodeMaterial()
 
+  // 也可以使用 uniform(new THREE.Vector2(2, 0.25))
+  // 有时候数值来源于外部，此时可以使用 Vector2
+  const frequencies = uniform(vec2(2, 0.25))
+
+  const colors = uniformArray([
+    new THREE.Color(0x0b5d79),
+    new THREE.Color(0x5ed6c2),
+    new THREE.Color(0xfeedaa),
+    new THREE.Color(0xfc8f74),
+    new THREE.Color(0xcf2c65)
+  ])
+
+  const pattern = positionWorld.y
+    .mul(frequencies.x)
+    .sub(time.mul(frequencies.y))
+    .fract()
+    .mul(colors.array.length)
+    .floor()
+    .toInt()
+
+  material.colorNode = colors.element(pattern)
+
   const mesh = new THREE.Mesh(geometry, material)
   mesh.castShadow = true
   mesh.receiveShadow = true
   mesh.position.y = 1
   scene.add(mesh)
+
+  // Tweaks
+  const gui = renderer.inspector.createParameters('Torus Knot')
+  gui.add(frequencies.value, 'x', 0, 10, 0.01).name('position frequency')
+  gui.add(frequencies.value, 'y', 0, 10, 0.01).name('time frequency')
+  // gui.addColor(colors, 'value').name('color')
 }
 
 /**

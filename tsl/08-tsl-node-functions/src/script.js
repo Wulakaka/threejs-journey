@@ -163,6 +163,15 @@ renderer.inspector = new Inspector()
       line.lessThanEqual(0).and(discarded).discard()
 
       return line
+    },
+    {
+      coordinates: 'vec2',
+      center: 'vec2',
+      radius: 'float',
+      thickness: 'float',
+      inverted: 'bool',
+      discarded: 'bool',
+      return: 'float'
     }
   )
 
@@ -170,7 +179,7 @@ renderer.inspector = new Inspector()
     circles({
       radius: float(0.075),
       discarded: bool(true)
-    })
+    }).toVar('circlesOutput')
   )
 
   const fade = uv().sub(0.5).length().smoothstep(0.5, 0.2)
@@ -180,6 +189,9 @@ renderer.inspector = new Inspector()
   mesh.rotation.x = -Math.PI * 0.5
   mesh.receiveShadow = true
   scene.add(mesh)
+
+  const program = await renderer.debug.getShaderAsync(scene, camera, mesh)
+  console.log(program.fragmentShader)
 }
 
 /**

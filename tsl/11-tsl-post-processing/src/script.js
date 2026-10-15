@@ -186,6 +186,7 @@ const progress = uniform(0.5)
 const thickness = uniform(0.02)
 const _color = uniform(color(0xff824d))
 const colorStrength = uniform(3)
+const offsetStrength = uniform(0.05)
 
 const shatterPass = shatter(
   renderPipeline.outputNode,
@@ -194,7 +195,8 @@ const shatterPass = shatter(
   progress,
   thickness,
   _color,
-  colorStrength
+  colorStrength,
+  offsetStrength
 )
 renderPipeline.outputNode = shatterPass
 
@@ -205,6 +207,7 @@ shatterGui.add(progress, 'value', 0, 1, 0.001).name('progress')
 shatterGui.add(thickness, 'value', 0, 0.05, 0.0001).name('thickness')
 shatterGui.addColor(_color, 'value').name('color')
 shatterGui.add(colorStrength, 'value', 1, 10, 0.01).name('colorStrength')
+shatterGui.add(offsetStrength, 'value', 0, 0.2, 0.001).name('offsetStrength')
 
 // Bloom pass
 const bloomPass = bloom(renderPipeline.outputNode)

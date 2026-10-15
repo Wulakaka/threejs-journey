@@ -4,11 +4,16 @@ import { Inspector } from 'three/addons/inspector/Inspector.js'
 import { SkyMesh } from 'three/addons/objects/SkyMesh.js'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import {
+  color,
+  convertToTexture,
   mrt,
   normalWorld,
   output,
   pass,
   renderOutput,
+  rtt,
+  texture,
+  time,
   uv,
   vec2,
   vec3,
@@ -170,6 +175,17 @@ const sobelPass = sobel(scenePass.getTextureNode('normal')).remapClamp(
   1
 )
 renderPipeline.outputNode = renderPipeline.outputNode.add(sobelPass)
+
+// Drunk
+// 创建一个 texture，再对它采样并转换
+const drunkTexture = convertToTexture(renderPipeline.outputNode)
+const waveUv = vec2(
+  uv().x,
+  uv().y.add(uv().x.add(time.mul(0.2)).mul(7).sin().mul(0.1))
+)
+renderPipeline.outputNode = texture(drunkTexture, waveUv).mul(
+  color('aquamarine')
+)
 
 // Color transform pass
 // 需要手动将 color transform 进程提前到 aa 之前

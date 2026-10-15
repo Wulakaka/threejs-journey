@@ -3,8 +3,9 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { Inspector } from 'three/addons/inspector/Inspector.js'
 import { SkyMesh } from 'three/addons/objects/SkyMesh.js'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
-import { pass, uv } from 'three/tsl'
+import { pass, uv, vec2 } from 'three/tsl'
 import { bloom } from 'three/addons/tsl/display/BloomNode.js'
+import { chromaticAberration } from 'three/addons/tsl/display/ChromaticAberrationNode.js'
 
 /**
  * Base
@@ -124,6 +125,15 @@ renderPipeline.outputNode = bloomPass.add(scenePass)
 const bloomGui = postProcessingGui.addFolder('bloom')
 bloomGui.add(bloomPass.threshold, 'value', 0, 2, 0.01).name('threshold')
 bloomGui.add(bloomPass.strength, 'value', 0, 2, 0.01).name('strength')
+
+// Chromatic aberration pass
+const chromaticAberrationPass = chromaticAberration(
+  renderPipeline.outputNode,
+  2, // 颜色偏移距离
+  vec2(0.5), // 中心位置
+  1 //可以让 rgb 有不同比例的偏移
+)
+renderPipeline.outputNode = chromaticAberrationPass
 
 /**
  * Floor

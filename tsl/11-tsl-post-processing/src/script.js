@@ -3,10 +3,11 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { Inspector } from 'three/addons/inspector/Inspector.js'
 import { SkyMesh } from 'three/addons/objects/SkyMesh.js'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
-import { pass, uv, vec2 } from 'three/tsl'
+import { mrt, normalWorld, output, pass, uv, vec2, vec4 } from 'three/tsl'
 import { bloom } from 'three/addons/tsl/display/BloomNode.js'
 import { chromaticAberration } from 'three/addons/tsl/display/ChromaticAberrationNode.js'
 import { pixelationPass } from 'three/addons/tsl/display/PixelationPassNode.js'
+import { sobel } from 'three/examples/jsm/tsl/display/SobelOperatorNode.js'
 
 /**
  * Base
@@ -111,35 +112,51 @@ const renderPipeline = new THREE.RenderPipeline(renderer)
 // Debug
 const postProcessingGui = renderer.inspector.createParameters('Post-processing')
 
-// // Scene pass
-// // 在 pass() 内部会实例化一个 RenderTarget
-// const scenePass = pass(scene, camera)
-// // 每次都赋值是为了方便调试
-// renderPipeline.outputNode = scenePass
-
-// Pixelation pass
-// 像素大小，normal edge 强度，depth edge 强度
-const pixelationPassOutput = pixelationPass(scene, camera, 10, 2, 1)
-renderPipeline.outputNode = pixelationPassOutput
-
-// Bloom pass
-const bloomPass = bloom(renderPipeline.outputNode)
-bloomPass.threshold.value = 0.25
-bloomPass.strength.value = 1
-renderPipeline.outputNode = renderPipeline.outputNode.add(bloomPass)
-
-const bloomGui = postProcessingGui.addFolder('bloom')
-bloomGui.add(bloomPass.threshold, 'value', 0, 2, 0.01).name('threshold')
-bloomGui.add(bloomPass.strength, 'value', 0, 2, 0.01).name('strength')
-
-// Chromatic aberration pass
-const chromaticAberrationPass = chromaticAberration(
-  renderPipeline.outputNode,
-  2, // 颜色偏移距离
-  vec2(0.5), // 中心位置
-  1 //可以让 rgb 有不同比例的偏移
+// Scene pass
+// 在 pass() 内部会实例化一个 RenderTarget
+const scenePass = pass(scene, camera)
+scenePass.setMRT(
+  mrt({
+    output: output,
+    normal: normalWorld // 渲染到名为 normal 的 textureNode 上
+  })
 )
-renderPipeline.outputNode = chromaticAberrationPass
+// 每次都赋值是为了方便调试
+// 默认行为就是 renderPipeline.outputNode = scenePass.getTextureNode('output')
+renderPipeline.outputNode = scenePass.getTextureNode('output')
+
+// // Pixelation pass
+// // 像素大小，normal edge 强度，depth edge 强度
+// const pixelationPassOutput = pixelationPass(scene, camera, 10, 2, 1)
+// renderPipeline.outputNode = pixelationPassOutput
+
+// // Bloom pass
+// const bloomPass = bloom(renderPipeline.outputNode)
+// bloomPass.threshold.value = 0.25
+// bloomPass.strength.value = 1
+// renderPipeline.outputNode = renderPipeline.outputNode.add(bloomPass)
+
+// const bloomGui = postProcessingGui.addFolder('bloom')
+// bloomGui.add(bloomPass.threshold, 'value', 0, 2, 0.01).name('threshold')
+// bloomGui.add(bloomPass.strength, 'value', 0, 2, 0.01).name('strength')
+
+// // Chromatic aberration pass
+// const chromaticAberrationPass = chromaticAberration(
+//   renderPipeline.outputNode,
+//   2, // 颜色偏移距离
+//   vec2(0.5), // 中心位置
+//   1 //可以让 rgb 有不同比例的偏移
+// )
+// renderPipeline.outputNode = chromaticAberrationPass
+
+// Sobel pass
+const sobelPass = sobel(scenePass.getTextureNode('normal')).remapClamp(
+  0.2,
+  1,
+  0,
+  1
+)
+renderPipeline.outputNode = renderPipeline.outputNode.add(sobelPass)
 
 /**
  * Floor
@@ -151,6 +168,13 @@ renderPipeline.outputNode = chromaticAberrationPass
     new THREE.PlaneGeometry(10, 10),
     new THREE.MeshStandardNodeMaterial({ map: texture, transparent: true })
   )
+
+  mesh.material.mrtNode = mrt({
+    output: output,
+    // 传递给名为 normal 的 render target 的值为白色
+    normal: vec4(1)
+  })
+
   mesh.material.opacityNode = uv().sub(0.5).length().smoothstep(0.5, 0.2)
   mesh.rotation.x = -Math.PI * 0.5
   mesh.receiveShadow = true
@@ -176,6 +200,11 @@ scene.add(model.scene)
  * Sky
  */
 const sky = new SkyMesh()
+sky.material.mrtNode = mrt({
+  output: output,
+  // 让名为 normal 的 render target 的值都传递 vec4(1)
+  normal: vec4(1)
+})
 sky.scale.setScalar(1000)
 scene.add(sky)
 const effectController = {

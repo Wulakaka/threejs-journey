@@ -3,11 +3,22 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { Inspector } from 'three/addons/inspector/Inspector.js'
 import { SkyMesh } from 'three/addons/objects/SkyMesh.js'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
-import { mrt, normalWorld, output, pass, uv, vec2, vec4 } from 'three/tsl'
+import {
+  mrt,
+  normalWorld,
+  output,
+  pass,
+  renderOutput,
+  uv,
+  vec2,
+  vec3,
+  vec4
+} from 'three/tsl'
 import { bloom } from 'three/addons/tsl/display/BloomNode.js'
 import { chromaticAberration } from 'three/addons/tsl/display/ChromaticAberrationNode.js'
 import { pixelationPass } from 'three/addons/tsl/display/PixelationPassNode.js'
 import { sobel } from 'three/examples/jsm/tsl/display/SobelOperatorNode.js'
+import { fxaa } from 'three/examples/jsm/tsl/display/FXAANode.js'
 
 /**
  * Base
@@ -69,7 +80,7 @@ controls.enableDamping = true
  */
 const renderer = new THREE.WebGPURenderer({
   canvas: canvas,
-  antialias: true
+  antialias: false
 })
 
 const toneMappingList = {
@@ -108,6 +119,8 @@ rendererGui.add(renderer, 'toneMappingExposure', 1, 10, 0.01)
  * Post-processing
  */
 const renderPipeline = new THREE.RenderPipeline(renderer)
+// 为了让 aa 在 color transform 之后，需要手动停用
+renderPipeline.outputColorTransform = false
 
 // Debug
 const postProcessingGui = renderer.inspector.createParameters('Post-processing')
@@ -158,6 +171,14 @@ const sobelPass = sobel(scenePass.getTextureNode('normal')).remapClamp(
 )
 renderPipeline.outputNode = renderPipeline.outputNode.add(sobelPass)
 
+// Color transform pass
+// 需要手动将 color transform 进程提前到 aa 之前
+renderPipeline.outputNode = renderOutput(renderPipeline.outputNode)
+
+// FXAA
+const fxaaPass = fxaa(renderPipeline.outputNode)
+renderPipeline.outputNode = fxaaPass
+
 /**
  * Floor
  */
@@ -174,6 +195,9 @@ renderPipeline.outputNode = renderPipeline.outputNode.add(sobelPass)
     // 传递给名为 normal 的 render target 的值为白色
     normal: vec4(1)
   })
+
+  //   斑马纹地板
+  //   mesh.material.colorNode = vec3(uv().x.mul(10).fract().step(0.5))
 
   mesh.material.opacityNode = uv().sub(0.5).length().smoothstep(0.5, 0.2)
   mesh.rotation.x = -Math.PI * 0.5

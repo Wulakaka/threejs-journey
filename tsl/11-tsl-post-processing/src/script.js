@@ -67,12 +67,38 @@ const renderer = new THREE.WebGPURenderer({
   canvas: canvas,
   antialias: true
 })
+
+const toneMappingList = {
+  None: THREE.NoToneMapping,
+  Linear: THREE.LinearToneMapping,
+  Reinhard: THREE.ReinhardToneMapping,
+  Cineon: THREE.CineonToneMapping,
+  ACESFilmic: THREE.ACESFilmicToneMapping,
+  AgX: THREE.AgXToneMapping,
+  Neutral: THREE.NeutralToneMapping
+}
+
+const toneMapping = {
+  value: 'Cineon'
+}
+
+renderer.toneMapping = toneMappingList[toneMapping.value]
+renderer.toneMappingExposure = 1.5
 renderer.shadowMap.enabled = true
 renderer.shadowMap.type = THREE.PCFShadowMap
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 renderer.setClearColor(0x111111)
 renderer.inspector = new Inspector()
+
+// Debug
+const rendererGui = renderer.inspector.createParameters('Renderer')
+rendererGui
+  .add(toneMapping, 'value', Object.keys(toneMappingList))
+  .name('toneMapping')
+  .onChange((value) => (renderer.toneMapping = toneMappingList[value]))
+
+rendererGui.add(renderer, 'toneMappingExposure', 1, 10, 0.01)
 
 /**
  * Floor

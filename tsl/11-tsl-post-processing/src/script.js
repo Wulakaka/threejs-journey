@@ -6,6 +6,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { pass, uv, vec2 } from 'three/tsl'
 import { bloom } from 'three/addons/tsl/display/BloomNode.js'
 import { chromaticAberration } from 'three/addons/tsl/display/ChromaticAberrationNode.js'
+import { pixelationPass } from 'three/addons/tsl/display/PixelationPassNode.js'
 
 /**
  * Base
@@ -110,17 +111,22 @@ const renderPipeline = new THREE.RenderPipeline(renderer)
 // Debug
 const postProcessingGui = renderer.inspector.createParameters('Post-processing')
 
-// Scene pass
-// 在 pass() 内部会实例化一个 RenderTarget
-const scenePass = pass(scene, camera)
-// 每次都赋值是为了方便调试
-renderPipeline.outputNode = scenePass
+// // Scene pass
+// // 在 pass() 内部会实例化一个 RenderTarget
+// const scenePass = pass(scene, camera)
+// // 每次都赋值是为了方便调试
+// renderPipeline.outputNode = scenePass
+
+// Pixelation pass
+// 像素大小，normal edge 强度，depth edge 强度
+const pixelationPassOutput = pixelationPass(scene, camera, 10, 2, 1)
+renderPipeline.outputNode = pixelationPassOutput
 
 // Bloom pass
 const bloomPass = bloom(renderPipeline.outputNode)
 bloomPass.threshold.value = 0.25
 bloomPass.strength.value = 1
-renderPipeline.outputNode = bloomPass.add(scenePass)
+renderPipeline.outputNode = renderPipeline.outputNode.add(bloomPass)
 
 const bloomGui = postProcessingGui.addFolder('bloom')
 bloomGui.add(bloomPass.threshold, 'value', 0, 2, 0.01).name('threshold')

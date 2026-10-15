@@ -3,7 +3,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { Inspector } from 'three/addons/inspector/Inspector.js'
 import { SkyMesh } from 'three/addons/objects/SkyMesh.js'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
-import { uv } from 'three/tsl'
+import { pass, uv } from 'three/tsl'
+import { bloom } from 'three/addons/tsl/display/BloomNode.js'
 
 /**
  * Base
@@ -99,6 +100,30 @@ rendererGui
   .onChange((value) => (renderer.toneMapping = toneMappingList[value]))
 
 rendererGui.add(renderer, 'toneMappingExposure', 1, 10, 0.01)
+
+/**
+ * Post-processing
+ */
+const renderPipeline = new THREE.RenderPipeline(renderer)
+
+// Debug
+const postProcessingGui = renderer.inspector.createParameters('Post-processing')
+
+// Scene pass
+// 在 pass() 内部会实例化一个 RenderTarget
+const scenePass = pass(scene, camera)
+// 每次都赋值是为了方便调试
+renderPipeline.outputNode = scenePass
+
+// Bloom pass
+const bloomPass = bloom(renderPipeline.outputNode)
+bloomPass.threshold.value = 0.25
+bloomPass.strength.value = 1
+renderPipeline.outputNode = bloomPass.add(scenePass)
+
+const bloomGui = postProcessingGui.addFolder('bloom')
+bloomGui.add(bloomPass.threshold, 'value', 0, 2, 0.01).name('threshold')
+bloomGui.add(bloomPass.strength, 'value', 0, 2, 0.01).name('strength')
 
 /**
  * Floor
@@ -218,7 +243,8 @@ const tick = () => {
   controls.update()
 
   // Render
-  renderer.render(scene, camera)
+  //   renderer.render(scene, camera)
+  renderPipeline.render()
 }
 
 renderer.setAnimationLoop(tick)

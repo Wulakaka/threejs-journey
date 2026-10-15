@@ -14,6 +14,7 @@ import {
   rtt,
   texture,
   time,
+  uniform,
   uv,
   vec2,
   vec3,
@@ -24,6 +25,7 @@ import { chromaticAberration } from 'three/addons/tsl/display/ChromaticAberratio
 import { pixelationPass } from 'three/addons/tsl/display/PixelationPassNode.js'
 import { sobel } from 'three/examples/jsm/tsl/display/SobelOperatorNode.js'
 import { fxaa } from 'three/examples/jsm/tsl/display/FXAANode.js'
+import { shatter } from './ShatterNode'
 
 /**
  * Base
@@ -148,16 +150,6 @@ renderPipeline.outputNode = scenePass.getTextureNode('output')
 // const pixelationPassOutput = pixelationPass(scene, camera, 10, 2, 1)
 // renderPipeline.outputNode = pixelationPassOutput
 
-// // Bloom pass
-// const bloomPass = bloom(renderPipeline.outputNode)
-// bloomPass.threshold.value = 0.25
-// bloomPass.strength.value = 1
-// renderPipeline.outputNode = renderPipeline.outputNode.add(bloomPass)
-
-// const bloomGui = postProcessingGui.addFolder('bloom')
-// bloomGui.add(bloomPass.threshold, 'value', 0, 2, 0.01).name('threshold')
-// bloomGui.add(bloomPass.strength, 'value', 0, 2, 0.01).name('strength')
-
 // // Chromatic aberration pass
 // const chromaticAberrationPass = chromaticAberration(
 //   renderPipeline.outputNode,
@@ -167,25 +159,62 @@ renderPipeline.outputNode = scenePass.getTextureNode('output')
 // )
 // renderPipeline.outputNode = chromaticAberrationPass
 
-// Sobel pass
-const sobelPass = sobel(scenePass.getTextureNode('normal')).remapClamp(
-  0.2,
-  1,
-  0,
-  1
-)
-renderPipeline.outputNode = renderPipeline.outputNode.add(sobelPass)
+// // Sobel pass
+// const sobelPass = sobel(scenePass.getTextureNode('normal')).remapClamp(
+//   0.2,
+//   1,
+//   0,
+//   1
+// )
+// renderPipeline.outputNode = renderPipeline.outputNode.add(sobelPass)
 
-// Drunk
-// 创建一个 texture，再对它采样并转换
-const drunkTexture = convertToTexture(renderPipeline.outputNode)
-const waveUv = vec2(
-  uv().x,
-  uv().y.add(uv().x.add(time.mul(0.2)).mul(7).sin().mul(0.1))
+// // Drunk
+// // 创建一个 texture，再对它采样并转换
+// const drunkTexture = convertToTexture(renderPipeline.outputNode)
+// const waveUv = vec2(
+//   uv().x,
+//   uv().y.add(uv().x.add(time.mul(0.2)).mul(7).sin().mul(0.1))
+// )
+// renderPipeline.outputNode = texture(drunkTexture, waveUv).mul(
+//   color('aquamarine')
+// )
+
+// Shatter
+const subdivision = uniform(3)
+const seed = uniform(18, 'int')
+const progress = uniform(0.5)
+const thickness = uniform(0.02)
+const _color = uniform(color(0xff824d))
+const colorStrength = uniform(3)
+
+const shatterPass = shatter(
+  renderPipeline.outputNode,
+  subdivision,
+  seed,
+  progress,
+  thickness,
+  _color,
+  colorStrength
 )
-renderPipeline.outputNode = texture(drunkTexture, waveUv).mul(
-  color('aquamarine')
-)
+renderPipeline.outputNode = shatterPass
+
+const shatterGui = postProcessingGui.addFolder('shatter')
+shatterGui.add(subdivision, 'value', 1, 10, 1).name('subdivision')
+shatterGui.add(seed, 'value', 0, 100, 1).name('seed')
+shatterGui.add(progress, 'value', 0, 1, 0.001).name('progress')
+shatterGui.add(thickness, 'value', 0, 0.05, 0.0001).name('thickness')
+shatterGui.addColor(_color, 'value').name('color')
+shatterGui.add(colorStrength, 'value', 1, 10, 0.01).name('colorStrength')
+
+// Bloom pass
+const bloomPass = bloom(renderPipeline.outputNode)
+bloomPass.threshold.value = 0.25
+bloomPass.strength.value = 1
+renderPipeline.outputNode = renderPipeline.outputNode.add(bloomPass)
+
+const bloomGui = postProcessingGui.addFolder('bloom')
+bloomGui.add(bloomPass.threshold, 'value', 0, 2, 0.01).name('threshold')
+bloomGui.add(bloomPass.strength, 'value', 0, 2, 0.01).name('strength')
 
 // Color transform pass
 // 需要手动将 color transform 进程提前到 aa 之前

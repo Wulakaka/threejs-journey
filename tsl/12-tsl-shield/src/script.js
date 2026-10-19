@@ -5,6 +5,8 @@ import { SkyMesh } from 'three/addons/objects/SkyMesh.js'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { bloom } from 'three/examples/jsm/tsl/display/BloomNode.js'
 import { pass, uv } from 'three/tsl'
+import Shield from './Shield'
+import { TransformControls } from 'three/examples/jsm/Addons.js'
 
 /**
  * Base
@@ -91,6 +93,32 @@ renderPipeline.outputNode = scenePassColor.add(bloomPass)
 const bloomGui = renderer.inspector.createParameters('Bloom').close()
 bloomGui.add(bloomPass.threshold, 'value', 0, 2, 0.01).name('threshold')
 bloomGui.add(bloomPass.strength, 'value', 0, 2, 0.01).name('strength')
+
+/**
+ * Shield
+ */
+
+// Texture
+const hexagonsTexture = await textureLoader.loadAsync('./hexagons.png')
+hexagonsTexture.wrapS = THREE.RepeatWrapping
+hexagonsTexture.wrapT = THREE.RepeatWrapping
+
+// Instance
+const shield = new Shield(hexagonsTexture)
+scene.add(shield.mesh)
+
+// Debug
+const shieldGui = renderer.inspector.createParameters('Shield')
+shieldGui.add(shield.radius, 'value', 0, 5, 0.01).name('radius')
+
+// Transform
+const transform = new TransformControls(camera, canvas)
+transform.attach(shield.mesh)
+scene.add(transform.getHelper())
+
+transform.addEventListener('dragging-changed', (e) => {
+  controls.enabled = !e.value
+})
 
 /**
  * Floor

@@ -81,9 +81,14 @@ export default class Shield {
   }
 
   setMaterial() {
-    this.material = new THREE.MeshBasicNodeMaterial()
+    this.material = new THREE.MeshBasicNodeMaterial({
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      color: 0x000000,
+      side: THREE.DoubleSide
+    })
 
-    this.material.colorNode = Fn(() => {
+    this.material.emissiveNode = Fn(() => {
       // Impacts
       const finalImpact = float(0)
 
@@ -119,7 +124,10 @@ export default class Shield {
         hexagonsFill
       )
 
-      return vec4(vec3(hexagons), 1)
+      // Emissive
+      const emissiveStrength = hexagons
+
+      return vec3(emissiveStrength)
     })()
 
     this.material.positionNode = positionLocal.mul(this.radius)

@@ -3,10 +3,10 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { Inspector } from 'three/addons/inspector/Inspector.js'
 import { SkyMesh } from 'three/addons/objects/SkyMesh.js'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
+import { TransformControls } from 'three/examples/jsm/Addons.js'
 import { bloom } from 'three/examples/jsm/tsl/display/BloomNode.js'
 import { pass, uv } from 'three/tsl'
-import Shield from './Shield'
-import { TransformControls } from 'three/examples/jsm/Addons.js'
+import Shield from './Shield.js'
 
 /**
  * Base
@@ -106,6 +106,25 @@ hexagonsTexture.wrapT = THREE.RepeatWrapping
 // Instance
 const shield = new Shield(hexagonsTexture)
 scene.add(shield.mesh)
+
+// Raycaster
+const raycaster = new THREE.Raycaster()
+canvas.addEventListener('pointerdown', (event) => {
+  const mouse = new THREE.Vector2(
+    (event.clientX / sizes.width) * 2 - 1,
+    -(event.clientY / sizes.height) * 2 + 1
+  )
+  raycaster.setFromCamera(mouse, camera)
+
+  const sphere = new THREE.Sphere(shield.mesh.position, shield.radius.value)
+
+  let intersect = new THREE.Vector3()
+  intersect = raycaster.ray.intersectSphere(sphere, intersect)
+
+  if (intersect) {
+    shield.impacts.add(intersect)
+  }
+})
 
 // Debug
 const shieldGui = renderer.inspector.createParameters('Shield')

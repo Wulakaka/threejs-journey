@@ -1,11 +1,13 @@
 import {
   add,
+  color,
   dot,
   float,
   Fn,
   If,
   Loop,
   max,
+  mix,
   mul,
   normalView,
   PI2,
@@ -25,9 +27,18 @@ import gsap from 'gsap'
 import * as THREE from 'three/webgpu'
 
 export default class Shield {
-  constructor(_texture, radius = 2) {
+  constructor(
+    _texture,
+    radius = 2,
+    colorA = color(0x1a5bff),
+    colorB = color(0xff2e43),
+    strength = 7
+  ) {
     this.texture = _texture
     this.radius = uniform(radius)
+    this.colorA = uniform(colorA)
+    this.colorB = uniform(colorB)
+    this.strength = uniform(strength)
 
     this.setImpacts()
     this.setGeometry()
@@ -137,9 +148,15 @@ export default class Shield {
         .mul(0.05)
 
       // Emissive
-      const emissiveStrength = add(hexagons, fresnel.pow(5), lines)
+      const emissiveStrength = add(hexagons, fresnel.pow(5), lines).mul(
+        this.strength
+      )
 
-      return vec3(emissiveStrength)
+      const emissive = mix(this.colorA, this.colorB, emissiveStrength).mul(
+        emissiveStrength
+      )
+
+      return emissive
     })()
 
     this.material.positionNode = positionLocal.mul(this.radius)

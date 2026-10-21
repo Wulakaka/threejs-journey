@@ -129,6 +129,9 @@ canvas.addEventListener('pointerdown', (event) => {
 // Debug
 const shieldGui = renderer.inspector.createParameters('Shield')
 shieldGui.add(shield.radius, 'value', 0, 5, 0.01).name('radius')
+shieldGui.addColor(shield.colorA, 'value').name('colorA')
+shieldGui.addColor(shield.colorB, 'value').name('colorB')
+shieldGui.add(shield.strength, 'value', 1, 100, 0.01).name('strength')
 
 // Transform
 const transform = new TransformControls(camera, canvas)

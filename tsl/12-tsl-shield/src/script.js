@@ -153,6 +153,7 @@ transform.addEventListener('dragging-changed', (e) => {
     new THREE.MeshStandardNodeMaterial({ map: texture, transparent: true })
   )
   mesh.material.opacityNode = uv().sub(0.5).length().smoothstep(0.5, 0.2)
+  mesh.material.colorNode = shield.junctionNode
   mesh.rotation.x = -Math.PI * 0.5
   mesh.receiveShadow = true
   mesh.renderOrder = -1

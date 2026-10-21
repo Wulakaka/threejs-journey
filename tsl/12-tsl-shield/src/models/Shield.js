@@ -10,6 +10,7 @@ import {
   mix,
   mul,
   normalView,
+  objectPosition,
   PI2,
   positionLocal,
   positionViewDirection,
@@ -44,6 +45,7 @@ export default class Shield {
     this.setGeometry()
     this.setMaterial()
     this.setMesh()
+    this.setJunctionNode()
   }
 
   setImpacts() {
@@ -161,7 +163,19 @@ export default class Shield {
 
     this.material.positionNode = positionLocal.mul(this.radius)
   }
+
   setMesh() {
     this.mesh = new THREE.Mesh(this.geometry, this.material)
+  }
+
+  setJunctionNode() {
+    // 这里不能使用 positionWorld，因为这是给其他 mesh 使用的
+    // 这里要获取 shield 的世界位置
+    const center = objectPosition(this.mesh)
+    this.junctionNode = Fn(() => {
+      const sdf = positionWorld.distance(center).sub(this.radius)
+
+      return vec3(sdf)
+    })()
   }
 }

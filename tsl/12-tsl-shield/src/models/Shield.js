@@ -1,4 +1,5 @@
 import {
+  add,
   dot,
   float,
   Fn,
@@ -125,7 +126,7 @@ export default class Shield {
       )
 
       // Emissive
-      const emissiveStrength = hexagons
+      const emissiveStrength = add(hexagons, fresnel.pow(5))
 
       return vec3(emissiveStrength)
     })()

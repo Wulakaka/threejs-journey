@@ -6,7 +6,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { TransformControls } from 'three/examples/jsm/Addons.js'
 import { bloom } from 'three/examples/jsm/tsl/display/BloomNode.js'
 import { pass, uv } from 'three/tsl'
-import Shield from './Shield.js'
+import Shield from './models/Shield.js'
 
 /**
  * Base

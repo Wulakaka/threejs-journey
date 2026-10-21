@@ -11,6 +11,7 @@ import {
   PI2,
   positionLocal,
   positionViewDirection,
+  positionWorld,
   texture,
   time,
   uniform,
@@ -125,8 +126,18 @@ export default class Shield {
         hexagonsFill
       )
 
+      // Lines
+      const lineStrength = positionWorld.y.mul(3).sub(time).sin().remap(-1, 1)
+      const lines = positionWorld.y
+        .mul(20)
+        .add(time)
+        .fract()
+        .pow(3)
+        .mul(lineStrength)
+        .mul(0.05)
+
       // Emissive
-      const emissiveStrength = add(hexagons, fresnel.pow(5))
+      const emissiveStrength = add(hexagons, fresnel.pow(5), lines)
 
       return vec3(emissiveStrength)
     })()

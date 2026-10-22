@@ -175,7 +175,17 @@ export default class Shield {
     this.junctionNode = Fn(() => {
       const sdf = positionWorld.distance(center).sub(this.radius)
 
-      return vec3(sdf)
+      const mask = sdf.negate().step(0)
+
+      const strength = sdf
+        .remapClamp(0, -0.2, 1, 0)
+        .mul(mask)
+        .pow(3)
+        .mul(this.strength)
+
+      const _color = mix(this.colorA, this.colorB, strength).mul(strength)
+
+      return _color
     })()
   }
 }

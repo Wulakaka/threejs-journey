@@ -5,7 +5,7 @@ import { SkyMesh } from 'three/addons/objects/SkyMesh.js'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { TransformControls } from 'three/examples/jsm/Addons.js'
 import { bloom } from 'three/examples/jsm/tsl/display/BloomNode.js'
-import { pass, uv } from 'three/tsl'
+import { materialEmissive, pass, uv } from 'three/tsl'
 import Shield from './models/Shield.js'
 
 /**
@@ -153,7 +153,7 @@ transform.addEventListener('dragging-changed', (e) => {
     new THREE.MeshStandardNodeMaterial({ map: texture, transparent: true })
   )
   mesh.material.opacityNode = uv().sub(0.5).length().smoothstep(0.5, 0.2)
-  mesh.material.colorNode = shield.junctionNode
+  mesh.material.emissiveNode = materialEmissive.add(shield.junctionNode)
   mesh.rotation.x = -Math.PI * 0.5
   mesh.receiveShadow = true
   mesh.renderOrder = -1
@@ -168,6 +168,7 @@ model.scene.traverse((child) => {
   if (child.isMesh) {
     child.castShadow = true
     child.receiveShadow = true
+    child.material.emissiveNode = materialEmissive.add(shield.junctionNode)
   }
 })
 scene.add(model.scene)

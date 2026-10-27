@@ -106,7 +106,7 @@ simplexTexture.wrapT = THREE.RepeatWrapping
 // Instance
 const explosions = new Explosions(
   simplexTexture,
-  5,
+  100,
   uniform(color(0x116eff)),
   uniform(color(0xff1111)),
   uniform(30)
@@ -118,22 +118,38 @@ const raycaster = new THREE.Raycaster()
 const cursor = new THREE.Vector2()
 // 第二个参数是向 normal 移动多少个单位
 const floorPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0)
+let shooting = false
 
-canvas.addEventListener('pointerdown', (event) => {
+window.addEventListener('keydown', (event) => {
+  if (event.code === 'Space') shooting = true
+})
+window.addEventListener('keyup', (event) => {
+  if (event.code === 'Space') shooting = false
+})
+
+document.addEventListener('pointermove', (event) => {
   // Update cursor
   // 范围 [-1, 1]
   cursor.x = (event.clientX / sizes.width) * 2 - 1
   cursor.y = -(event.clientY / sizes.height) * 2 + 1
+})
+
+window.setInterval(() => {
+  if (!shooting) return
+
+  const newCursor = cursor.clone()
+  newCursor.x += (Math.random() - 0.5) * 0.2
+  newCursor.y += (Math.random() - 0.5) * 0.2
 
   // Intersect
-  raycaster.setFromCamera(cursor, camera)
+  raycaster.setFromCamera(newCursor, camera)
 
   let intersect = new THREE.Vector3()
   intersect = raycaster.ray.intersectPlane(floorPlane, intersect)
   if (intersect) {
     explosions.create(intersect, 0.5 + Math.random() * 0.5)
   }
-})
+}, 40)
 
 // Debug
 const explosionsGui = renderer.inspector.createParameters('Explosions')

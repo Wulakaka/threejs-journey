@@ -1,4 +1,16 @@
-import { add, color, float, Fn, texture, time, uv, vec2, vec3 } from 'three/tsl'
+import {
+  add,
+  color,
+  float,
+  Fn,
+  frontFacing,
+  mix,
+  texture,
+  time,
+  uv,
+  vec2,
+  vec3
+} from 'three/tsl'
 import * as THREE from 'three/webgpu'
 
 export default class Explosions {
@@ -26,7 +38,8 @@ export default class Explosions {
 
   setMaterial() {
     this.material = new THREE.MeshBasicNodeMaterial({
-      color: 0x111111
+      color: 0x111111,
+      side: THREE.DoubleSide
     })
 
     const progress = time.mul(0.25).fract()
@@ -41,6 +54,21 @@ export default class Explosions {
       const finalNoise = add(noise1, noise2).div(2).pow(2)
 
       return finalNoise.sub(progress).greaterThan(0)
+    })()
+
+    // Emissive
+    this.material.emissiveNode = Fn(() => {
+      const emissiveMix = progress.smoothstep(0, 0.7)
+      const emissiveColor = mix(
+        this.emissiveColorA,
+        this.emissiveColorB,
+        emissiveMix
+      ).toVertexStage()
+      // 不能在这之后转换到 VertexStage，因为 frontFacing 是在 fragment shader 中
+      const backFacingMask = frontFacing.toFloat().oneMinus()
+      const emissiveStrength = this.emissiveStrength.mul(backFacingMask)
+
+      return emissiveColor.mul(emissiveStrength)
     })()
   }
 

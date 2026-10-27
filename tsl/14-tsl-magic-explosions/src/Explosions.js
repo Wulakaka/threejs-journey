@@ -4,17 +4,20 @@ import {
   float,
   Fn,
   frontFacing,
+  instanceIndex,
   max,
   min,
   mix,
   positionLocal,
   texture,
   time,
+  uniformArray,
   uv,
   vec2,
   vec3
 } from 'three/tsl'
 import * as THREE from 'three/webgpu'
+import gsap from 'gsap'
 
 export default class Explosions {
   constructor(
@@ -30,9 +33,24 @@ export default class Explosions {
     this.emissiveColorB = emissiveColorB
     this.emissiveStrength = emissiveStrength
 
+    this.index = 0
+
+    this.setBuffers()
     this.setGeometry()
     this.setMaterial()
     this.setMesh()
+  }
+
+  setBuffers() {
+    this.positions = uniformArray([], 'vec3')
+    this.radiuses = uniformArray([], 'float')
+    this.progresses = uniformArray([], 'float')
+
+    for (let i = 0; i < this.max; i++) {
+      this.positions.array[i] = new THREE.Vector3()
+      this.radiuses.array[i] = 1
+      this.progresses.array[i] = 0
+    }
   }
 
   setGeometry() {
@@ -45,7 +63,10 @@ export default class Explosions {
       side: THREE.DoubleSide
     })
 
-    const progress = time.mul(0.25).fract()
+    // Buffers
+    const radius = this.radiuses.element(instanceIndex)
+    const position = this.positions.element(instanceIndex)
+    const progress = this.progresses.element(instanceIndex)
 
     // Mask
     this.material.maskNode = Fn(() => {
@@ -79,8 +100,15 @@ export default class Explosions {
       // Radius
       const radiusIn = progress.remap(0, 0.075)
       const radiusOut = progress.remap(0.075, 1, 1, 0.3)
-      const radiusFinal = min(radiusIn, radiusOut).oneMinus().pow(2).oneMinus()
+      const radiusFinal = min(radiusIn, radiusOut)
+        .oneMinus()
+        .pow(2)
+        .oneMinus()
+        .mul(radius)
       positionLocal.mulAssign(radiusFinal)
+
+      // Translate
+      positionLocal.addAssign(position)
 
       // Floor clamp
       // 让低于地面的顶点到上面来
@@ -93,5 +121,26 @@ export default class Explosions {
   setMesh() {
     this.mesh = new THREE.Mesh(this.geometry, this.material)
     this.mesh.castShadow = true
+    this.mesh.count = this.max
+  }
+
+  create(position = new THREE.Vector3(), radius = 1) {
+    const index = this.index
+    this.positions.array[index].copy(position)
+    this.radiuses.array[index] = radius
+    this.progresses.array[index] = 0
+
+    const dummy = { progress: 0 }
+    gsap.to(dummy, {
+      progress: 1,
+      duration: 2,
+      ease: 'linear',
+      onUpdate: () => {
+        this.progresses.array[index] = dummy.progress
+      }
+    })
+
+    this.index++
+    this.index = this.index % this.max
   }
 }

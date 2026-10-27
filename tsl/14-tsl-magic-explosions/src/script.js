@@ -113,6 +113,28 @@ const explosions = new Explosions(
 )
 scene.add(explosions.mesh)
 
+// Shooting
+const raycaster = new THREE.Raycaster()
+const cursor = new THREE.Vector2()
+// 第二个参数是向 normal 移动多少个单位
+const floorPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0)
+
+canvas.addEventListener('pointerdown', (event) => {
+  // Update cursor
+  // 范围 [-1, 1]
+  cursor.x = (event.clientX / sizes.width) * 2 - 1
+  cursor.y = -(event.clientY / sizes.height) * 2 + 1
+
+  // Intersect
+  raycaster.setFromCamera(cursor, camera)
+
+  let intersect = new THREE.Vector3()
+  intersect = raycaster.ray.intersectPlane(floorPlane, intersect)
+  if (intersect) {
+    explosions.create(intersect, 0.5 + Math.random() * 0.5)
+  }
+})
+
 // Debug
 const explosionsGui = renderer.inspector.createParameters('Explosions')
 

@@ -3,7 +3,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { Inspector } from 'three/addons/inspector/Inspector.js'
 import { SkyMesh } from 'three/addons/objects/SkyMesh.js'
 import { bloom } from 'three/examples/jsm/tsl/display/BloomNode.js'
-import { pass, uv } from 'three/tsl'
+import { color, pass, uniform, uv } from 'three/tsl'
+import Explosions from './Explosions'
 
 /**
  * Base
@@ -91,6 +92,39 @@ renderPipeline.outputNode = scenePassColor.add(bloomPass)
 const bloomGui = renderer.inspector.createParameters('Bloom').close()
 bloomGui.add(bloomPass.threshold, 'value', 0, 2, 0.01).name('threshold')
 bloomGui.add(bloomPass.strength, 'value', 0, 2, 0.01).name('strength')
+
+/**
+ * Explosions
+ */
+// Simplex texture
+const simplexTexture = await textureLoader.load(
+  './simplex-tiling-noise-256x256.png'
+)
+simplexTexture.wrapS = THREE.RepeatWrapping
+simplexTexture.wrapT = THREE.RepeatWrapping
+
+// Instance
+const explosions = new Explosions(
+  simplexTexture,
+  5,
+  uniform(color(0x116eff)),
+  uniform(color(0xff1111)),
+  uniform(30)
+)
+scene.add(explosions.mesh)
+
+// Debug
+const explosionsGui = renderer.inspector.createParameters('Explosions')
+
+explosionsGui
+  .addColor(explosions.emissiveColorA, 'value')
+  .name('emissiveColorA')
+explosionsGui
+  .addColor(explosions.emissiveColorB, 'value')
+  .name('emissiveColorB')
+explosionsGui
+  .add(explosions.emissiveStrength, 'value', 1, 100, 0.01)
+  .name('emissiveStrength')
 
 /**
  * Floor

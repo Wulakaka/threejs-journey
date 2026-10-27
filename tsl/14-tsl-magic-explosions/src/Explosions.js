@@ -4,7 +4,10 @@ import {
   float,
   Fn,
   frontFacing,
+  max,
+  min,
   mix,
+  positionLocal,
   texture,
   time,
   uv,
@@ -69,6 +72,21 @@ export default class Explosions {
       const emissiveStrength = this.emissiveStrength.mul(backFacingMask)
 
       return emissiveColor.mul(emissiveStrength)
+    })()
+
+    // Position
+    this.material.positionNode = Fn(() => {
+      // Radius
+      const radiusIn = progress.remap(0, 0.075)
+      const radiusOut = progress.remap(0.075, 1, 1, 0.3)
+      const radiusFinal = min(radiusIn, radiusOut).oneMinus().pow(2).oneMinus()
+      positionLocal.mulAssign(radiusFinal)
+
+      // Floor clamp
+      // 让低于地面的顶点到上面来
+      positionLocal.y.assign(max(positionLocal.y, 0.01))
+
+      return positionLocal
     })()
   }
 

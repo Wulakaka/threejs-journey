@@ -11,6 +11,7 @@ import {
   positionLocal,
   texture,
   time,
+  uniform,
   uniformArray,
   uv,
   vec2,
@@ -34,6 +35,8 @@ export default class Explosions {
     this.emissiveStrength = emissiveStrength
 
     this.index = 0
+    this.count = 0
+    this.startIndex = uniform(0, 'int')
 
     this.setBuffers()
     this.setGeometry()
@@ -64,9 +67,10 @@ export default class Explosions {
     })
 
     // Buffers
-    const radius = this.radiuses.element(instanceIndex)
-    const position = this.positions.element(instanceIndex)
-    const progress = this.progresses.element(instanceIndex)
+    const arrayInstanceIndex = instanceIndex.add(this.startIndex).mod(this.max)
+    const radius = this.radiuses.element(arrayInstanceIndex)
+    const position = this.positions.element(arrayInstanceIndex)
+    const progress = this.progresses.element(arrayInstanceIndex)
 
     // Mask
     this.material.maskNode = Fn(() => {
@@ -121,7 +125,8 @@ export default class Explosions {
   setMesh() {
     this.mesh = new THREE.Mesh(this.geometry, this.material)
     this.mesh.castShadow = true
-    this.mesh.count = this.max
+    this.mesh.count = 0
+    this.mesh.visible = false
   }
 
   create(position = new THREE.Vector3(), radius = 1) {
@@ -137,10 +142,20 @@ export default class Explosions {
       ease: 'linear',
       onUpdate: () => {
         this.progresses.array[index] = dummy.progress
+      },
+      onComplete: () => {
+        this.count--
+        this.mesh.count = Math.min(this.count, this.max)
+        this.startIndex.value++
+        if (this.mesh.count === 0) {
+          this.mesh.visible = false
+        }
       }
     })
 
-    this.index++
-    this.index = this.index % this.max
+    this.index = (this.index + 1) % this.max
+    this.count++
+    this.mesh.count = Math.min(this.count, this.max)
+    this.mesh.visible = true
   }
 }

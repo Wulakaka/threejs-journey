@@ -2,7 +2,25 @@ import * as THREE from 'three/webgpu'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { Inspector } from 'three/addons/inspector/Inspector.js'
 import { bloom } from 'three/examples/jsm/tsl/display/BloomNode.js'
-import { pass } from 'three/tsl'
+import {
+  cos,
+  float,
+  Fn,
+  hash,
+  instanceIndex,
+  mul,
+  pass,
+  PI,
+  PI2,
+  range,
+  select,
+  time,
+  TWO_PI,
+  uint,
+  uv,
+  varying,
+  vec3
+} from 'three/tsl'
 
 /**
  * Base
@@ -84,14 +102,103 @@ const bloomGui = renderer.inspector.createParameters('Bloom').close()
 bloomGui.add(bloomPass.threshold, 'value', 0, 2, 0.01).name('threshold')
 bloomGui.add(bloomPass.strength, 'value', 0, 2, 0.01).name('strength')
 
+// /**
+//  * Dummy
+//  */
+// const dummy = new THREE.Mesh(
+//   new THREE.BoxGeometry(),
+//   new THREE.MeshNormalMaterial()
+// )
+// scene.add(dummy)
+
 /**
- * Dummy
+ * Galaxy
  */
-const dummy = new THREE.Mesh(
-  new THREE.BoxGeometry(),
-  new THREE.MeshNormalMaterial()
+const count = 10000
+
+// Material
+const material = new THREE.SpriteNodeMaterial({
+  blending: THREE.AdditiveBlending,
+  depthTest: false,
+  depthWrite: false
+})
+
+// Varyings
+const progress = varying(0)
+
+// Random spherical position
+const randomSphericalPosition = Fn(
+  ([seed = uint(0), radius = float(1)]) => {
+    const u = hash(seed)
+    const v = hash(seed.add(123).mul(2))
+
+    const theta = u.mul(TWO_PI)
+    const phi = v.remap(0, 1, -1, 1).acos()
+    const sinPhi = phi.sin()
+
+    return vec3(
+      theta.sin().mul(sinPhi),
+      phi.cos(),
+      theta.cos().mul(sinPhi)
+    ).mul(radius)
+  },
+  {
+    seed: 'uint',
+    radius: 'float',
+    return: 'vec3'
+  }
 )
-scene.add(dummy)
+
+// Position
+material.positionNode = Fn(() => {
+  const newPosition = vec3(instanceIndex, 0, 0)
+
+  // Progress
+  progress.assign(range(0, 1).add(time.mul(0.02)).fract())
+
+  // Branches
+  const angle = instanceIndex.toFloat().mod(3).div(3).mul(PI2)
+
+  angle.addAssign(progress.mul(2).exp())
+
+  const radius = progress.oneMinus().mul(3)
+
+  newPosition.x.assign(angle.cos().mul(radius))
+  newPosition.z.assign(angle.sin().mul(radius))
+
+  // Spread
+  const spreadRadius = progress.oneMinus().mul(range(0, 1))
+  const spread = randomSphericalPosition(instanceIndex, spreadRadius)
+  newPosition.addAssign(spread)
+
+  return newPosition
+})()
+
+// Scale
+material.scaleNode = range(0, 0.025)
+
+// Color
+material.colorNode = Fn(() => {
+  // Shape
+  const distanceToCenter = uv().sub(0.5).length()
+  const shape1 = distanceToCenter.step(0.5).oneMinus()
+  const shape2 = shape1.sub(float(0.4).step(distanceToCenter))
+  const shapePingPong = instanceIndex.mod(2)
+  const shape = select(shapePingPong, shape1, shape2)
+
+  // Fade
+  const fade = progress.remapClamp(0, 0.5, 0, 1).pow(2)
+
+  // Final
+  const final = mul(shape, fade, 10)
+
+  return vec3(final)
+})()
+
+// Sprite
+const galaxy = new THREE.Sprite(material)
+galaxy.count = count
+scene.add(galaxy)
 
 /**
  * Animate

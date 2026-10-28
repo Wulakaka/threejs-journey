@@ -2,7 +2,18 @@ import * as THREE from 'three/webgpu'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { Inspector } from 'three/addons/inspector/Inspector.js'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
-import { uv } from 'three/tsl'
+import {
+  color,
+  Fn,
+  hash,
+  instanceIndex,
+  positionLocal,
+  range,
+  time,
+  uv,
+  vec2,
+  vec3
+} from 'three/tsl'
 
 /**
  * Base
@@ -114,6 +125,74 @@ lightsGui
 
 lightsGui.addColor(ambientLight, 'color').name('ambientColor')
 lightsGui.add(ambientLight, 'intensity', 0, 5, 0.01).name('ambientIntensity')
+
+// /**
+//  * Points with PointsMaterial
+//  */
+// // Geometry
+// const geometry = new THREE.TorusKnotGeometry(1.25, 0.5, 128, 32)
+
+// // Material
+// const material = new THREE.PointsMaterial()
+
+// // Points
+// const points = new THREE.Points(geometry, material)
+// points.position.y = 1
+// scene.add(points)
+
+// /**
+//  * Sprite with SpriteMaterial
+//  */
+
+// //  Material
+// const material = new THREE.SpriteNodeMaterial()
+
+// material.sizeAttenuation = false
+
+// material.positionNode = range(vec3(-3, 0, -3), vec3(3, 3, 3))
+// material.scaleNode = range(vec2(0.05), vec2(0.1))
+
+// material.rotationNode = time.mul(hash(instanceIndex).sub(0.5))
+
+// material.colorNode = vec3(uv(), 1)
+
+// // Sprite
+// const sprite = new THREE.Sprite(material)
+// sprite.count = 10
+// scene.add(sprite)
+
+// /**
+//  * Mesh with SpriteNodeMaterial
+//  */
+// // Geometry
+// const geometry = new THREE.CircleGeometry(0.5, 16)
+// // Material
+// const material = new THREE.SpriteNodeMaterial()
+
+// material.positionNode = range(vec3(-3, 0, -3), vec3(3, 3, 3))
+
+// // Mesh
+// const mesh = new THREE.Mesh(geometry, material)
+// mesh.count = 10
+// scene.add(mesh)
+
+/**
+ * Stress test
+ */
+// Material
+const material = new THREE.SpriteNodeMaterial()
+
+material.positionNode = range(vec3(-3, 0, -3), vec3(3, 3, 3))
+
+material.scaleNode = 0.005
+
+material.colorNode = positionLocal
+  .remap(vec3(-3, 0, -3), vec3(3, 3, 3))
+  .toVertexStage()
+
+const sprite = new THREE.Sprite(material)
+sprite.count = 1000000
+scene.add(sprite)
 
 /**
  * Animate

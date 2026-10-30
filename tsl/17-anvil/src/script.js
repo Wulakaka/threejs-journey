@@ -251,6 +251,16 @@ bladeGui
   .name('emissiveStrength')
 
 /**
+ * Sparkles light
+ */
+const sparklesLight = new THREE.PointLight(0xff9955, 5)
+sparklesLight.position.set(0.4, 2.65, 0.35)
+scene.add(sparklesLight)
+
+// const sparklesLightHelper = new THREE.PointLightHelper(sparklesLight, 0.25)
+// scene.add(sparklesLightHelper)
+
+/**
  * Impact
  */
 const impact = () => {
@@ -259,6 +269,9 @@ const impact = () => {
 
   // Blade
   bladeEffectStrength.value += 0.15
+
+  // Light
+  sparklesLight.intensity += 3
 }
 canvas.addEventListener('pointerdown', impact)
 
@@ -280,6 +293,9 @@ const tick = () => {
 
   // Blade
   bladeEffectStrength.value += (0 - bladeEffectStrength.value) * deltaTime * 0.5
+
+  // Sparkles light
+  sparklesLight.intensity += (5 - sparklesLight.intensity) * deltaTime * 3
 
   // Render
   renderPipeline.render()

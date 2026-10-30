@@ -6,13 +6,21 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { bloom } from 'three/examples/jsm/tsl/display/BloomNode.js'
 import {
   color,
+  deltaTime,
   Fn,
   grayscale,
+  hash,
+  If,
+  instancedArray,
+  instanceIndex,
   materialColor,
   mix,
   mul,
   pass,
   positionGeometry,
+  positionLocal,
+  range,
+  TWO_PI,
   uniform,
   uv,
   vec3,
@@ -261,6 +269,108 @@ scene.add(sparklesLight)
 // scene.add(sparklesLightHelper)
 
 /**
+ * Sparkles
+ */
+const count = 2000
+const explosionCount = 150
+
+// Buffers
+const positions = instancedArray(count, 'vec3')
+const velocities = instancedArray(count, 'vec3')
+const lives = instancedArray(count, 'float')
+
+// Uniforms
+const sparklesIndex = uniform(0, 'int')
+const sparklesScale = uniform(0.025)
+const sparklesDecay = uniform(0.3)
+const sparklesColorA = uniform(color(0xff822e))
+const sparklesColorB = uniform(color(0x5e24ff))
+const sparklesEmissiveStrength = uniform(45)
+
+// Computes
+const sparklesExplodeCompute = Fn(() => {
+  const newInstanceIndex = instanceIndex.add(sparklesIndex).mod(count)
+
+  // Buffers
+  const position = positions.element(newInstanceIndex)
+  const velocity = velocities.element(newInstanceIndex)
+  const life = lives.element(newInstanceIndex)
+
+  position.assign(vec3(0.05, 1.95, -0.1))
+
+  // Velocity
+  const angle = hash(newInstanceIndex).toFloat().mul(TWO_PI)
+  const explosionDirection = vec3(
+    angle.sin(),
+    hash(newInstanceIndex.add(123).mul(2)).mul(1.25),
+    angle.cos()
+  )
+
+  velocity.assign(explosionDirection.mul(3))
+
+  // Life
+  life.assign(hash(newInstanceIndex.add(234).mul(3)))
+})().compute(explosionCount)
+
+const sparklesUpdateCompute = Fn(() => {
+  // Buffers
+  const position = positions.element(instanceIndex)
+  const velocity = velocities.element(instanceIndex)
+  const life = lives.element(instanceIndex)
+
+  // Gravity
+  velocity.y.subAssign(deltaTime.mul(9.81))
+
+  // Bounce
+  If(position.y.lessThan(0.05), () => {
+    position.y.assign(0.05)
+    velocity.mulAssign(vec3(0.9, -0.5, 0.9))
+  })
+
+  // Apply velocity to position
+  position.addAssign(velocity.mul(deltaTime))
+
+  // Life decay
+  // 最大到 1
+  life.assign(life.add(sparklesDecay.mul(deltaTime)).min(1))
+})().compute(count)
+
+// Material
+const material = new THREE.SpriteNodeMaterial({
+  color: 0x000000
+})
+
+// Position
+material.positionNode = positions.element(instanceIndex)
+
+// Scale
+material.scaleNode = sparklesScale
+  .mul(range(0.5, 1))
+  .mul(lives.element(instanceIndex).remapClamp(0.5, 1, 1, 0)) // 从 0.5 开始是为了保证前半段都不消失
+
+// Emissive
+// smoothstep 让位于两侧的值更多
+const colorMix = hash(instanceIndex.add(345).mul(4)).smoothstep(0, 1)
+material.emissiveNode = mix(sparklesColorA, sparklesColorB, colorMix)
+  .mul(sparklesEmissiveStrength)
+  .toVertexStage()
+
+// Mesh
+const mesh = new THREE.Sprite(material)
+mesh.count = count
+scene.add(mesh)
+
+// Debug
+const sparklesGui = renderer.inspector.createParameters('Sparkles')
+sparklesGui.add(sparklesScale, 'value', 0, 0.1, 0.0001).name('sparklesScale')
+sparklesGui.add(sparklesDecay, 'value', 0, 1, 0.01).name('sparklesDecay')
+sparklesGui.addColor(sparklesColorA, 'value').name('colorA')
+sparklesGui.addColor(sparklesColorB, 'value').name('colorB')
+sparklesGui
+  .add(sparklesEmissiveStrength, 'value', 1, 100, 0.01)
+  .name('emissiveStrength')
+
+/**
  * Impact
  */
 const impact = () => {
@@ -272,6 +382,11 @@ const impact = () => {
 
   // Light
   sparklesLight.intensity += 3
+
+  // Sparkles
+  renderer.compute(sparklesExplodeCompute, explosionCount)
+  // 递增
+  sparklesIndex.value += explosionCount
 }
 canvas.addEventListener('pointerdown', impact)
 
@@ -296,6 +411,9 @@ const tick = () => {
 
   // Sparkles light
   sparklesLight.intensity += (5 - sparklesLight.intensity) * deltaTime * 3
+
+  // Compute
+  renderer.compute(sparklesUpdateCompute)
 
   // Render
   renderPipeline.render()

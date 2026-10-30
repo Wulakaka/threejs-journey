@@ -4,7 +4,20 @@ import { Inspector } from 'three/addons/inspector/Inspector.js'
 import { SkyMesh } from 'three/addons/objects/SkyMesh.js'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { bloom } from 'three/examples/jsm/tsl/display/BloomNode.js'
-import { pass, uv } from 'three/tsl'
+import {
+  color,
+  Fn,
+  grayscale,
+  materialColor,
+  mix,
+  mul,
+  pass,
+  positionGeometry,
+  uniform,
+  uv,
+  vec3,
+  vec4
+} from 'three/tsl'
 
 /**
  * Base
@@ -195,6 +208,61 @@ lightsGui.addColor(ambientLight, 'color').name('ambientColor')
 lightsGui.add(ambientLight, 'intensity', 0, 5, 0.01).name('ambientIntensity')
 
 /**
+ * Hammer
+ */
+const hammer = model.scene.getObjectByName('hammer')
+hammer.rotation.reorder('YXZ')
+
+/**
+ * blade
+ */
+const blade = model.scene.getObjectByName('blade')
+blade.material = new THREE.MeshPhysicalNodeMaterial().copy(blade.material)
+
+const bladeEffectStrength = uniform(0)
+const bladeColorA = uniform(color(0xff007b))
+const bladeColorB = uniform(color(0xffb070))
+const bladeEmissiveStrength = uniform(1.5)
+
+blade.material.emissiveNode = Fn(() => {
+  const mask = grayscale(materialColor.rgb).remapClamp(0, 0.13, 1, 0)
+  const distanceToImpact = positionGeometry.sub(vec3(0, 0, 0.3)).length()
+  const effect = mask
+    .sub(distanceToImpact.mul(2))
+    .add(bladeEffectStrength)
+    .max(0)
+    .pow(2)
+
+  const emissiveColor = mul(
+    mix(bladeColorA, bladeColorB, effect),
+    effect,
+    bladeEmissiveStrength
+  )
+
+  return emissiveColor
+})()
+
+// Debug
+const bladeGui = renderer.inspector.createParameters('Blade')
+bladeGui.addColor(bladeColorA, 'value').name('colorA')
+bladeGui.addColor(bladeColorB, 'value').name('colorB')
+bladeGui
+  .add(bladeEmissiveStrength, 'value', 0, 5, 0.01)
+  .name('emissiveStrength')
+
+/**
+ * Impact
+ */
+const impact = () => {
+  // Hammer
+  hammer.rotation.x = Math.PI / 2
+
+  // Blade
+  bladeEffectStrength.value += 0.15
+}
+canvas.addEventListener('pointerdown', impact)
+
+/**
  * Animate
  */
 const timer = new THREE.Timer()
@@ -205,6 +273,13 @@ const tick = () => {
 
   // Update controls
   controls.update()
+
+  // Hammer
+  // 目标与当前的差值
+  hammer.rotation.x += (0 - hammer.rotation.x) * deltaTime
+
+  // Blade
+  bladeEffectStrength.value += (0 - bladeEffectStrength.value) * deltaTime * 0.5
 
   // Render
   renderPipeline.render()

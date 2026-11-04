@@ -2,7 +2,21 @@ import * as THREE from 'three/webgpu'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { Inspector } from 'three/addons/inspector/Inspector.js'
 import { bloom } from 'three/examples/jsm/tsl/display/BloomNode.js'
-import { color, mix, pass, uniform, uv, vec2, vec4 } from 'three/tsl'
+import {
+  color,
+  Fn,
+  instancedArray,
+  instanceIndex,
+  mix,
+  pass,
+  positionLocal,
+  range,
+  uniform,
+  uv,
+  vec2,
+  vec4
+} from 'three/tsl'
+import { randomSphericalPosition } from './utils'
 
 /**
  * Base
@@ -90,6 +104,98 @@ bloomGui.add(bloomPass.threshold, 'value', 0, 2, 0.01).name('threshold')
 bloomGui.add(bloomPass.strength, 'value', 0, 2, 0.01).name('strength')
 
 /**
+ * Petals
+ */
+// setup
+const count = 100
+
+// Geometry
+const geometry = new THREE.SphereGeometry(
+  1,
+  3,
+  3,
+  Math.PI * 0.4,
+  Math.PI * 0.2,
+  Math.PI * 0.4,
+  Math.PI * 0.2
+)
+
+geometry.translate(0, 0, -1)
+
+// Texture
+const petalTexture = textureLoader.load('./petals-alpha-map.png')
+
+// Material
+const material = new THREE.MeshLambertNodeMaterial({
+  side: THREE.DoubleSide,
+  alphaMap: petalTexture,
+  // 通过关闭 transparent，将把 texture 用作遮罩
+  // transparent: true,
+  // alpha 小于 0.1 时将被 discard
+  alphaTest: 0.1
+})
+
+// Uniforms
+const scale = uniform(0.5)
+const colorA = uniform(color(0xffcda3))
+const colorB = uniform(color(0xff142c))
+
+// Buffers
+const scaleBuffer = range(0.5, 1)
+const colorMixBuffer = range(0, 1)
+const initialPositionsBuffer = instancedArray(count, 'vec3')
+const positionsBuffer = instancedArray(count, 'vec3')
+const progressesBuffer = instancedArray(count, 'float')
+
+// Init compute
+const initPetals = Fn(() => {
+  const initialPosition = initialPositionsBuffer.element(instanceIndex)
+
+  initialPosition.assign(randomSphericalPosition(instanceIndex, 1))
+})()
+
+const initPetalsCompute = initPetals.compute(count)
+
+renderer.compute(initPetalsCompute)
+
+// Update compute
+const updatePetals = Fn(() => {
+  const initialPosition = initialPositionsBuffer.element(instanceIndex)
+  const position = positionsBuffer.element(instanceIndex)
+  const progress = progressesBuffer.element(instanceIndex)
+})()
+const updateCompute = updatePetals.compute(count)
+
+// Position
+material.positionNode = Fn(() => {
+  const position = initialPositionsBuffer.element(instanceIndex)
+
+  // Scale
+  positionLocal.mulAssign(scale, scaleBuffer)
+
+  // Position
+  positionLocal.addAssign(position)
+  return positionLocal
+})()
+
+// Color
+material.colorNode = mix(
+  colorA,
+  colorB,
+  colorMixBuffer.smoothstep(0, 1)
+).toVertexStage()
+
+const mesh = new THREE.Mesh(geometry, material)
+mesh.count = count
+scene.add(mesh)
+
+// Debug
+const petalsFolderGui = renderer.inspector.createParameters('Petals')
+petalsFolderGui.add(scale, 'value', 0, 1, 0.001).name('scale')
+petalsFolderGui.addColor(colorA, 'value').name('colorA')
+petalsFolderGui.addColor(colorB, 'value').name('colorB')
+
+/**
  * Title
  */
 {
@@ -151,6 +257,9 @@ lightsGui.add(ambientLight, 'intensity', 0, 5, 0.01).name('ambientIntensity')
 const tick = () => {
   // Update controls
   controls.update()
+
+  // Compute
+  renderer.compute(updateCompute)
 
   // Render
   renderPipeline.render()

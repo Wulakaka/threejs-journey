@@ -13,9 +13,11 @@ import {
   min,
   mix,
   mx_noise_vec3,
+  normalLocal,
   pass,
   positionLocal,
   range,
+  rotate,
   time,
   uniform,
   uv,
@@ -113,7 +115,7 @@ bloomGui.add(bloomPass.strength, 'value', 0, 2, 0.01).name('strength')
  * Petals
  */
 // setup
-const count = 1000
+const count = 3000
 
 // Geometry
 const geometry = new THREE.SphereGeometry(
@@ -200,6 +202,11 @@ material.positionNode = Fn(() => {
   const position = positionsBuffer.element(instanceIndex)
   const progress = progressesBuffer.element(instanceIndex)
 
+  // Rotation
+  const rotation = position.add(instanceIndex).mul(10)
+  positionLocal.assign(rotate(positionLocal, rotation))
+  normalLocal.assign(rotate(normalLocal, rotation))
+
   // Scale
   const progressScale = min(
     progress.remap(0, 0.1),
@@ -221,6 +228,8 @@ material.colorNode = mix(
 
 const mesh = new THREE.Mesh(geometry, material)
 mesh.count = count
+mesh.castShadow = true
+mesh.receiveShadow = true
 scene.add(mesh)
 
 // Debug

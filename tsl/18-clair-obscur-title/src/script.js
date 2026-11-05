@@ -22,6 +22,7 @@ import {
   uniform,
   uv,
   vec2,
+  vec3,
   vec4
 } from 'three/tsl'
 import { randomSphericalPosition } from './utils'
@@ -112,6 +113,27 @@ bloomGui.add(bloomPass.threshold, 'value', 0, 2, 0.01).name('threshold')
 bloomGui.add(bloomPass.strength, 'value', 0, 2, 0.01).name('strength')
 
 /**
+ * Cursor
+ */
+const raycaster = new THREE.Raycaster()
+const cursor = new THREE.Vector2()
+const intersectionPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0)
+const intersect = new THREE.Vector3()
+
+// const cursorHelper = new THREE.Mesh(
+//   new THREE.IcosahedronGeometry(0.25, 3),
+//   new THREE.MeshBasicMaterial({
+//     wireframe: true
+//   })
+// )
+// scene.add(cursorHelper)
+
+window.addEventListener('pointermove', (event) => {
+  cursor.x = (event.clientX / sizes.width) * 2 - 1
+  cursor.y = -(event.clientY / sizes.height) * 2 + 1
+})
+
+/**
  * Petals
  */
 // setup
@@ -151,6 +173,7 @@ const radius = uniform(0.35)
 const windStrength = uniform(0.003)
 const windFrequency = uniform(3)
 const windVariation = uniform(0.3)
+const spawnPosition = uniform(vec3())
 
 // Buffers
 const scaleBuffer = range(0.5, 1)
@@ -186,7 +209,7 @@ const updatePetals = Fn(() => {
   progress.addAssign(deltaTime.mul(0.6))
   If(progress.greaterThan(1), () => {
     progress.assign(progress.fract())
-    position.assign(initialPosition.mul(radius))
+    position.assign(initialPosition.mul(radius).add(spawnPosition))
   })
 
   // Position
@@ -304,6 +327,12 @@ lightsGui.add(ambientLight, 'intensity', 0, 5, 0.01).name('ambientIntensity')
 const tick = () => {
   // Update controls
   controls.update()
+
+  // Cursor + Raycaster
+  raycaster.setFromCamera(cursor, camera)
+  raycaster.ray.intersectPlane(intersectionPlane, intersect)
+  // cursorHelper.position.copy(intersect)
+  spawnPosition.value.copy(intersect)
 
   // Compute
   renderer.compute(updateCompute)

@@ -4,13 +4,19 @@ import { Inspector } from 'three/addons/inspector/Inspector.js'
 import { bloom } from 'three/examples/jsm/tsl/display/BloomNode.js'
 import {
   color,
+  deltaTime,
   Fn,
+  hash,
+  If,
   instancedArray,
   instanceIndex,
+  min,
   mix,
+  mx_noise_vec3,
   pass,
   positionLocal,
   range,
+  time,
   uniform,
   uv,
   vec2,
@@ -107,7 +113,7 @@ bloomGui.add(bloomPass.strength, 'value', 0, 2, 0.01).name('strength')
  * Petals
  */
 // setup
-const count = 100
+const count = 1000
 
 // Geometry
 const geometry = new THREE.SphereGeometry(
@@ -136,9 +142,13 @@ const material = new THREE.MeshLambertNodeMaterial({
 })
 
 // Uniforms
-const scale = uniform(0.5)
+const scale = uniform(0.1)
 const colorA = uniform(color(0xffcda3))
 const colorB = uniform(color(0xff142c))
+const radius = uniform(0.35)
+const windStrength = uniform(0.003)
+const windFrequency = uniform(3)
+const windVariation = uniform(0.3)
 
 // Buffers
 const scaleBuffer = range(0.5, 1)
@@ -150,8 +160,14 @@ const progressesBuffer = instancedArray(count, 'float')
 // Init compute
 const initPetals = Fn(() => {
   const initialPosition = initialPositionsBuffer.element(instanceIndex)
+  const position = positionsBuffer.element(instanceIndex)
+  const progress = progressesBuffer.element(instanceIndex)
 
   initialPosition.assign(randomSphericalPosition(instanceIndex, 1))
+
+  position.assign(initialPosition.mul(radius))
+
+  progress.assign(hash(instanceIndex.mul(3)))
 })()
 
 const initPetalsCompute = initPetals.compute(count)
@@ -163,15 +179,33 @@ const updatePetals = Fn(() => {
   const initialPosition = initialPositionsBuffer.element(instanceIndex)
   const position = positionsBuffer.element(instanceIndex)
   const progress = progressesBuffer.element(instanceIndex)
+
+  // Progress
+  progress.addAssign(deltaTime.mul(0.6))
+  If(progress.greaterThan(1), () => {
+    progress.assign(progress.fract())
+    position.assign(initialPosition.mul(radius))
+  })
+
+  // Position
+  const wind = mx_noise_vec3(
+    position.mul(windFrequency).add(time.mul(windVariation))
+  ).mul(windStrength)
+  position.addAssign(wind)
 })()
 const updateCompute = updatePetals.compute(count)
 
 // Position
 material.positionNode = Fn(() => {
-  const position = initialPositionsBuffer.element(instanceIndex)
+  const position = positionsBuffer.element(instanceIndex)
+  const progress = progressesBuffer.element(instanceIndex)
 
   // Scale
-  positionLocal.mulAssign(scale, scaleBuffer)
+  const progressScale = min(
+    progress.remap(0, 0.1),
+    progress.remap(1, 0.5)
+  ).clamp()
+  positionLocal.mulAssign(scale, scaleBuffer, progressScale)
 
   // Position
   positionLocal.addAssign(position)
@@ -194,6 +228,10 @@ const petalsFolderGui = renderer.inspector.createParameters('Petals')
 petalsFolderGui.add(scale, 'value', 0, 1, 0.001).name('scale')
 petalsFolderGui.addColor(colorA, 'value').name('colorA')
 petalsFolderGui.addColor(colorB, 'value').name('colorB')
+petalsFolderGui.add(radius, 'value', 0, 1, 0.001).name('radius')
+petalsFolderGui.add(windStrength, 'value', 0, 0.01, 0.0001).name('windStrength')
+petalsFolderGui.add(windFrequency, 'value', 0, 10, 0.01).name('windFrequency')
+petalsFolderGui.add(windVariation, 'value', 0, 1, 0.01).name('windVariation')
 
 /**
  * Title

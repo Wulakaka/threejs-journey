@@ -26,6 +26,7 @@ import { pixelationPass } from 'three/addons/tsl/display/PixelationPassNode.js'
 import { sobel } from 'three/examples/jsm/tsl/display/SobelOperatorNode.js'
 import { fxaa } from 'three/examples/jsm/tsl/display/FXAANode.js'
 import { shatter } from './ShatterNode'
+import { outline } from 'three/examples/jsm/tsl/display/OutlineNode.js'
 
 /**
  * Base
@@ -150,6 +151,14 @@ renderPipeline.outputNode = scenePass.getTextureNode('output')
 // const pixelationPassOutput = pixelationPass(scene, camera, 10, 2, 1)
 // renderPipeline.outputNode = pixelationPassOutput
 
+// Outline pass
+const outlinePass = outline(scene, camera, {
+  selectedObjects: []
+})
+
+const { visibleEdge } = outlinePass
+renderPipeline.outputNode = renderPipeline.outputNode.add(visibleEdge)
+
 // // Chromatic aberration pass
 // const chromaticAberrationPass = chromaticAberration(
 //   renderPipeline.outputNode,
@@ -265,6 +274,8 @@ model.scene.traverse((child) => {
     child.receiveShadow = true
   }
 })
+
+outlinePass.selectedObjects = [model.scene]
 model.scene.position.y = 0.001
 scene.add(model.scene)
 

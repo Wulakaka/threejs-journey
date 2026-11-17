@@ -1,17 +1,23 @@
-import * as THREE from 'three/webgpu'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { Inspector } from 'three/addons/inspector/Inspector.js'
 import { bloom } from 'three/examples/jsm/tsl/display/BloomNode.js'
-import { EPSILON, Fn, pass, positionLocal, uniform } from 'three/tsl'
-import { instancedArray } from 'three/tsl'
-import { instanceIndex } from 'three/tsl'
-import { vec3 } from 'three/tsl'
-import { hash } from 'three/tsl'
-import { deltaTime } from 'three/tsl'
-import { Loop } from 'three/tsl'
-import { If } from 'three/tsl'
-import { dot } from 'three/tsl'
-import { color } from 'three/tsl'
+import {
+  color,
+  deltaTime,
+  dot,
+  EPSILON,
+  Fn,
+  hash,
+  If,
+  instancedArray,
+  instanceIndex,
+  Loop,
+  pass,
+  positionLocal,
+  uniform,
+  vec3
+} from 'three/tsl'
+import * as THREE from 'three/webgpu'
 
 /**
  * Base
@@ -54,7 +60,8 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   100
 )
-camera.position.z = 16
+camera.position.z = 20
+camera.position.y = 20
 scene.add(camera)
 
 // Controls
@@ -146,6 +153,19 @@ const cursorHelper = new THREE.Mesh(
 )
 // scene.add(cursorHelper)
 
+const floor = new THREE.Mesh(
+  new THREE.PlaneGeometry(10, 10),
+  new THREE.MeshLambertMaterial({
+    color: 'white'
+  })
+)
+
+floor.rotation.x = -Math.PI / 2
+
+floor.position.y = 0
+
+// scene.add(floor)
+
 /**
  * Sphere particles
  */
@@ -166,8 +186,10 @@ const heatImpactStrength = uniform(30)
 const emissiveColor = uniform(color(0xff3f0f))
 const cursorPosition = uniform(vec3())
 const cursorVelocity = uniform(vec3())
-const cursorRadius = uniform(1.75)
+const cursorRadius = uniform(4)
 const cursorStrength = uniform(0.05)
+const globalGravity = uniform(0.1)
+const globalGravityDamping = uniform(0.2)
 
 // Computes
 const initCompute = Fn(() => {
@@ -176,7 +198,7 @@ const initCompute = Fn(() => {
   position.assign(
     vec3(
       hash(instanceIndex),
-      hash(instanceIndex.add(12).mul(2)),
+      hash(instanceIndex.add(12).mul(2)).add(1),
       hash(instanceIndex.add(23).mul(3))
     )
       .sub(0.5)
@@ -205,6 +227,9 @@ const updateCompute = Fn(() => {
     .mul(cursorStrength)
   aVelocity.addAssign(_cursorVelocity)
   aHeat.addAssign(_cursorVelocity.length().mul(50))
+
+  // Global gravity
+  aVelocity.y.subAssign(globalGravity.mul(clampedDeltaTime))
 
   // Center gravity
   const toCenter = aPosition.negate().normalize()
@@ -246,6 +271,15 @@ const updateCompute = Fn(() => {
       aHeat.addAssign(heat)
       bHeat.addAssign(heat)
     })
+  })
+
+  // Touching floor
+  const overlapFloor = radius.sub(aPosition.y)
+  If(overlapFloor.greaterThan(0), () => {
+    aPosition.y.assign(radius)
+    aVelocity.y.assign(aVelocity.y.negate())
+    aVelocity.y.mulAssign(globalGravityDamping.oneMinus())
+    aHeat.addAssign(overlapFloor.sub(0.01).max(0).mul(10))
   })
 
   // Apply velocity
@@ -302,6 +336,10 @@ spheresGui
 spheresGui.addColor(emissiveColor, 'value').name('emissiveColor')
 spheresGui.add(cursorRadius, 'value', 0, 5, 0.001).name('cursorRadius')
 spheresGui.add(cursorStrength, 'value', 0, 0.2, 0.001).name('cursorStrength')
+spheresGui.add(globalGravity, 'value', 0, 20, 0.01).name('globalGravity')
+spheresGui
+  .add(globalGravityDamping, 'value', 0, 1, 0.01)
+  .name('globalGravityDamping')
 
 /**
  * Animate

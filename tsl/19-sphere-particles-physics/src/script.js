@@ -195,6 +195,8 @@ const updateCompute = Fn(() => {
   const aHeat = heatBuffer.element(instanceIndex)
 
   // Cursor
+  // 鼠标效果并不是刚体撞击，而是类似于加速了范围内的球体。
+  // 刚体撞击会有方向的变化，这里只是把鼠标的速度传递给了球体。
   const cursorDistance = aPosition.distance(cursorPosition)
   // 距离 cursor 越近，越接近 1
   const cursorDistanceRatio = cursorDistance.div(cursorRadius).oneMinus().max(0)

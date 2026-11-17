@@ -1281,6 +1281,16 @@ importers:
         specifier: ^8.3.5
         version: 8.3.5
 
+  tsl/19-sphere-particles-physics:
+    dependencies:
+      three:
+        specifier: ^0.187.0
+        version: 0.187.0
+    devDependencies:
+      vite:
+        specifier: ^8.3.5
+        version: 8.3.5
+
 packages:
 
   '@babel/code-frame@7.27.1':

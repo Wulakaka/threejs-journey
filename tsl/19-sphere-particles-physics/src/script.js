@@ -138,6 +138,8 @@ const velocitiesBuffer = instancedArray(count, 'vec3')
 // Uniforms
 const radius = uniform(0.5)
 const gravityStrength = uniform(0.025)
+const impactDamping = uniform(0.05)
+const generalDamping = uniform(0.4)
 
 // Computes
 const initCompute = Fn(() => {
@@ -191,7 +193,9 @@ const updateCompute = Fn(() => {
       // Apply impact velocities
       const relativeVelocity = aVelocity.sub(bVelocity)
       const impactStrength = dot(relativeVelocity, direction)
-      const impactVelocity = direction.mul(impactStrength)
+      const impactVelocity = direction
+        .mul(impactStrength)
+        .mul(impactDamping.oneMinus())
       aVelocity.subAssign(impactVelocity)
       bVelocity.addAssign(impactVelocity)
     })
@@ -199,6 +203,9 @@ const updateCompute = Fn(() => {
 
   // Apply velocity
   aPosition.addAssign(aVelocity)
+
+  // Velocity damping
+  aVelocity.mulAssign(generalDamping.mul(clampedDeltaTime).oneMinus())
 })().compute(count)
 
 // Geometry
@@ -230,6 +237,8 @@ scene.add(mesh)
 const spheresGui = renderer.inspector.createParameters('Spheres')
 spheresGui.add(radius, 'value', 0, 0.5, 0.001).name('radius')
 spheresGui.add(gravityStrength, 'value', 0, 0.1, 0.001).name('gravityStrength')
+spheresGui.add(impactDamping, 'value', 0, 0.1, 0.001).name('impactDamping')
+spheresGui.add(generalDamping, 'value', 0, 1, 0.01).name('generalDamping')
 
 /**
  * Animate

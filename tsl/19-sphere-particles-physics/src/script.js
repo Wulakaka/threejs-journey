@@ -2,12 +2,15 @@ import * as THREE from 'three/webgpu'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { Inspector } from 'three/addons/inspector/Inspector.js'
 import { bloom } from 'three/examples/jsm/tsl/display/BloomNode.js'
-import { Fn, pass, positionLocal, uniform } from 'three/tsl'
+import { EPSILON, Fn, pass, positionLocal, uniform } from 'three/tsl'
 import { instancedArray } from 'three/tsl'
 import { instanceIndex } from 'three/tsl'
 import { vec3 } from 'three/tsl'
 import { hash } from 'three/tsl'
 import { deltaTime } from 'three/tsl'
+import { Loop } from 'three/tsl'
+import { If } from 'three/tsl'
+import { dot } from 'three/tsl'
 
 /**
  * Base
@@ -164,6 +167,35 @@ const updateCompute = Fn(() => {
   const toCenter = aPosition.negate().normalize()
   const gravityVelocity = toCenter.mul(gravityStrength).mul(clampedDeltaTime)
   aVelocity.addAssign(gravityVelocity)
+
+  // Sphere collision
+  Loop({ start: instanceIndex.add(1), end: count }, ({ i }) => {
+    // Buffers
+    const bPosition = positionsBuffer.element(i)
+    const bVelocity = velocitiesBuffer.element(i)
+
+    // Relation to sphere A
+    const delta = bPosition.sub(aPosition)
+    const distance = delta.length()
+    const direction = delta.div(distance.max(EPSILON))
+
+    // Is touching
+    const radius2 = radius.mul(2)
+    If(distance.lessThan(radius2), () => {
+      // Move away by overlap distance
+      const overlap = radius2.sub(distance)
+      const avoidance = direction.mul(overlap.div(2))
+      aPosition.subAssign(avoidance)
+      bPosition.addAssign(avoidance)
+
+      // Apply impact velocities
+      const relativeVelocity = aVelocity.sub(bVelocity)
+      const impactStrength = dot(relativeVelocity, direction)
+      const impactVelocity = direction.mul(impactStrength)
+      aVelocity.subAssign(impactVelocity)
+      bVelocity.addAssign(impactVelocity)
+    })
+  })
 
   // Apply velocity
   aPosition.addAssign(aVelocity)

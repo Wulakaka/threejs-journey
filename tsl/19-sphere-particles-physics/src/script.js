@@ -11,6 +11,7 @@ import { deltaTime } from 'three/tsl'
 import { Loop } from 'three/tsl'
 import { If } from 'three/tsl'
 import { dot } from 'three/tsl'
+import { color } from 'three/tsl'
 
 /**
  * Base
@@ -134,12 +135,16 @@ const count = 10
 // Buffers
 const positionsBuffer = instancedArray(count, 'vec3')
 const velocitiesBuffer = instancedArray(count, 'vec3')
+const heatBuffer = instancedArray(count, 'float')
 
 // Uniforms
 const radius = uniform(0.5)
 const gravityStrength = uniform(0.025)
 const impactDamping = uniform(0.05)
 const generalDamping = uniform(0.4)
+const heatDamping = uniform(3)
+const heatImpactStrength = uniform(30)
+const emissiveColor = uniform(color(0xff3f0f))
 
 // Computes
 const initCompute = Fn(() => {
@@ -164,6 +169,7 @@ const updateCompute = Fn(() => {
   // Buffers
   const aPosition = positionsBuffer.element(instanceIndex)
   const aVelocity = velocitiesBuffer.element(instanceIndex)
+  const aHeat = heatBuffer.element(instanceIndex)
 
   // Center gravity
   const toCenter = aPosition.negate().normalize()
@@ -175,6 +181,7 @@ const updateCompute = Fn(() => {
     // Buffers
     const bPosition = positionsBuffer.element(i)
     const bVelocity = velocitiesBuffer.element(i)
+    const bHeat = heatBuffer.element(i)
 
     // Relation to sphere A
     const delta = bPosition.sub(aPosition)
@@ -198,6 +205,11 @@ const updateCompute = Fn(() => {
         .mul(impactDamping.oneMinus())
       aVelocity.subAssign(impactVelocity)
       bVelocity.addAssign(impactVelocity)
+
+      // Impact heat
+      const heat = impactStrength.sub(0.01).max(0).mul(heatImpactStrength)
+      aHeat.addAssign(heat)
+      bHeat.addAssign(heat)
     })
   })
 
@@ -206,6 +218,9 @@ const updateCompute = Fn(() => {
 
   // Velocity damping
   aVelocity.mulAssign(generalDamping.mul(clampedDeltaTime).oneMinus())
+
+  // Heat damping
+  aHeat.mulAssign(heatDamping.mul(clampedDeltaTime).oneMinus())
 })().compute(count)
 
 // Geometry
@@ -214,6 +229,7 @@ const geometry = new THREE.IcosahedronGeometry(1, 2)
 // Material
 const material = new THREE.MeshLambertNodeMaterial({ color: 0xffffff })
 
+// Position
 material.positionNode = Fn(() => {
   // Scale
   positionLocal.mulAssign(radius)
@@ -223,6 +239,11 @@ material.positionNode = Fn(() => {
 
   return positionLocal
 })()
+
+// Emissive
+const heat = heatBuffer.element(instanceIndex)
+
+material.emissiveNode = emissiveColor.mul(heat)
 
 // Mesh
 const mesh = new THREE.Mesh(geometry, material)
@@ -239,6 +260,11 @@ spheresGui.add(radius, 'value', 0, 0.5, 0.001).name('radius')
 spheresGui.add(gravityStrength, 'value', 0, 0.1, 0.001).name('gravityStrength')
 spheresGui.add(impactDamping, 'value', 0, 0.1, 0.001).name('impactDamping')
 spheresGui.add(generalDamping, 'value', 0, 1, 0.01).name('generalDamping')
+spheresGui.add(heatDamping, 'value', 0, 10, 0.1).name('heatDamping')
+spheresGui
+  .add(heatImpactStrength, 'value', 0, 100, 0.1)
+  .name('heatImpactStrength')
+spheresGui.addColor(emissiveColor, 'value').name('emissiveColor')
 
 /**
  * Animate

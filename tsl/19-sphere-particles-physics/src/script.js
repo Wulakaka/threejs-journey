@@ -128,9 +128,28 @@ lightsGui.addColor(ambientLight, 'color').name('ambientColor')
 lightsGui.add(ambientLight, 'intensity', 0, 5, 0.01).name('ambientIntensity')
 
 /**
+ * Cursor
+ */
+
+const raycaster = new THREE.Raycaster()
+const cursor = new THREE.Vector2()
+
+window.addEventListener('pointermove', (event) => {
+  cursor.x = (event.clientX / sizes.width) * 2 - 1
+  cursor.y = -(event.clientY / sizes.height) * 2 + 1
+})
+
+// Helper
+const cursorHelper = new THREE.Mesh(
+  new THREE.IcosahedronGeometry(1, 3),
+  new THREE.MeshBasicMaterial({ wireframe: true })
+)
+// scene.add(cursorHelper)
+
+/**
  * Sphere particles
  */
-const count = 10
+const count = 6000
 
 // Buffers
 const positionsBuffer = instancedArray(count, 'vec3')
@@ -138,13 +157,17 @@ const velocitiesBuffer = instancedArray(count, 'vec3')
 const heatBuffer = instancedArray(count, 'float')
 
 // Uniforms
-const radius = uniform(0.5)
+const radius = uniform(0.15)
 const gravityStrength = uniform(0.025)
 const impactDamping = uniform(0.05)
 const generalDamping = uniform(0.4)
 const heatDamping = uniform(3)
 const heatImpactStrength = uniform(30)
 const emissiveColor = uniform(color(0xff3f0f))
+const cursorPosition = uniform(vec3())
+const cursorVelocity = uniform(vec3())
+const cursorRadius = uniform(1.75)
+const cursorStrength = uniform(0.05)
 
 // Computes
 const initCompute = Fn(() => {
@@ -170,6 +193,16 @@ const updateCompute = Fn(() => {
   const aPosition = positionsBuffer.element(instanceIndex)
   const aVelocity = velocitiesBuffer.element(instanceIndex)
   const aHeat = heatBuffer.element(instanceIndex)
+
+  // Cursor
+  const cursorDistance = aPosition.distance(cursorPosition)
+  // 距离 cursor 越近，越接近 1
+  const cursorDistanceRatio = cursorDistance.div(cursorRadius).oneMinus().max(0)
+  const _cursorVelocity = cursorVelocity
+    .mul(cursorDistanceRatio)
+    .mul(cursorStrength)
+  aVelocity.addAssign(_cursorVelocity)
+  aHeat.addAssign(_cursorVelocity.length().mul(50))
 
   // Center gravity
   const toCenter = aPosition.negate().normalize()
@@ -265,6 +298,8 @@ spheresGui
   .add(heatImpactStrength, 'value', 0, 100, 0.1)
   .name('heatImpactStrength')
 spheresGui.addColor(emissiveColor, 'value').name('emissiveColor')
+spheresGui.add(cursorRadius, 'value', 0, 5, 0.001).name('cursorRadius')
+spheresGui.add(cursorStrength, 'value', 0, 0.2, 0.001).name('cursorStrength')
 
 /**
  * Animate
@@ -272,6 +307,19 @@ spheresGui.addColor(emissiveColor, 'value').name('emissiveColor')
 const tick = () => {
   // Update controls
   controls.update()
+
+  // Cursor + Raycaster
+  raycaster.setFromCamera(cursor, camera)
+  const planeNormal = camera.position.clone().normalize()
+  const plane = new THREE.Plane(planeNormal, 0)
+
+  const intersect = new THREE.Vector3()
+  raycaster.ray.intersectPlane(plane, intersect)
+
+  cursorHelper.position.copy(intersect)
+
+  cursorVelocity.value.copy(intersect).sub(cursorPosition.value)
+  cursorPosition.value.copy(intersect)
 
   // Computes
   renderer.compute(updateCompute)

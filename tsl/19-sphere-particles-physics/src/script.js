@@ -2,7 +2,12 @@ import * as THREE from 'three/webgpu'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { Inspector } from 'three/addons/inspector/Inspector.js'
 import { bloom } from 'three/examples/jsm/tsl/display/BloomNode.js'
-import { pass } from 'three/tsl'
+import { Fn, pass, positionLocal, uniform } from 'three/tsl'
+import { instancedArray } from 'three/tsl'
+import { instanceIndex } from 'three/tsl'
+import { vec3 } from 'three/tsl'
+import { hash } from 'three/tsl'
+import { deltaTime } from 'three/tsl'
 
 /**
  * Base
@@ -119,13 +124,80 @@ lightsGui.addColor(ambientLight, 'color').name('ambientColor')
 lightsGui.add(ambientLight, 'intensity', 0, 5, 0.01).name('ambientIntensity')
 
 /**
- * Dummy
+ * Sphere particles
  */
-const dummy = new THREE.Mesh(
-  new THREE.BoxGeometry(),
-  new THREE.MeshNormalMaterial()
-)
-scene.add(dummy)
+const count = 10
+
+// Buffers
+const positionsBuffer = instancedArray(count, 'vec3')
+const velocitiesBuffer = instancedArray(count, 'vec3')
+
+// Uniforms
+const radius = uniform(0.5)
+const gravityStrength = uniform(0.025)
+
+// Computes
+const initCompute = Fn(() => {
+  const position = positionsBuffer.element(instanceIndex)
+
+  position.assign(
+    vec3(
+      hash(instanceIndex),
+      hash(instanceIndex.add(12).mul(2)),
+      hash(instanceIndex.add(23).mul(3))
+    )
+      .sub(0.5)
+      .mul(10)
+  )
+})().compute(count)
+
+renderer.compute(initCompute)
+
+const updateCompute = Fn(() => {
+  const clampedDeltaTime = deltaTime.min(1 / 30)
+
+  // Buffers
+  const aPosition = positionsBuffer.element(instanceIndex)
+  const aVelocity = velocitiesBuffer.element(instanceIndex)
+
+  // Center gravity
+  const toCenter = aPosition.negate().normalize()
+  const gravityVelocity = toCenter.mul(gravityStrength).mul(clampedDeltaTime)
+  aVelocity.addAssign(gravityVelocity)
+
+  // Apply velocity
+  aPosition.addAssign(aVelocity)
+})().compute(count)
+
+// Geometry
+const geometry = new THREE.IcosahedronGeometry(1, 2)
+
+// Material
+const material = new THREE.MeshLambertNodeMaterial({ color: 0xffffff })
+
+material.positionNode = Fn(() => {
+  // Scale
+  positionLocal.mulAssign(radius)
+
+  // Translate
+  positionLocal.addAssign(positionsBuffer.element(instanceIndex))
+
+  return positionLocal
+})()
+
+// Mesh
+const mesh = new THREE.Mesh(geometry, material)
+mesh.castShadow = true
+mesh.receiveShadow = true
+mesh.frustumCulled = false
+mesh.count = count
+
+scene.add(mesh)
+
+// Debug
+const spheresGui = renderer.inspector.createParameters('Spheres')
+spheresGui.add(radius, 'value', 0, 0.5, 0.001).name('radius')
+spheresGui.add(gravityStrength, 'value', 0, 0.1, 0.001).name('gravityStrength')
 
 /**
  * Animate
@@ -133,6 +205,9 @@ scene.add(dummy)
 const tick = () => {
   // Update controls
   controls.update()
+
+  // Computes
+  renderer.compute(updateCompute)
 
   // Render
   renderPipeline.render()

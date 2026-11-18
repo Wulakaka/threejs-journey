@@ -20,6 +20,7 @@ import { TWO_PI } from 'three/tsl'
 import { rotate } from 'three/tsl'
 import { time } from 'three/tsl'
 import { vertexIndex } from 'three/tsl'
+import { transformNormalToView } from 'three/tsl'
 
 /**
  * Base
@@ -328,6 +329,9 @@ renderer.compute(computeNormal)
     side: THREE.DoubleSide
   })
 
+  const colorVarying = vec3().toVarying()
+  const normalVarying = vec3().toVarying()
+
   material.positionNode = Fn(() => {
     // 通过 step 筛选出来只有 vertexIndex 为 2 的值
     const tip = vertexIndex.toFloat().step(2)
@@ -377,8 +381,29 @@ renderer.compute(computeNormal)
     const bend = mul(terrainScale, wind.remap(0, 1, -0.1, 0.1), tip)
     newPosition.x.addAssign(bend)
 
+    // Color
+    colorVarying.assign(texture(terrainColorTexture, terrainUv).rgb)
+
+    // Normal
+    const normal = texture(terrainNormalTexture, terrainUv).rgb.remap(
+      0,
+      1,
+      -1,
+      1
+    )
+    normal.assign(vec3(normal.x, normal.z, normal.y.negate()))
+    normalVarying.assign(normal)
+
+    // Hide
+    const visible = scale.step(0.05)
+    newPosition.mulAssign(visible)
+
     return newPosition
   })()
+
+  material.colorNode = colorVarying
+
+  material.normalNode = transformNormalToView(normalVarying)
 
   // Mesh
   const mesh = new THREE.Mesh(geometry, material)

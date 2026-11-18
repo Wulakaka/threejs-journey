@@ -4,7 +4,14 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { Inspector } from 'three/addons/inspector/Inspector.js'
 import { SkyMesh } from 'three/addons/objects/SkyMesh.js'
 import { bloom } from 'three/addons/tsl/display/BloomNode.js'
-import { pass } from 'three/tsl'
+import { Fn, pass, vec3 } from 'three/tsl'
+import { texture } from 'three/tsl'
+import { vec4 } from 'three/tsl'
+import { vec2 } from 'three/tsl'
+import { uvec2 } from 'three/tsl'
+import { textureStore } from 'three/tsl'
+import { instanceIndex } from 'three/tsl'
+import { float } from 'three/tsl'
 
 /**
  * Base
@@ -98,6 +105,7 @@ bloomGui.add(bloomPass.strength, 'value', 0, 2, 0.01).name('strength')
  */
 const anvil = await gltfLoader.loadAsync('./anvil.glb')
 anvil.scene.position.x = -3
+anvil.scene.position.y = 1
 anvil.scene.position.z = 2.8
 anvil.scene.traverse((child) => {
   if (child.isMesh) {
@@ -191,6 +199,48 @@ lightsGui.addColor(ambientLight, 'color').name('ambientColor')
 lightsGui.add(ambientLight, 'intensity', 0, 5, 0.01).name('ambientIntensity')
 
 /**
+ * Textures
+ */
+const terrainDataTexture = await textureLoader.loadAsync('./floor-data.png')
+const terrainColorTexture = await textureLoader.loadAsync('./floor-color.jpg')
+terrainColorTexture.colorSpace = THREE.SRGBColorSpace
+
+/**
+ * Compute normal
+ */
+const resolution = 32
+
+const terrainNormalTexture = new THREE.StorageTexture(resolution, resolution)
+
+const computeNormal = Fn(() => {
+  // UV
+  const indexUV = uvec2(
+    instanceIndex.mod(resolution),
+    instanceIndex.div(resolution)
+  )
+  const textureUV = indexUV.toVec2().div(resolution)
+
+  // Sample texture on each side
+  const texelSize = float(1).div(resolution)
+  const xPos = texture(terrainDataTexture, textureUV.add(vec2(texelSize, 0))).r
+  const xNeg = texture(terrainDataTexture, textureUV.sub(vec2(texelSize, 0))).r
+  const yPos = texture(terrainDataTexture, textureUV.add(vec2(0, texelSize))).r
+  const yNeg = texture(terrainDataTexture, textureUV.sub(vec2(0, texelSize))).r
+
+  // Calculate normal
+  const xDelta = xNeg.sub(xPos)
+  const yDelta = yNeg.sub(yPos)
+  const normal = vec3(xDelta, yDelta, 1).normalize()
+
+  // Store
+  const _color = vec4(normal.remap(-1, 1), 1)
+  // toWriteOnly 通知 WebGPU API 我们只想写入缓存区，也就会开启相应的优化
+  textureStore(terrainNormalTexture, indexUV, _color).toWriteOnly()
+})().compute(resolution * resolution)
+
+renderer.compute(computeNormal)
+
+/**
  * Floor
  */
 {
@@ -199,7 +249,13 @@ lightsGui.add(ambientLight, 'intensity', 0, 5, 0.01).name('ambientIntensity')
   geometry.rotateX(-Math.PI * 0.5)
 
   // Material
-  const material = new THREE.MeshStandardNodeMaterial()
+  const material = new THREE.MeshStandardNodeMaterial({
+    map: terrainColorTexture,
+    displacementMap: terrainDataTexture,
+    normalMap: terrainNormalTexture
+  })
+
+  // material.outputNode = texture(terrainNormalTexture)
 
   // Mesh
   const mesh = new THREE.Mesh(geometry, material)

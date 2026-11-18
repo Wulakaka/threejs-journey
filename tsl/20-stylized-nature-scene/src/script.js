@@ -12,6 +12,8 @@ import { uvec2 } from 'three/tsl'
 import { textureStore } from 'three/tsl'
 import { instanceIndex } from 'three/tsl'
 import { float } from 'three/tsl'
+import { positionGeometry } from 'three/tsl'
+import { instancedBufferAttribute } from 'three/tsl'
 
 /**
  * Base
@@ -259,6 +261,76 @@ renderer.compute(computeNormal)
 
   // Mesh
   const mesh = new THREE.Mesh(geometry, material)
+  mesh.castShadow = true
+  mesh.receiveShadow = true
+  scene.add(mesh)
+}
+
+/**
+ * Grass
+ */
+{
+  const subdivisions = 10
+  const count = subdivisions * subdivisions
+  const size = 10
+  const halfSize = size * 0.5
+  const cellSize = size / (subdivisions - 1)
+
+  // Blades position
+  const instancePositionsArray = new Float32Array(count * 2)
+  for (let iX = 0; iX < subdivisions; iX++) {
+    for (let iZ = 0; iZ < subdivisions; iZ++) {
+      const i = iX * subdivisions + iZ
+      instancePositionsArray[i * 2 + 0] =
+        iX * cellSize - halfSize + (Math.random() - 0.5) * cellSize
+      instancePositionsArray[i * 2 + 1] =
+        iZ * cellSize - halfSize + (Math.random() - 0.5) * cellSize
+    }
+  }
+  const instancePositions = new THREE.InstancedBufferAttribute(
+    instancePositionsArray,
+    2
+  )
+
+  // Blade geometry
+  // 二维三角形
+  const vertexPositions = new Float32Array(3 * 2)
+  vertexPositions[0] = 0.25
+  vertexPositions[1] = 0
+  vertexPositions[2] = -0.25
+  vertexPositions[3] = 0
+  vertexPositions[4] = 0
+  vertexPositions[5] = 1
+  const geometry = new THREE.BufferGeometry()
+  geometry.setAttribute(
+    'position',
+    new THREE.Float32BufferAttribute(vertexPositions, 2)
+  )
+  // 处理无法计算 boundingSphere 的报错
+  geometry.boundingSphere = new THREE.Sphere(
+    new THREE.Vector3(),
+    Math.hypot(halfSize, halfSize)
+  )
+
+  // Material
+  const material = new THREE.MeshStandardNodeMaterial({
+    side: THREE.DoubleSide
+  })
+
+  material.positionNode = Fn(() => {
+    const newPosition = vec3(positionGeometry.xy, 0)
+    const instancePosition = instancedBufferAttribute(instancePositions)
+
+    // Instance position
+    newPosition.xz.addAssign(instancePosition)
+
+    return newPosition
+  })()
+
+  // Mesh
+  const mesh = new THREE.Mesh(geometry, material)
+  mesh.position.y = 1
+  mesh.count = count
   mesh.castShadow = true
   mesh.receiveShadow = true
   scene.add(mesh)

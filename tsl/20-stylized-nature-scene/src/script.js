@@ -14,6 +14,12 @@ import { instanceIndex } from 'three/tsl'
 import { float } from 'three/tsl'
 import { positionGeometry } from 'three/tsl'
 import { instancedBufferAttribute } from 'three/tsl'
+import { mul } from 'three/tsl'
+import { range } from 'three/tsl'
+import { TWO_PI } from 'three/tsl'
+import { rotate } from 'three/tsl'
+import { time } from 'three/tsl'
+import { vertexIndex } from 'three/tsl'
 
 /**
  * Base
@@ -206,6 +212,11 @@ lightsGui.add(ambientLight, 'intensity', 0, 5, 0.01).name('ambientIntensity')
 const terrainDataTexture = await textureLoader.loadAsync('./floor-data.png')
 const terrainColorTexture = await textureLoader.loadAsync('./floor-color.jpg')
 terrainColorTexture.colorSpace = THREE.SRGBColorSpace
+const simpleNoiseTexture = await textureLoader.loadAsync(
+  './simplex-tiling-noise-256x256.png'
+)
+simpleNoiseTexture.wrapS = THREE.RepeatWrapping
+simpleNoiseTexture.wrapT = THREE.RepeatWrapping
 
 /**
  * Compute normal
@@ -270,9 +281,9 @@ renderer.compute(computeNormal)
  * Grass
  */
 {
-  const subdivisions = 10
+  const subdivisions = 100
   const count = subdivisions * subdivisions
-  const size = 10
+  const size = 9.75
   const halfSize = size * 0.5
   const cellSize = size / (subdivisions - 1)
 
@@ -318,18 +329,59 @@ renderer.compute(computeNormal)
   })
 
   material.positionNode = Fn(() => {
+    // 通过 step 筛选出来只有 vertexIndex 为 2 的值
+    const tip = vertexIndex.toFloat().step(2)
     const newPosition = vec3(positionGeometry.xy, 0)
     const instancePosition = instancedBufferAttribute(instancePositions)
 
+    // Terrain data
+    // 这里不能使用 size
+    const terrainUv = instancePosition.div(10).add(0.5)
+    terrainUv.y.assign(terrainUv.y.oneMinus())
+    const terrainData = texture(terrainDataTexture, terrainUv).rg
+
+    // Rotation
+    const angle = range(0, TWO_PI)
+    newPosition.xz.assign(rotate(newPosition.xz, angle))
+
+    // Scale
+    const terrainScale = terrainData.g.remapClamp(0, 0.2)
+    const scale = mul(range(0.7, 1), 0.4, terrainScale)
+    newPosition.mulAssign(scale)
+
     // Instance position
     newPosition.xz.addAssign(instancePosition)
+
+    // Terrain elevation
+    newPosition.y.addAssign(terrainData.r)
+
+    // Wind
+    const wind = texture(
+      simpleNoiseTexture,
+      terrainUv.mul(0.4).add(time.mul(0.08))
+    ).r
+
+    // Wiggle
+    const wiggleTime = time.add(instanceIndex).mul(7)
+    const wiggle = mul(
+      wind,
+      terrainScale,
+      terrainData.r,
+      tip,
+      wiggleTime.sin(),
+      0.06
+    )
+    newPosition.x.addAssign(wiggle)
+
+    // Bend
+    const bend = mul(terrainScale, wind.remap(0, 1, -0.1, 0.1), tip)
+    newPosition.x.addAssign(bend)
 
     return newPosition
   })()
 
   // Mesh
   const mesh = new THREE.Mesh(geometry, material)
-  mesh.position.y = 1
   mesh.count = count
   mesh.castShadow = true
   mesh.receiveShadow = true

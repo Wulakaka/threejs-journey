@@ -1,26 +1,39 @@
-import * as THREE from 'three/webgpu'
 import { GLTFLoader } from 'three/addons/Addons.js'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { Inspector } from 'three/addons/inspector/Inspector.js'
 import { SkyMesh } from 'three/addons/objects/SkyMesh.js'
 import { bloom } from 'three/addons/tsl/display/BloomNode.js'
-import { Fn, pass, vec3 } from 'three/tsl'
-import { texture } from 'three/tsl'
-import { vec4 } from 'three/tsl'
-import { vec2 } from 'three/tsl'
-import { uvec2 } from 'three/tsl'
-import { textureStore } from 'three/tsl'
-import { instanceIndex } from 'three/tsl'
-import { float } from 'three/tsl'
-import { positionGeometry } from 'three/tsl'
-import { instancedBufferAttribute } from 'three/tsl'
-import { mul } from 'three/tsl'
-import { range } from 'three/tsl'
-import { TWO_PI } from 'three/tsl'
-import { rotate } from 'three/tsl'
-import { time } from 'three/tsl'
-import { vertexIndex } from 'three/tsl'
-import { transformNormalToView } from 'three/tsl'
+import { hashBlur } from 'three/examples/jsm/tsl/display/hashBlur.js'
+import {
+  add,
+  cameraFar,
+  cameraNear,
+  float,
+  Fn,
+  If,
+  instancedBufferAttribute,
+  instanceIndex,
+  linearDepth,
+  mul,
+  pass,
+  positionGeometry,
+  range,
+  rotate,
+  texture,
+  textureStore,
+  time,
+  transformNormalToView,
+  TWO_PI,
+  uv,
+  uvec2,
+  vec2,
+  vec3,
+  vec4,
+  vertexIndex,
+  viewportLinearDepth,
+  viewportSharedTexture
+} from 'three/tsl'
+import * as THREE from 'three/webgpu'
 
 /**
  * Base
@@ -409,6 +422,76 @@ renderer.compute(computeNormal)
   const mesh = new THREE.Mesh(geometry, material)
   mesh.count = count
   mesh.castShadow = true
+  mesh.receiveShadow = true
+  scene.add(mesh)
+}
+
+/**
+ * Grass
+ */
+{
+  // Geometry
+  const geometry = new THREE.PlaneGeometry(10, 10)
+
+  // Material
+  const material = new THREE.MeshStandardNodeMaterial({
+    transparent: true
+  })
+
+  material.backdropNode = Fn(() => {
+    // Water depth
+    const waterDepth = viewportLinearDepth
+      .sub(linearDepth())
+      .mul(cameraFar.sub(cameraNear))
+      .max(0) // 避免出现草的边缘很白的情况
+
+    // 背后是 sky 时，值会非常大
+    If(waterDepth.greaterThan(20), () => {
+      waterDepth.assign(1)
+    })
+
+    const blurAmount = waterDepth.mul(0.02)
+
+    const newColor = hashBlur(viewportSharedTexture(), blurAmount, {
+      repeats: 25
+    })
+
+    // Absorption 需要被吸收的程度
+    const absorption = vec3(0.45, 0.07, 0.01)
+    // 多少光能穿过水后留下来
+    const transmittance = absorption.negate().mul(waterDepth).mul(7).exp()
+    newColor.mulAssign(transmittance)
+
+    return newColor
+  })()
+
+  material.backdropAlphaNode = Fn(() => {
+    // Terrain data
+    const terrainElevation = texture(terrainDataTexture).r
+
+    // Shore
+    const wavesPattern1 = texture(
+      simpleNoiseTexture,
+      uv().mul(2).add(time.mul(-0.02))
+    ).g
+    const wavesPattern2 = texture(
+      simpleNoiseTexture,
+      uv().mul(2).add(time.mul(0.03))
+    ).b
+    const wavesPattern = add(wavesPattern1, wavesPattern2).mul(0.5)
+    const landProximity = terrainElevation.remap(0, 0.65)
+    const shore = wavesPattern.step(landProximity)
+
+    // Discard
+    terrainElevation.greaterThan(0.68).discard()
+
+    return shore
+  })()
+
+  // Mesh
+  const mesh = new THREE.Mesh(geometry, material)
+  mesh.position.y = 0.65
+  mesh.rotation.x = -Math.PI / 2
   mesh.receiveShadow = true
   scene.add(mesh)
 }

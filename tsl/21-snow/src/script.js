@@ -3,7 +3,19 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { Inspector } from 'three/addons/inspector/Inspector.js'
 import { SkyMesh } from 'three/addons/objects/SkyMesh.js'
 import { bloom } from 'three/addons/tsl/display/BloomNode.js'
-import { pass, texture, uniform, uv, vec4 } from 'three/tsl'
+import {
+  Fn,
+  instanceIndex,
+  min,
+  pass,
+  positionLocal,
+  storageTexture,
+  texture,
+  uniform,
+  uv,
+  uvec2,
+  vec4
+} from 'three/tsl'
 import * as THREE from 'three/webgpu'
 
 /**
@@ -274,9 +286,9 @@ depthCamera.position.y = -(near + safe.value)
 depthCamera.rotation.x = Math.PI / 2
 scene.add(depthCamera)
 
-// Helper
-const cameraHelper = new THREE.CameraHelper(depthCamera)
-scene.add(cameraHelper)
+// // Helper
+// const cameraHelper = new THREE.CameraHelper(depthCamera)
+// scene.add(cameraHelper)
 
 // Render target
 const depthRenderTarget = new THREE.RenderTarget(resolution, resolution)
@@ -289,12 +301,72 @@ depthRenderTarget.depthTexture = depthTexture
 const depthMaterial = new THREE.NodeMaterial()
 depthMaterial.fragmentNode = vec4(0, 0, 0, 1)
 
+/**
+ * Compute texture
+ */
+// Storage texture
+const snowTexture = new THREE.StorageTexture(resolution, resolution)
+snowTexture.format = THREE.RedFormat
+snowTexture.type = THREE.FloatType
+
+// storageTexture 创建一个 node，并设置可读写
+// 后续可以通过 store 方法写入，load 方法读取
+const snowTextureNode = storageTexture(snowTexture).setAccess(
+  THREE.NodeAccess.READ_WRITE
+)
+
+// Reset compute
+const resetSnowCompute = Fn(() => {
+  // UV
+  const indexUV = uvec2(
+    instanceIndex.mod(resolution),
+    instanceIndex.div(resolution)
+  )
+
+  snowTextureNode.store(indexUV, vec4(1, 0, 0, 0))
+})().compute(resolution * resolution)
+renderer.compute(resetSnowCompute)
+
+window.addEventListener('keydown', (event) => {
+  if (event.code === 'Space') {
+    renderer.compute(resetSnowCompute)
+  }
+})
+
+// Update compute
+const updateSnowTextureCompute = Fn(() => {
+  // UV
+  const indexUV = uvec2(
+    instanceIndex.mod(resolution),
+    instanceIndex.div(resolution)
+  )
+
+  const textureUV = indexUV.toVec2().div(resolution)
+
+  // Setup
+  const currentSnow = snowTextureNode.load(indexUV).r
+  // toVar 创建一个新的变量，而不是引用
+  const newSnow = currentSnow.toVar()
+
+  // Dig depth
+  const depth = texture(depthTexture, textureUV).r.remap(
+    safe.div(thickness.add(safe)),
+    1,
+    0,
+    thickness
+  )
+  newSnow.assign(min(newSnow, depth))
+
+  // Store
+  snowTextureNode.store(indexUV, vec4(newSnow, 0, 0, 0))
+})().compute(resolution * resolution)
+
 // Debug mesh
 const debugMesh = new THREE.Mesh(
   new THREE.BoxGeometry(1, 1, 1),
   new THREE.NodeMaterial()
 )
-debugMesh.material.fragmentNode = vec4(texture(depthTexture).r, 0, 0, 1)
+debugMesh.material.fragmentNode = vec4(texture(snowTexture).r, 0, 0, 1)
 debugMesh.position.y = 2.5
 debugMesh.scale.setScalar(2)
 scene.add(debugMesh)
@@ -320,6 +392,18 @@ const material = new THREE.MeshStandardNodeMaterial({
 })
 
 material.opacityNode = uv().sub(0.5).length().smoothstep(0.5, 0.35)
+
+const snowElevation = Fn(([position]) => {
+  const snowUV = position.div(size).add(0.5)
+  return texture(snowTexture, snowUV).r
+})
+
+material.positionNode = Fn(() => {
+  // Elevation
+  const newPosition = positionLocal.toVar()
+  newPosition.z.addAssign(snowElevation(newPosition.xy))
+  return newPosition
+})()
 
 // Mesh
 const floor = new THREE.Mesh(geometry, material)
@@ -366,6 +450,8 @@ const tick = () => {
   const rendererState = THREE.RendererUtils.resetRendererState(renderer)
 
   // Render depth
+  // 隐藏 floor，避免出现对 depthTexture 进行同时的读和写
+  floor.visible = false
   // 使用极简的 material 来渲染，避免性能浪费
   scene.overrideMaterial = depthMaterial
   // 设置 render target
@@ -373,11 +459,15 @@ const tick = () => {
   renderer.render(scene, depthCamera)
 
   // Restore
+  floor.visible = true
   scene.overrideMaterial = null
   // 恢复 render target
   renderer.setRenderTarget(null)
   // 恢复之前的 renderer state
   THREE.RendererUtils.restoreRendererState(renderer, rendererState)
+
+  // Compute snow
+  renderer.compute(updateSnowTextureCompute)
 
   // Render
   renderPipeline.render()

@@ -4,9 +4,11 @@ import { Inspector } from 'three/addons/inspector/Inspector.js'
 import { SkyMesh } from 'three/addons/objects/SkyMesh.js'
 import { bloom } from 'three/addons/tsl/display/BloomNode.js'
 import {
+  cross,
   Fn,
   instanceIndex,
   min,
+  normalLocal,
   pass,
   positionLocal,
   storageTexture,
@@ -14,6 +16,7 @@ import {
   uniform,
   uv,
   uvec2,
+  vec3,
   vec4
 } from 'three/tsl'
 import * as THREE from 'three/webgpu'
@@ -402,6 +405,18 @@ material.positionNode = Fn(() => {
   // Elevation
   const newPosition = positionLocal.toVar()
   newPosition.z.addAssign(snowElevation(newPosition.xy))
+
+  // Normal
+  const spacing = size / resolution
+  const positionA = positionLocal.add(vec3(spacing, 0, 0))
+  const positionB = positionLocal.add(vec3(0, spacing, 0))
+  positionA.z.addAssign(snowElevation(positionA.xy))
+  positionB.z.addAssign(snowElevation(positionB.xy))
+  const toA = positionA.sub(newPosition).normalize()
+  const toB = positionB.sub(newPosition).normalize()
+
+  normalLocal.assign(cross(toA, toB))
+
   return newPosition
 })()
 

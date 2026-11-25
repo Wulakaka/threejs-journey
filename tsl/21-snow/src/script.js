@@ -3,7 +3,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { Inspector } from 'three/addons/inspector/Inspector.js'
 import { SkyMesh } from 'three/addons/objects/SkyMesh.js'
 import { bloom } from 'three/addons/tsl/display/BloomNode.js'
-import { pass, uniform, uv } from 'three/tsl'
+import { pass, texture, uniform, uv, vec4 } from 'three/tsl'
 import * as THREE from 'three/webgpu'
 
 /**
@@ -254,6 +254,52 @@ const resolution = 512
 const thickness = uniform(0.3)
 
 /**
+ * Depth
+ */
+const halfSize = size / 2
+const near = 1
+const safe = uniform(1)
+const far = near + safe.value + thickness.value
+
+// Camera
+const depthCamera = new THREE.OrthographicCamera(
+  -halfSize,
+  halfSize,
+  halfSize,
+  -halfSize,
+  near,
+  far
+)
+depthCamera.position.y = -(near + safe.value)
+depthCamera.rotation.x = Math.PI / 2
+scene.add(depthCamera)
+
+// Helper
+const cameraHelper = new THREE.CameraHelper(depthCamera)
+scene.add(cameraHelper)
+
+// Render target
+const depthRenderTarget = new THREE.RenderTarget(resolution, resolution)
+
+// Depth texture
+const depthTexture = new THREE.DepthTexture()
+depthRenderTarget.depthTexture = depthTexture
+
+// Depth material
+const depthMaterial = new THREE.NodeMaterial()
+depthMaterial.fragmentNode = vec4(0, 0, 0, 1)
+
+// Debug mesh
+const debugMesh = new THREE.Mesh(
+  new THREE.BoxGeometry(1, 1, 1),
+  new THREE.NodeMaterial()
+)
+debugMesh.material.fragmentNode = vec4(texture(depthTexture).r, 0, 0, 1)
+debugMesh.position.y = 2.5
+debugMesh.scale.setScalar(2)
+scene.add(debugMesh)
+
+/**
  * Floor
  */
 // Geometry
@@ -314,6 +360,24 @@ const tick = () => {
   sphere.position.x += (intersect.x - sphere.position.x) * deltaTime * 3
   sphere.position.y = 0.5
   sphere.position.z += (intersect.z - sphere.position.z) * deltaTime * 3
+
+  // Reset
+  // 获取 reset 之前的 state
+  const rendererState = THREE.RendererUtils.resetRendererState(renderer)
+
+  // Render depth
+  // 使用极简的 material 来渲染，避免性能浪费
+  scene.overrideMaterial = depthMaterial
+  // 设置 render target
+  renderer.setRenderTarget(depthRenderTarget)
+  renderer.render(scene, depthCamera)
+
+  // Restore
+  scene.overrideMaterial = null
+  // 恢复 render target
+  renderer.setRenderTarget(null)
+  // 恢复之前的 renderer state
+  THREE.RendererUtils.restoreRendererState(renderer, rendererState)
 
   // Render
   renderPipeline.render()

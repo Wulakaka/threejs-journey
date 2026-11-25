@@ -3,11 +3,15 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { Inspector } from 'three/addons/inspector/Inspector.js'
 import { SkyMesh } from 'three/addons/objects/SkyMesh.js'
 import { bloom } from 'three/addons/tsl/display/BloomNode.js'
+import { deltaTime } from 'three/tsl'
 import {
+  add,
   cross,
   Fn,
   instanceIndex,
+  ivec2,
   min,
+  mix,
   normalLocal,
   pass,
   positionLocal,
@@ -267,6 +271,8 @@ objectsGui.add(objectsOptions, 'animated')
 const size = 20
 const resolution = 512
 const thickness = uniform(0.3)
+const blurStrength = uniform(5)
+const accumulationStrength = uniform(0.03)
 
 /**
  * Depth
@@ -347,9 +353,22 @@ const updateSnowTextureCompute = Fn(() => {
   const textureUV = indexUV.toVec2().div(resolution)
 
   // Setup
+  const clampedDeltaTime = deltaTime.min(1 / 30)
   const currentSnow = snowTextureNode.load(indexUV).r
   // toVar 创建一个新的变量，而不是引用
   const newSnow = currentSnow.toVar()
+
+  // Accumulate
+  newSnow.addAssign(accumulationStrength.mul(clampedDeltaTime))
+
+  // Blur
+  const side0 = snowTextureNode.load(indexUV.add(ivec2(0, 1))).r
+  const side1 = snowTextureNode.load(indexUV.add(ivec2(1, 0))).r
+  const side2 = snowTextureNode.load(indexUV.add(ivec2(0, -1))).r
+  const side3 = snowTextureNode.load(indexUV.add(ivec2(-1, 0))).r
+  const blurSnow = add(currentSnow, side0, side1, side2, side3).div(5)
+
+  newSnow.assign(mix(newSnow, blurSnow, blurStrength.mul(clampedDeltaTime)))
 
   // Dig depth
   const depth = texture(depthTexture, textureUV).r.remap(
@@ -364,15 +383,15 @@ const updateSnowTextureCompute = Fn(() => {
   snowTextureNode.store(indexUV, vec4(newSnow, 0, 0, 0))
 })().compute(resolution * resolution)
 
-// Debug mesh
-const debugMesh = new THREE.Mesh(
-  new THREE.BoxGeometry(1, 1, 1),
-  new THREE.NodeMaterial()
-)
-debugMesh.material.fragmentNode = vec4(texture(snowTexture).r, 0, 0, 1)
-debugMesh.position.y = 2.5
-debugMesh.scale.setScalar(2)
-scene.add(debugMesh)
+// // Debug mesh
+// const debugMesh = new THREE.Mesh(
+//   new THREE.BoxGeometry(1, 1, 1),
+//   new THREE.NodeMaterial()
+// )
+// debugMesh.material.fragmentNode = vec4(texture(snowTexture).r, 0, 0, 1)
+// debugMesh.position.y = 2.5
+// debugMesh.scale.setScalar(2)
+// scene.add(debugMesh)
 
 /**
  * Floor
@@ -426,6 +445,37 @@ floor.rotation.x = -Math.PI / 2
 floor.receiveShadow = true
 floor.castShadow = true
 scene.add(floor)
+
+/**
+ * Tweaks
+ */
+const snowGui = renderer.inspector.createParameters('Snow')
+snowGui
+  .add(thickness, 'value', 0, 1, 0.001)
+  .name('thickness')
+  .onChange((value) => {
+    const far = near + safe.value + thickness.value
+    depthCamera.far = far
+    depthCamera.updateProjectionMatrix()
+
+    if (typeof cameraHelper !== 'undefined') {
+      cameraHelper.update()
+    }
+  })
+snowGui.add(blurStrength, 'value', 0, 20, 0.01).name('blurStrength')
+snowGui
+  .add(accumulationStrength, 'value', 0, 0.1, 0.001)
+  .name('accumulationStrength')
+snowGui
+  .addButton(
+    {
+      reset: () => {
+        renderer.compute(resetSnowCompute)
+      }
+    },
+    'reset'
+  )
+  .name('Reset [space]')
 
 /**
  * Animate

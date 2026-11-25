@@ -1,10 +1,10 @@
-import * as THREE from 'three/webgpu'
+import { GLTFLoader } from 'three/addons/Addons.js'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { Inspector } from 'three/addons/inspector/Inspector.js'
 import { SkyMesh } from 'three/addons/objects/SkyMesh.js'
-import { GLTFLoader } from 'three/addons/Addons.js'
 import { bloom } from 'three/addons/tsl/display/BloomNode.js'
-import { pass } from 'three/tsl'
+import { pass, uniform, uv } from 'three/tsl'
+import * as THREE from 'three/webgpu'
 
 /**
  * Base
@@ -245,6 +245,42 @@ objectsGui.add(objectsOptions, 'wireframe').onChange(() => {
   michelleMesh.material.wireframe = objectsOptions.wireframe
 })
 objectsGui.add(objectsOptions, 'animated')
+
+/**
+ * Common
+ */
+const size = 20
+const resolution = 512
+const thickness = uniform(0.3)
+
+/**
+ * Floor
+ */
+// Geometry
+const geometry = new THREE.PlaneGeometry(size, size, resolution, resolution)
+
+// Normal texture
+const textureNormal = textureLoader.load('./snow_field_aerial_nor_gl_2k.png')
+textureNormal.wrapS = THREE.RepeatWrapping
+textureNormal.wrapT = THREE.RepeatWrapping
+textureNormal.repeat.x = 3
+textureNormal.repeat.y = 3
+
+// Material
+const material = new THREE.MeshStandardNodeMaterial({
+  normalMap: textureNormal,
+  roughness: 0.5,
+  transparent: true
+})
+
+material.opacityNode = uv().sub(0.5).length().smoothstep(0.5, 0.35)
+
+// Mesh
+const floor = new THREE.Mesh(geometry, material)
+floor.rotation.x = -Math.PI / 2
+floor.receiveShadow = true
+floor.castShadow = true
+scene.add(floor)
 
 /**
  * Animate
